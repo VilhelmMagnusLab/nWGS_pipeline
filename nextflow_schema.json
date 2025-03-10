@@ -1,0 +1,34 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/your-username/my-pipeline/master/nextflow_schema.json",
+    "title": "My Pipeline Parameters",
+    "description": "Pipeline parameters for My Pipeline",
+    "type": "object",
+    "definitions": {
+        "input_output_options": {
+            "title": "Input/output options",
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to input samplesheet CSV file",
+                    "help_text": "Path to comma-separated file containing information about the samples in the experiment.",
+                    "required": true
+                },
+                "outdir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The output directory where the results will be saved.",
+                    "default": "results",
+                    "help_text": "The output directory where the results will be saved."
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/input_output_options"
+        }
+    ]
+} 

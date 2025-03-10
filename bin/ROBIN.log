@@ -1,0 +1,201 @@
+2024-10-29 12:29:18,992 - root - ERROR - Output is required when --browse is not set.
+2024-10-29 12:30:18,024 - nicegui - ERROR - Executor shutdown has been called
+Traceback (most recent call last):
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "uvloop/loop.pyx", line 1512, in uvloop.loop.Loop.run_until_complete
+  File "uvloop/loop.pyx", line 1505, in uvloop.loop.Loop.run_until_complete
+  File "uvloop/loop.pyx", line 1379, in uvloop.loop.Loop.run_forever
+  File "uvloop/loop.pyx", line 557, in uvloop.loop.Loop._run
+  File "uvloop/loop.pyx", line 476, in uvloop.loop.Loop._on_idle
+  File "uvloop/cbhandles.pyx", line 83, in uvloop.loop.Handle._run
+  File "uvloop/cbhandles.pyx", line 63, in uvloop.loop.Handle._run
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/background_tasks.py", line 52, in _handle_task_result
+    task.result()
+  File "uvloop/loop.pyx", line 476, in uvloop.loop.Loop._on_idle
+  File "uvloop/cbhandles.pyx", line 83, in uvloop.loop.Handle._run
+  File "uvloop/cbhandles.pyx", line 61, in uvloop.loop.Handle._run
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/client.py", line 285, in result_with_client
+    await result
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/main.py", line 238, in startup
+    await MAINPAGE.start_analysis()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/main.py", line 361, in start_analysis
+    await self.robin.start_background()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/brain_class.py", line 320, in start_background
+    self.Target_Coverage = TargetCoverage(
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/subpages/TargetCoverage_object.py", line 336, in __init__
+    raise SystemExit(
+SystemExit: Docker is not running on this computer. Either don't track coverage or start docker. If you are on a mac you may need to enable the standard docker socket - see https://github.com/gh640/wait-for-docker/issues/12#issuecomment-1551456057
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/background_tasks.py", line 52, in _handle_task_result
+    task.result()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/storage.py", line 72, in backup
+    await f.write(json.dumps(self, indent=self.indent))
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/aiofiles/base.py", line 66, in __aexit__
+    await get_running_loop().run_in_executor(
+  File "uvloop/loop.pyx", line 2742, in uvloop.loop.Loop.run_in_executor
+  File "uvloop/loop.pyx", line 3182, in uvloop.loop.Loop._check_default_executor
+RuntimeError: Executor shutdown has been called
+2024-10-29 12:32:31,215 - nicegui - ERROR - Executor shutdown has been called
+Traceback (most recent call last):
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "uvloop/loop.pyx", line 1512, in uvloop.loop.Loop.run_until_complete
+  File "uvloop/loop.pyx", line 1505, in uvloop.loop.Loop.run_until_complete
+  File "uvloop/loop.pyx", line 1379, in uvloop.loop.Loop.run_forever
+  File "uvloop/loop.pyx", line 557, in uvloop.loop.Loop._run
+  File "uvloop/loop.pyx", line 476, in uvloop.loop.Loop._on_idle
+  File "uvloop/cbhandles.pyx", line 83, in uvloop.loop.Handle._run
+  File "uvloop/cbhandles.pyx", line 63, in uvloop.loop.Handle._run
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/background_tasks.py", line 52, in _handle_task_result
+    task.result()
+  File "uvloop/loop.pyx", line 476, in uvloop.loop.Loop._on_idle
+  File "uvloop/cbhandles.pyx", line 83, in uvloop.loop.Handle._run
+  File "uvloop/cbhandles.pyx", line 61, in uvloop.loop.Handle._run
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/client.py", line 285, in result_with_client
+    await result
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/main.py", line 238, in startup
+    await MAINPAGE.start_analysis()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/main.py", line 361, in start_analysis
+    await self.robin.start_background()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/brain_class.py", line 320, in start_background
+    self.Target_Coverage = TargetCoverage(
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/subpages/TargetCoverage_object.py", line 336, in __init__
+    raise SystemExit(
+SystemExit: Docker is not running on this computer. Either don't track coverage or start docker. If you are on a mac you may need to enable the standard docker socket - see https://github.com/gh640/wait-for-docker/issues/12#issuecomment-1551456057
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/background_tasks.py", line 52, in _handle_task_result
+    task.result()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/storage.py", line 72, in backup
+    await f.write(json.dumps(self, indent=self.indent))
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/aiofiles/base.py", line 66, in __aexit__
+    await get_running_loop().run_in_executor(
+  File "uvloop/loop.pyx", line 2742, in uvloop.loop.Loop.run_in_executor
+  File "uvloop/loop.pyx", line 3182, in uvloop.loop.Loop._check_default_executor
+RuntimeError: Executor shutdown has been called
+2024-10-29 12:32:55,433 - nicegui - ERROR - Executor shutdown has been called
+Traceback (most recent call last):
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "uvloop/loop.pyx", line 1512, in uvloop.loop.Loop.run_until_complete
+  File "uvloop/loop.pyx", line 1505, in uvloop.loop.Loop.run_until_complete
+  File "uvloop/loop.pyx", line 1379, in uvloop.loop.Loop.run_forever
+  File "uvloop/loop.pyx", line 557, in uvloop.loop.Loop._run
+  File "uvloop/loop.pyx", line 476, in uvloop.loop.Loop._on_idle
+  File "uvloop/cbhandles.pyx", line 83, in uvloop.loop.Handle._run
+  File "uvloop/cbhandles.pyx", line 63, in uvloop.loop.Handle._run
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/background_tasks.py", line 52, in _handle_task_result
+    task.result()
+  File "uvloop/loop.pyx", line 476, in uvloop.loop.Loop._on_idle
+  File "uvloop/cbhandles.pyx", line 83, in uvloop.loop.Handle._run
+  File "uvloop/cbhandles.pyx", line 61, in uvloop.loop.Handle._run
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/client.py", line 285, in result_with_client
+    await result
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/main.py", line 238, in startup
+    await MAINPAGE.start_analysis()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/main.py", line 361, in start_analysis
+    await self.robin.start_background()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/brain_class.py", line 320, in start_background
+    self.Target_Coverage = TargetCoverage(
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/subpages/TargetCoverage_object.py", line 336, in __init__
+    raise SystemExit(
+SystemExit: Docker is not running on this computer. Either don't track coverage or start docker. If you are on a mac you may need to enable the standard docker socket - see https://github.com/gh640/wait-for-docker/issues/12#issuecomment-1551456057
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/background_tasks.py", line 52, in _handle_task_result
+    task.result()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/storage.py", line 72, in backup
+    await f.write(json.dumps(self, indent=self.indent))
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/aiofiles/base.py", line 66, in __aexit__
+    await get_running_loop().run_in_executor(
+  File "uvloop/loop.pyx", line 2742, in uvloop.loop.Loop.run_in_executor
+  File "uvloop/loop.pyx", line 3182, in uvloop.loop.Loop._check_default_executor
+RuntimeError: Executor shutdown has been called
+2024-10-29 12:34:34,024 - nicegui - ERROR - Executor shutdown has been called
+Traceback (most recent call last):
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "uvloop/loop.pyx", line 1512, in uvloop.loop.Loop.run_until_complete
+  File "uvloop/loop.pyx", line 1505, in uvloop.loop.Loop.run_until_complete
+  File "uvloop/loop.pyx", line 1379, in uvloop.loop.Loop.run_forever
+  File "uvloop/loop.pyx", line 557, in uvloop.loop.Loop._run
+  File "uvloop/loop.pyx", line 476, in uvloop.loop.Loop._on_idle
+  File "uvloop/cbhandles.pyx", line 83, in uvloop.loop.Handle._run
+  File "uvloop/cbhandles.pyx", line 63, in uvloop.loop.Handle._run
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/background_tasks.py", line 52, in _handle_task_result
+    task.result()
+  File "uvloop/loop.pyx", line 476, in uvloop.loop.Loop._on_idle
+  File "uvloop/cbhandles.pyx", line 83, in uvloop.loop.Handle._run
+  File "uvloop/cbhandles.pyx", line 61, in uvloop.loop.Handle._run
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/client.py", line 285, in result_with_client
+    await result
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/main.py", line 238, in startup
+    await MAINPAGE.start_analysis()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/main.py", line 361, in start_analysis
+    await self.robin.start_background()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/brain_class.py", line 320, in start_background
+    self.Target_Coverage = TargetCoverage(
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/subpages/TargetCoverage_object.py", line 336, in __init__
+    raise SystemExit(
+SystemExit: Docker is not running on this computer. Either don't track coverage or start docker. If you are on a mac you may need to enable the standard docker socket - see https://github.com/gh640/wait-for-docker/issues/12#issuecomment-1551456057
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/background_tasks.py", line 52, in _handle_task_result
+    task.result()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/storage.py", line 72, in backup
+    await f.write(json.dumps(self, indent=self.indent))
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/aiofiles/base.py", line 66, in __aexit__
+    await get_running_loop().run_in_executor(
+  File "uvloop/loop.pyx", line 2742, in uvloop.loop.Loop.run_in_executor
+  File "uvloop/loop.pyx", line 3182, in uvloop.loop.Loop._check_default_executor
+RuntimeError: Executor shutdown has been called
+2024-10-29 12:47:23,349 - nicegui - ERROR - Executor shutdown has been called
+Traceback (most recent call last):
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "uvloop/loop.pyx", line 1512, in uvloop.loop.Loop.run_until_complete
+  File "uvloop/loop.pyx", line 1505, in uvloop.loop.Loop.run_until_complete
+  File "uvloop/loop.pyx", line 1379, in uvloop.loop.Loop.run_forever
+  File "uvloop/loop.pyx", line 557, in uvloop.loop.Loop._run
+  File "uvloop/loop.pyx", line 476, in uvloop.loop.Loop._on_idle
+  File "uvloop/cbhandles.pyx", line 83, in uvloop.loop.Handle._run
+  File "uvloop/cbhandles.pyx", line 63, in uvloop.loop.Handle._run
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/background_tasks.py", line 52, in _handle_task_result
+    task.result()
+  File "uvloop/loop.pyx", line 476, in uvloop.loop.Loop._on_idle
+  File "uvloop/cbhandles.pyx", line 83, in uvloop.loop.Handle._run
+  File "uvloop/cbhandles.pyx", line 61, in uvloop.loop.Handle._run
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/client.py", line 285, in result_with_client
+    await result
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/main.py", line 238, in startup
+    await MAINPAGE.start_analysis()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/main.py", line 361, in start_analysis
+    await self.robin.start_background()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/brain_class.py", line 320, in start_background
+    self.Target_Coverage = TargetCoverage(
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/robin/subpages/TargetCoverage_object.py", line 336, in __init__
+    raise SystemExit(
+SystemExit: Docker is not running on this computer. Either don't track coverage or start docker. If you are on a mac you may need to enable the standard docker socket - see https://github.com/gh640/wait-for-docker/issues/12#issuecomment-1551456057
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/background_tasks.py", line 52, in _handle_task_result
+    task.result()
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/nicegui/storage.py", line 72, in backup
+    await f.write(json.dumps(self, indent=self.indent))
+  File "/home/chbope/miniconda3/envs/robin/lib/python3.9/site-packages/aiofiles/base.py", line 66, in __aexit__
+    await get_running_loop().run_in_executor(
+  File "uvloop/loop.pyx", line 2742, in uvloop.loop.Loop.run_in_executor
+  File "uvloop/loop.pyx", line 3182, in uvloop.loop.Loop._check_default_executor
+RuntimeError: Executor shutdown has been called

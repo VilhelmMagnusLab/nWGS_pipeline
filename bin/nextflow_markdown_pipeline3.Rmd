@@ -1,0 +1,373 @@
+---
+output:
+  pdf_document:
+    fig_height: 3
+    latex_engine: pdflatex
+   # output: pdf_document
+header-includes:
+   - \usepackage{helvet}
+   - \renewcommand*\familydefault{\sfdefault}
+   - \usepackage[T1]{fontenc}
+   - \usepackage{xcolor}
+   - \usepackage{placeins}
+   - \usepackage{float}
+
+geometry: margin=0.5in
+---
+
+```{r setup, include=FALSE}
+# Global chunk options and required libraries
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(scales)
+library(data.table)
+library(rmarkdown)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(htmltools)
+
+
+
+args <- commandArgs(trailingOnly = TRUE)
+if (length(args) < 17) {
+  stop("Usage: Rscript report.R <sample_id> <cramino_stat> <votes_file> <dictionary_file> <logo_file> <copy_number_plot_file> <tumor_copy_number_file> <cnv_filter_file> <cnv_chr9> <cnv_chr7> <mgmt_results_file> <snv_results_file> <structure_variant_file> <terp_html> <annotsv_html> <svanna_html>  <output_pdf_file>")
+}
+
+
+sample_id              <- args[1]
+cramino_stat           <- args[2]
+votes_file             <- args[3]
+dictionary_file        <- args[4]
+logo_file              <- args[5]
+copy_number_plot_file  <- args[6]
+tumor_copy_number_file <- args[7]
+cnv_filter_file        <- args[8]
+cnv_chr9               <- args[9]
+cnv_chr7               <- args[10]
+mgmt_results_file      <- args[11]
+snv_results_file       <- args[12]
+structure_variant_file <- args[13]
+terp_html              <- args[14]
+annotsv_html           <- args[15]
+svanna_html            <- args[16]
+output_pdf_file        <- args[17]
+
+# Read in the votes and dictionary files
+if (!file.exists(votes_file)) {
+  stop("Votes file not found: ", votes_file)
+}
+votes <- read.csv(votes_file, header = TRUE, sep = "\t")
+print(votes)
+mc <- read.csv(votes_file, header = TRUE, sep = "\t")
+if (!file.exists(dictionary_file)) {
+  stop("Dictionary file not found: ", dictionary_file)
+}
+dict <- read.csv(dictionary_file, header = TRUE, sep = "\t")
+
+# Merge the votes with the dictionary
+mc <- votes %>% 
+  left_join(dict, by = c("class" = "Methylation.Class.Name.Abbreviated"))
+
+# Summarise scores by methylation class family
+mcf <- mc %>%
+  group_by(Methylation.Class.Family) %>%
+  summarise(score_MCF = sum(score))
+
+```
+
+```{r, out.height= "50px", echo=FALSE, fig.align="right"}
+knitr::include_graphics(logo_file)
+```
+
+# WGS Report - P24 Nanopore Sequencing
+
+## Sample ID: `r args[1]`
+
+##### Read statistics
+
+```{r comment='', echo=FALSE}
+lines <- readLines(cramino_stat, n = 15)  # Read the first 15 lines
+if (length(lines) > 2) {
+  cat(lines[2:(length(lines) - 1)], sep = '\n')  # Skip first and last line
+} else {
+  cat("Not enough lines to display after skipping first and last.\n")
+}
+
+```
+
+### CrossNN Methylation-based classification
+
+Methylation-based classification is based on **`r as.integer(votes$num_features[1])`** CpG sites (overlap of sites covered in this sample and the model).
+At the methylation class (MC) level, the sample has been classified as **`r ifelse(mc$score[1] >= 0.2, mc$Methylation.Class.Name[1], "not classifiable (score < 0.2)")`**. 
+This prediction has a confidence score of **`r round(mc$score[1], digits=3)`**.
+At the methylation class **family** (MCF) level, the sample has been classified as **`r ifelse(max(mcf$score_MCF)>=0.2, mcf[which.max(mcf$score_MCF),]$Methylation.Class.Family, "not classifiable (score < 0.2)")`**.
+The MCF prediction has a confidence score of **`r round(max(mcf$score_MCF), digits=3)`**.
+
+Scores for the Top 5 entities on MC and MCF level are given below.
+Vertical dashed lines indicate the recommended >0.2 cut-off for classification.
+
+```{r, out.height = "150px", fig.align = 'center', echo=FALSE, warning=FALSE}
+library(ggplot2)
+
+ggplot(data = mc, aes(x = Methylation.Class.Name, y = score)) +
+  geom_bar(stat = "identity", fill = "#1f78b4") +
+  geom_hline(yintercept = 0.2, linetype = "dashed") +
+  coord_flip() +
+  scale_x_discrete(limits = mc[order(mc$score, decreasing = TRUE), ]$Methylation.Class.Name[5:1]) +
+  scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), limits = c(0, 1)) +
+  ylab("score") + xlab("") +
+  ggtitle("Methylation class (MC)") +
+  theme_classic() + theme(aspect.ratio = 1)
+
+```
+
+```{r, out.height = "150px", fig.align = 'center', echo=FALSE, warning=FALSE}
+ggplot(mcf, aes(x = Methylation.Class.Family, y = score_MCF)) +
+  geom_bar(stat = "identity", fill = "#4daf4a") +
+  geom_hline(yintercept = 0.2, linetype = "dashed") +
+  coord_flip() +
+  scale_x_discrete(limits = mcf[order(mcf$score_MCF, decreasing = TRUE), ]$Methylation.Class.Family[5:1]) +
+  scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), limits = c(0, 1)) +
+  ylab("score") + xlab("") +
+  ggtitle("Methylation class family (MCF)") +
+  theme_classic() + theme(aspect.ratio = 1)
+
+```
+
+#### Disclaimer
+
+Methylation-based classification using nanopore whole genome sequencing is a research tool currently under development. It has not been clinically validated in sufficiently large cohorts. Interpretation and implementation of the results in a clinical setting is in the sole responsibility of the treating physician.
+
+### Copy number profile
+
+```{r, out.height = "150px", echo=FALSE}
+# Display the copy number plot using the provided file path
+knitr::include_graphics(copy_number_plot_file)
+```
+
+```{r, out.height = "150px", echo=FALSE}
+# Display the copy number plot using the provided file path
+knitr::include_graphics(cnv_chr9)
+```
+
+```{r, out.height = "150px", echo=FALSE}
+# Display the copy number plot using the provided file path
+knitr::include_graphics(cnv_chr7)
+```
+
+```{r comment='', echo=FALSE}
+# Read the file (using tab as the delimiter)
+# Read the copy number variation data
+df <- read.csv(tumor_copy_number_file, 
+               sep = "\t", 
+               stringsAsFactors = FALSE)
+
+# Define centromere positions
+centromere_1p <- 121000000  # Approximate centromere position for chromosome 1
+centromere_19q <- 30000000   # Approximate centromere position for chromosome 19
+
+# Define conditions for 1p loss and 19q loss separately
+cond_1p_loss <- any(df$Chrom == "1" & df$Start < centromere_1p & df$Event.Type == "Loss")
+cond_19q_loss <- any(df$Chrom == "19" & df$End > centromere_19q & df$Event.Type == "Loss")
+
+# Define conditions for chr7 gain and chr10 loss
+cond_chr7_gain <- any(df$Chrom == "7" & df$Event.Type == "Gain")
+cond_chr10_loss <- any(df$Chrom == "10" & df$Event.Type == "Loss")
+
+# Determine message based on conditions
+if (cond_1p_loss && cond_19q_loss) {
+  msg <- "There is 1p and 19q loss."
+} else if (cond_chr7_gain && cond_chr10_loss) {
+  msg <- "There is a gain on chromosome 7 and a loss on chromosome 10."
+} else {
+  msg <- "No 1p/19q loss, and no chromosome 7 gain or chromosome 10 loss detected."
+}
+
+cat(msg, "\n")
+
+
+```
+
+### Copy Number Variation Filter Table
+```{r comment='', echo=FALSE}
+df_mgmt <- read.csv(cnv_filter_file, stringsAsFactors = FALSE)
+# Filter rows where 'score' is exactly 2 or -2
+df_filtered <- subset(df_mgmt, Score %in% c(2, -2))
+
+if(nrow(df_filtered) == 0){
+  cat("There is no copy number variation to be reported")
+} else {
+  if (knitr::is_html_output()) {
+    tbl <- kable(df_filtered, 
+                 format = "html", 
+                 table.attr = "style='border: 1px solid black; border-collapse: collapse; width: 80%; margin-left: auto; margin-right: auto;'", 
+                 align = "c")
+    for (i in 1:(ncol(df_filtered) - 1)) {
+      tbl <- tbl %>% column_spec(i, border_right = "1px solid black")
+    }
+    tbl %>% 
+      kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE, position = "center")
+  } else if (knitr::is_latex_output()) {
+    align_str <- paste0("|", paste(rep("c", ncol(df_filtered)), collapse = "|"), "|")
+    kable(df_filtered, format = "latex", booktabs = TRUE, align = align_str) %>%
+      kable_styling(latex_options = c("striped", "hold_position", "scale_down"), full_width = FALSE, position = "center")
+  } else {
+    kable(df_filtered)
+  }
+}
+
+
+```
+
+### Methylation Table
+
+```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(kableExtra)
+
+# Read the methylation results table using the provided file path
+df_mgmt <- read.csv(mgmt_results_file, stringsAsFactors = FALSE)
+
+if (knitr::is_html_output()) {
+  tbl <- kable(df_mgmt, 
+               format = "html", 
+               table.attr = "style='border: 1px solid black; border-collapse: collapse; width: 80%; margin-left: auto; margin-right: auto;'", 
+               align = "c")
+  for (i in 1:(ncol(df_mgmt) - 1)) {
+    tbl <- tbl %>% column_spec(i, border_right = "1px solid black")
+  }
+  tbl %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE, position = "center")
+} else if (knitr::is_latex_output()) {
+  align_str <- paste0("|", paste(rep("c", ncol(df_mgmt)), collapse = "|"), "|")
+  kable(df_mgmt, format = "latex", booktabs = TRUE, align = align_str) %>%
+    kable_styling(latex_options = c("striped", "hold_position", "scale_down"), full_width = FALSE, position = "center")
+} else {
+  kable(df_mgmt)
+}
+
+```
+### SNV calling and annotation
+
+```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
+# Read the CSV file
+#df_mgmt <- read.csv("/home/chbope/Documents/trash/tmp/rmd/Dummy_merge_annotation_filter_snvs_allcall.csv", sep=",")
+
+# Display the first 15 rows of the table with borders
+#kable(head(df_mgmt, 15), table.attr = "style='border: 1px solid black;'", escape = FALSE) %>%
+#  row_spec(0, bold = TRUE, color = "black", background = "white") # Optional: style the header
+```
+
+```{r comment='', echo=FALSE}
+#cat(readLines("/home/chbope/Documents/trash/tmp/rmd/Dummy_merge_annotation_filter_snvs_allcall.csv"), sep ='\n')
+```
+
+
+```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(kableExtra)
+
+# Read the SNV annotation results using the provided file path
+df_mgmt <- read.csv(snv_results_file, header = TRUE, stringsAsFactors = FALSE, sep = "\t")
+
+if (knitr::is_html_output()) {
+  tbl <- kable(df_mgmt, 
+               format = "html", 
+               table.attr = "style='border: 1px solid black; border-collapse: collapse; width: 80%; margin-left: auto; margin-right: auto;'", 
+               align = "c")
+  for (i in 1:(ncol(df_mgmt) - 1)) {
+    tbl <- tbl %>% column_spec(i, border_right = "1px solid black")
+  }
+  tbl %>% 
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE, position = "center")
+} else if (knitr::is_latex_output()) {
+  kable(df_mgmt, format = "latex", booktabs = TRUE, align = "c") %>%
+    kable_styling(latex_options = c("repeat_header", "striped", "hold_position", "scale_down"), full_width = FALSE, position = "center")
+} else {
+  kable(df_mgmt)
+}
+
+```
+
+### Structure Variant
+```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(kableExtra)
+
+# Read the structure variant file using the provided file path
+df_mgmt <- read.csv(structure_variant_file, stringsAsFactors = FALSE)
+
+if (nrow(df_mgmt) > 0) {
+  if (knitr::is_html_output()) {
+    tbl <- kable(df_mgmt, 
+                 format = "html", 
+                 table.attr = "style='border: 1px solid black; border-collapse: collapse; width: 80%; margin-left: auto; margin-right: auto;'", 
+                 align = "c")
+    for (i in 1:(ncol(df_mgmt) - 1)) {
+      tbl <- tbl %>% column_spec(i, border_right = "1px solid black")
+    }
+    tbl %>% 
+      kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE, position = "center")
+  } else if (knitr::is_latex_output()) {
+    align_str <- paste0("|", paste(rep("c", ncol(df_mgmt)), collapse = "|"), "|")
+    kable(df_mgmt, format = "latex", booktabs = TRUE, align = align_str) %>%
+      kable_styling(latex_options = c("striped", "hold_position", "scale_down"), full_width = FALSE, position = "center")
+  } else {
+    kable(df_mgmt)
+  }
+} else {
+  if (knitr::is_html_output()) {
+    cat("<p>No fusion event was detected in this sample.</p>")
+  } else if (knitr::is_latex_output()) {
+    cat("No fusion event was detected in this sample.")
+  } else {
+    cat("No fusion event was detected in this sample.")
+  }
+}
+
+
+```
+
+
+### External Results
+```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
+
+# Insert links to the full AnnotSV and Svanna results using the provided URLs
+```{r result='asis', comment='', echo=FALSE, message=FALSE, warning=FALSE}
+# Determine the link for AnnotSV results:
+
+# Determine the link for Svanna results:
+svanna_link <- if (file.exists(svanna_html)) {
+  paste0("file://", svanna_html)
+} else {
+  svanna_html
+}
+
+annotsv_link <- if (file.exists(annotsv_html)) {
+  paste0("file://", annotsv_html)
+} else {
+  annotsv_html  # assume it's a URL if not a local file
+}
+
+
+
+terp_link <- if (file.exists(terp_html)) {
+  paste0("file://", terp_html)
+} else {
+  terp_html
+}
+
+latex_code <- paste0(
+  "The  Svanna full result can be found at: \\href{", annotsv_link, "}{\\textcolor{blue}{Svanna  Result}}  \\\\\n",
+  "The  AnnotSV full result can be found at: \\href{", svanna_link, "}{\\textcolor{blue}{ AnnotSV Result}} \\\\\n",
+  "The Terp full result can be found at: \\href{", terp_html, "}{\\textcolor{blue}{Terp Result}} "
+)
+
+knitr::raw_latex(latex_code)
+
+```
+
+
+#### Report generated on `r Sys.time()`

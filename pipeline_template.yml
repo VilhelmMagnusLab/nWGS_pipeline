@@ -1,0 +1,13 @@
+name: "My Pipeline"
+description: "Description of my pipeline"
+type: "pipeline"
+keywords:
+  - keyword1
+  - keyword2
+tools:
+  - fastqc
+  - multiqc
+input:
+  - samplesheet.csv
+output:
+  - multiqc_report.html 

@@ -1,0 +1,11 @@
+{
+    "name": "nWGS_pipeline",
+    "homePage": "https://github.com/christianbope/nWGS_pipeline",
+    "repos": {
+        "https://github.com/nf-core/modules.git": {
+            "modules": {
+                "nf-core": {}
+            }
+        }
+    }
+} 
