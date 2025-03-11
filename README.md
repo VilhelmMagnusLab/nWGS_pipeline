@@ -191,6 +191,8 @@ process {
 
 ### 4. Sample Configuration
 
+#### Input structure for running directly from sample ID file:
+
 1. Create a sample ID file with the following format: This file is used to run the analysis pipeline knowing the tumor content of the sample.
 ```
 sample_id1   tumor content (float)
@@ -217,9 +219,8 @@ sample_id1   flowcell_id1
 sample_id2   flowcell_id2
 ```
 
-2. Mergebam input structure:
+#### Mergebam input structure:
 
-#### input structure:
 
 ```
 input_dir/
