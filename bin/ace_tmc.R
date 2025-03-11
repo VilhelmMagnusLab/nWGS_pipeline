@@ -14,6 +14,7 @@ sample_id <- args[3]
 suppressPackageStartupMessages({
     library(ACE)
     library(QDNAseq)
+    library(QDNAseq.hg38)
 })
 
 # Create output directory
@@ -34,13 +35,18 @@ runACE(
 
 # Read the fitpicker file and extract threshold
 fitpicker_file <- file.path(output_dir, 
-                           paste0(sample_id, "_copyNumbersCalled"), 
+                           "1000kbp",
                            "2N", 
                            "fitpicker_2N.tsv")
+
+# Ensure the file exists before reading
+if (!file.exists(fitpicker_file)) {
+    stop(paste("Fitpicker file not found:", fitpicker_file))
+}
 
 fit_data <- read.table(fitpicker_file, header=TRUE, sep="\t")
 threshold_value <- fit_data$likely_fit[1]
 
 # Write threshold to file
 threshold_output <- file.path(output_dir, "threshold_value.txt")
-writeLines(as.character(threshold_value), threshold_output) 
+cat(sprintf("%.4f", threshold_value), file=threshold_output) 

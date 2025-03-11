@@ -1,0 +1,78 @@
+# Use Ubuntu 20.04 as base image
+FROM ubuntu:20.04
+
+# Avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    bzip2 \
+    ca-certificates \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libfontconfig1-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libjpeg-dev \
+    build-essential \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
+    bash miniconda.sh -b -p /opt/conda && \
+    rm miniconda.sh
+
+# Add conda to path
+ENV PATH="/opt/conda/bin:${PATH}"
+
+# Create conda environment with R and basic packages
+RUN conda create -n ace_env -c conda-forge -c bioconda -c r \
+    r-base=4.2 \
+    r-essentials \
+    r-devtools \
+    r-remotes \
+    bioconductor-genomicranges \
+    bioconductor-rtracklayer \
+    bioconductor-qdnaseq \
+    bioconductor-biobase \
+    r-optparse \
+    r-data.table \
+    r-ggplot2 \
+    r-reshape2 \
+    r-gridextra \
+    && conda clean -afy
+
+# Install BiocManager, QDNAseq.hg38, and ACE
+RUN conda run -n ace_env R -e "\
+    if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager', repos='http://cran.rstudio.com/'); \
+    BiocManager::install(c('QDNAseq', 'QDNAseq.hg19'), dependencies=TRUE, ask=FALSE); \
+    BiocManager::install('ACE', dependencies=TRUE, ask=FALSE); \
+    remotes::install_github('asntech/QDNAseq.hg38@main', dependencies=TRUE)"
+
+# Verify installations
+RUN conda run -n ace_env R -e "\
+    library(ACE); \
+    library(QDNAseq.hg38); \
+    cat('ACE version:', as.character(packageVersion('ACE')), '\n'); \
+    cat('QDNAseq.hg38 version:', as.character(packageVersion('QDNAseq.hg38')), '\n')"
+
+# Create activation script
+RUN echo '#!/bin/bash\n\
+source /opt/conda/etc/profile.d/conda.sh\n\
+conda activate ace_env\n\
+exec \"$@\"' > /usr/local/bin/entrypoint.sh && \
+chmod +x /usr/local/bin/entrypoint.sh
+
+# Set entrypoint to activate conda environment
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+SHELL ["/bin/bash", "-c"]
+

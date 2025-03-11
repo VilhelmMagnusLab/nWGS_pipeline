@@ -216,6 +216,7 @@ workflow epi2me {
         sv_ch = Channel.empty()
 
         if (params.run_mode in ['modkit', 'all']) {
+            println "Running modkit..."
             modkit_ch = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed ->
                 tuple(
                     sid, 
@@ -230,6 +231,7 @@ workflow epi2me {
         }
 
         if (params.run_mode in ['cnv', 'all']) {
+            println "Running cnv..."
             cnv_ch = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed ->
                 tuple(
                     sid, 
@@ -244,6 +246,7 @@ workflow epi2me {
         }
 
         if (params.run_mode in ['sv', 'all']) {
+            println "Running sv..."
             sv_ch = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed ->
                 tuple(
                     sid, 

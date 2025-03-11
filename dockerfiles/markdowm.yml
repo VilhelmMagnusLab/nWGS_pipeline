@@ -1,0 +1,16 @@
+name: markdown_env
+channels:
+  - conda-forge
+dependencies:
+  - phantomjs
+  - pandoc
+  - r-base
+  - r-ggplot2
+  - r-scales
+  - r-data.table
+  - r-rmarkdown
+  - r-dplyr
+  - r-knitr
+  - r-kableextra
+  - r-webshot
+  - r-pagedown

@@ -1,0 +1,22 @@
+# Use the official Miniconda image as a base
+FROM continuumio/miniconda3
+
+# Set a working directory
+WORKDIR /app
+
+# Copy the Conda environment file to the image
+COPY NN_model.yml  environment.yml
+
+# Install the Conda environment
+RUN conda env create -f environment.yml
+
+# Activate the Conda environment and ensure it is the default
+RUN echo "conda activate nanodx_env2feb" >> ~/.bashrc
+ENV PATH="/opt/conda/envs/nanodx_env2feb/bin:$PATH"
+
+# Verify installation (optional)
+RUN conda info --envs
+
+# Default command to keep the container running
+CMD ["/bin/bash"]
+

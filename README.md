@@ -210,16 +210,6 @@ The file paths should follow this structure:
         └── file2.bam
 ```
 
-2. Run the pipeline:
-```bash
-# Run complete workflow in order
-nextflow run main.nf --run_order_mode
-
-# Run individual modules
-nextflow run main.nf --run_mode_mergebam
-nextflow run main.nf --run_mode_epi2me all
-nextflow run main.nf --run_mode_analysis rmd
-```
 
 ### Important Notes:
 
@@ -268,7 +258,169 @@ results/
     └── reports/
 ```
 
+## 2. **Running Pipeline**
+
+### Pipeline Modes
+```bash
+# Run complete workflow in order
+nextflow run main.nf --run_order_mode
+
+# Run individual modules
+nextflow run main.nf --run_mode_mergebam
+nextflow run main.nf --run_mode_epi2me all
+nextflow run main.nf --run_mode_analysis rmd
+```
+#### Epi2me Pipeline Modes
+```bash
+# Run all Epi2me analyses
+nextflow run main.nf --run_mode_epi2me all
+
+# Run specific Epi2me analyses
+nextflow run main.nf --run_mode_epi2me cnv    # Run only CNV analysis
+nextflow run main.nf --run_mode_epi2me sv     # Run only structural variant calling
+nextflow run main.nf --run_mode_epi2me modkit # Run only modified base calling
+```
+
+#### Analysis Pipeline Modes
+```bash
+# Run all analyses
+nextflow run main.nf --run_mode_analysis all
+
+# Run specific analyses
+nextflow run main.nf --run_mode_analysis occ     # Run only OCC analysis
+nextflow run main.nf --run_mode_analysis mgmt    # Run only MGMT analysis
+nextflow run main.nf --run_mode_analysis annotsv # Run only AnnotSV analysis
+nextflow run main.nf --run_mode_analysis cnv     # Run only CNV analysis
+nextflow run main.nf --run_mode_analysis terp    # Run only TERP analysis
+nextflow run main.nf --run_mode_analysis rmd     # Generate only the pdf report
+```
+
+## Acknowledgment and General Information
+
+### Citing this Workflow
+If you use this pipeline in your research, please cite:
+```
+[Citation details to be added]
+```
+
+### Acknowledgments
+We would like to thank:
+- The Nextflow community for their excellent framework
+- Oxford Nanopore Technologies for their sequencing technology and tools
+- All contributors and testers of this pipeline
+
+### License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+### Funding
+This work was supported by:
+- [Funding details to be added]
+- [Grant numbers to be added]
+
+### Download
+The latest version of the pipeline can be downloaded from:
+```bash
+git clone https://github.com/yourusername/nWGS_pipeline.git
+```
+
+## Questions and Feedback
+
+For questions, bug reports, or feature requests, please contact:
+
+**Maintainers:**
+- Christian Bope (chbope@ous-hf.no / christianbope@gmail.com)
+- Skabbi (skabbi@gmail.com)
+
+You can also:
+1. Open an issue on GitHub
+2. Submit a pull request with improvements
+3. Contact the maintainers directly via email
+
 ## Citations
 
 If you use this pipeline, please cite:
 - [Citations to be added]
+
+# Mergebam Pipeline
+
+Example of actual paths:
+```
+input_dir/
+├── T10-01/
+│   ├── 20231215_1340_3E_PAM69496_5c1d2ed7/bam_pass/
+│   │   ├── PAM69496_pass_barcode01_*.bam
+│   │   └── PAM69496_pass_barcode01_*.bam.bai
+│   └── 20231216_1420_3E_PAM69496_7d4e9fc2/bam_pass/
+│       ├── PAM69496_pass_barcode01_*.bam
+│       └── PAM69496_pass_barcode01_*.bam.bai
+└── T10-02/
+    └── 20231217_1510_3E_PAM69497_8f3g1hj4/bam_pass/
+        ├── PAM69497_pass_barcode02_*.bam
+        └── PAM69497_pass_barcode02_*.bam.bai
+```
+
+## Configuration
+
+In your `nextflow.config`, specify the input directory:
+
+```nextflow
+params {
+    input_dir = "/path/to/nanopore/data"  // Directory containing sample folders
+    // The pipeline will automatically find all BAM files in */bam_pass/ subdirectories
+}
+```
+
+## Usage
+
+Run the pipeline with:
+
+
+The pipeline will:
+1. Find all BAM files in the `*/bam_pass/` directories for each sample
+2. Merge BAM files for each sample
+3. Create index files for merged BAMs
+4. Extract regions of interest
+
+## Expected Output
+
+```
+results/
+├── merged_bams/
+│   ├── T10-01.merged.bam
+│   ├── T10-01.merged.bam.bai
+│   ├── T10-02.merged.bam
+│   └── T10-02.merged.bam.bai
+└── occ_bam/
+    ├── T10-01_roi.bam
+    ├── T10-01_roi.bam.bai
+    ├── T10-02_roi.bam
+    └── T10-02_roi.bam.bai
+```
+## Requirements
+
+- Nextflow >= 21.04.0
+- SAMtools >= 1.13
+- Sufficient disk space for merged BAM files
+- Memory requirements depend on BAM file sizes
+
+## Input Directory Structure
+
+The pipeline expects Nanopore sequencing data with BAM files in a specific structure:
+
+```
+input_dir/
+├── sample_id1/
+│   └── */bam_pass/
+│       ├── *.bam
+│       └── *.bam.bai
+├── sample_id2/
+│   └── */bam_pass/
+│       ├── *.bam
+│       └── *.bam.bai
+└── sample_id3/
+    └── */bam_pass/
+        ├── *.bam
+        └── *.bam.bai
+```
+
+

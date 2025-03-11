@@ -1,0 +1,37 @@
+# Use the official Miniconda image as a base
+FROM continuumio/miniconda3
+
+# Set a working directory
+WORKDIR /app
+
+# Update apt-get and install required packages in one layer
+RUN apt-get update && \
+    apt-get install -y \
+      wkhtmltopdf \
+      texlive-latex-base \
+      texlive-fonts-recommended \
+      texlive-fonts-extra \
+      texlive-latex-extra \
+      texlive-xetex \
+      pandoc && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the Conda environment file to the image
+COPY markdowm.yml environment.yml
+
+# Install the Conda environment
+RUN conda env create -f environment.yml && conda clean -a
+
+# Activate the Conda environment for interactive shells
+RUN echo "conda activate markdown_env" >> ~/.bashrc
+
+# Ensure the conda environment is in the PATH
+ENV PATH="/opt/conda/envs/markdown_env/bin:$PATH"
+
+# Verify installation (optional)
+RUN conda info --envs
+
+# Default command to keep the container running
+CMD ["/bin/bash"]
+

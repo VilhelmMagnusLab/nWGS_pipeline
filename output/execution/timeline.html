@@ -206,15 +206,17 @@ $(function() {
 
   // Nextflow report data
   window.data = {
-    "elapsed": "8m 11s",
-    "beginningMillis": 1741347575190,
-    "endingMillis": 1741348066480,
+    "elapsed": "9m 59s",
+    "beginningMillis": 1741680042031,
+    "endingMillis": 1741697741994,
     "processes": [
-        {"label": "mergebam:merge_bam_files (1)", "cached": false, "index": 0, "times": [{"starting_time": 1741347578256, "ending_time": 1741347578275}, {"starting_time": 1741347578275, "ending_time": 1741347851789, "label": "4m 52s \/ 28.7 MB"}, {"starting_time": 1741347851789, "ending_time": 1741347870402}]},
-        {"label": "analysis:cramino_report (1)", "cached": false, "index": 1, "times": [{"starting_time": 1741347870545, "ending_time": 1741347870602}, {"starting_time": 1741347870602, "ending_time": 1741347887363, "label": "40.5s \/ 69.6 MB"}, {"starting_time": 1741347887363, "ending_time": 1741347911023}]},
-        {"label": "mergebam:extract_roi (1)", "cached": false, "index": 2, "times": [{"starting_time": 1741347911042, "ending_time": 1741347911123}, {"starting_time": 1741347911123, "ending_time": 1741347990962, "label": "2m 4s \/ 13.6 MB"}, {"starting_time": 1741347990962, "ending_time": 1741348034731}]},
-        {"label": "analysis:annotatecnv (1)", "cached": false, "index": 3, "times": [{"starting_time": 1741348034751, "ending_time": 1741348034831}, {"starting_time": 1741348034831, "ending_time": 1741348065757, "label": "31s \/ -"}]},
-        {"label": "analysis:igv_tools (1)", "cached": false, "index": 4, "times": []}
+        {"label": "mergebam:merge_bam_files (1)", "cached": true, "index": 0, "times": [{"starting_time": 1741680042031, "ending_time": 1741680042059}, {"starting_time": 1741680042059, "ending_time": 1741680175529, "label": "2m 37s \/ 20.4 MB \/ CACHED"}, {"starting_time": 1741680175529, "ending_time": 1741680199324}]},
+        {"label": "mergebam:extract_roi (1)", "cached": true, "index": 1, "times": [{"starting_time": 1741680199462, "ending_time": 1741680199525}, {"starting_time": 1741680199525, "ending_time": 1741680276121, "label": "1m 31s \/ 13.4 MB \/ CACHED"}, {"starting_time": 1741680276121, "ending_time": 1741680289993}]},
+        {"label": "analysis:igv_tools (1)", "cached": true, "index": 2, "times": [{"starting_time": 1741682257940, "ending_time": 1741682257962}, {"starting_time": 1741682257962, "ending_time": 1741682263055, "label": "12.5s \/ 226.6 MB \/ CACHED"}, {"starting_time": 1741682263055, "ending_time": 1741682270473}]},
+        {"label": "analysis:cramino_report (1)", "cached": true, "index": 3, "times": [{"starting_time": 1741682270502, "ending_time": 1741682270574}, {"starting_time": 1741682270574, "ending_time": 1741682285705, "label": "32.4s \/ 54.5 MB \/ CACHED"}, {"starting_time": 1741682285705, "ending_time": 1741682302865}]},
+        {"label": "epi2me:run_epi2me_modkit (1)", "cached": false, "index": 4, "times": [{"starting_time": 1741697146763, "ending_time": 1741697146828}, {"starting_time": 1741697146828, "ending_time": 1741697726132, "label": "9m 52s \/ 4.4 GB"}, {"starting_time": 1741697726132, "ending_time": 1741697738442}]},
+        {"label": "analysis:annotesv (1)", "cached": false, "index": 5, "times": [{"starting_time": 1741697738473, "ending_time": 1741697738543}, {"starting_time": 1741697738543, "ending_time": 1741697741270, "label": "2.8s \/ -"}]},
+        {"label": "epi2me:run_epi2me_sv (1)", "cached": false, "index": 6, "times": []}
     ]
 }
 ;

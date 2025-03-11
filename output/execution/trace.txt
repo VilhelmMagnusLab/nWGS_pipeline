@@ -1,7 +1,8 @@
 task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
-1	51/0574cd	326275	mergebam:merge_bam_files (1)	ABORTED	-	2025-03-07 12:36:31.740	-	-	-	-	-	-	-
-s	467.7%	28.7 MB	982 MB	9.6 GB	4.4 GB
-6	cd/daaadd	333248	analysis:cramino_report (1)	COMPLETED	0	2025-03-07 12:44:30.545	40.5s	16.8s	386.1%	69.6 MB	22.8 GB	4.4 GB	30.4 KB
-2	bc/dfebe5	334934	mergebam:extract_roi (1)	COMPLETED	0	2025-03-07 12:45:11.042	2m 4s	1m 20s	99.4%	13.6 MB	27.1 MB	4.4 GB	32 MB
-7	fa/230d76	337978	analysis:annotatecnv (1)	FAILED	2	2025-03-07 12:47:14.751	31s	30.9s	-	-	-	-	-
-11	1c/41ed7d	339363	analysis:igv_tools (1)	ABORTED	-	2025-03-07 12:47:45.769	-	-	-	-	-	-	-
+1	2d/1d74aa	2421441	mergebam:merge_bam_files (1)	CACHED	0	2025-03-11 09:00:42.031	2m 37s	2m 13s	923.1%	20.4 MB	973.2 MB	9.6 GB	4.4 GB
+2	ec/a88ca3	2424315	mergebam:extract_roi (1)	CACHED	0	2025-03-11 09:03:19.462	1m 31s	1m 17s	99.6%	13.4 MB	27.1 MB	4.4 GB	32 MB
+6	cd/b8175c	2677469	analysis:cramino_report (1)	CACHED	0	2025-03-11 09:37:50.502	32.4s	15.1s	419.4%	54.5 MB	430.9 MB	4.4 GB	30.4 KB
+7	9d/9d43fe	2676968	analysis:igv_tools (1)	CACHED	0	2025-03-11 09:37:37.940	12.5s	5.1s	97.0%	226.6 MB	241 MB	17.8 MB	110.2 KB
+3	79/b16088	3142710	epi2me:run_epi2me_modkit (1)	COMPLETED	0	2025-03-11 13:45:46.763	9m 52s	9m 39s	345.9%	4.4 GB	53.5 GB	148.6 GB	83 GB
+9	da/770f1b	3244579	analysis:annotesv (1)	FAILED	1	2025-03-11 13:55:38.473	2.8s	2.7s	-	-	-	-	-
+4	31/5cbb11	3244806	epi2me:run_epi2me_sv (1)	ABORTED	-	2025-03-11 13:55:41.291	-	-	-	-	-	-	-
