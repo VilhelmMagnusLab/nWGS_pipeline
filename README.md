@@ -211,14 +211,6 @@ The file paths should follow this structure:
 ```
 
 
-### Important Notes:
-
-1. All paths should be absolute paths
-2. Ensure read/write permissions for all directories
-3. Container bind paths must include all required directories
-4. The singularity cache directory needs sufficient storage space
-5. Memory and CPU requirements can be adjusted in nextflow.config
-
 ## Input Requirements
 
 1. Sample ID file format (sample_ids.txt):
@@ -279,6 +271,13 @@ results/
     ├── methylation/
     └── reports/
 ```
+### Important Notes:
+
+1. All paths should be absolute paths
+2. Ensure read/write permissions for all directories
+3. Container bind paths must include all required directories
+4. The singularity cache directory needs sufficient storage space
+5. Memory and CPU requirements can be adjusted in nextflow.config
 
 ## 2. **Running Pipeline**
 
