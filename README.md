@@ -227,18 +227,46 @@ sample_id1   flowcell_id1
 sample_id2   flowcell_id2
 ```
 
-2. Directory structure:
+2. Mergebam 
+
+###input structure:
+
 ```
 input_dir/
-├── sample_id1/
-│   └── bam_pass/
-│       ├── file1.bam
-│       └── file2.bam
-└── sample_id2/
-    └── bam_pass/
-        ├── file1.bam
-        └── file2.bam
+├── T10-01/
+│   ├── 20231215_1340_3E_PAM69496_5c1d2ed7/bam_pass/
+│   │   ├── PAM69496_pass_barcode01_*.bam
+│   │   └── PAM69496_pass_barcode01_*.bam.bai
+│   └── 20231216_1420_3E_PAM69496_7d4e9fc2/bam_pass/
+│       ├── PAM69496_pass_barcode01_*.bam
+│       └── PAM69496_pass_barcode01_*.bam.bai
+└── T10-02/
+    └── 20231217_1510_3E_PAM69497_8f3g1hj4/bam_pass/
+        ├── PAM69497_pass_barcode02_*.bam
+        └── PAM69497_pass_barcode02_*.bam.bai
 ```
+
+### Expected Output
+
+```
+results/
+├── merged_bams/
+│   ├── T10-01.merged.bam
+│   ├── T10-01.merged.bam.bai
+│   ├── T10-02.merged.bam
+│   └── T10-02.merged.bam.bai
+└── occ_bam/
+    ├── T10-01_roi.bam
+    ├── T10-01_roi.bam.bai
+    ├── T10-02_roi.bam
+    └── T10-02_roi.bam.bai
+```
+## Requirements
+
+- Nextflow >= 21.04.0
+- SAMtools >= 1.13
+- Sufficient disk space for merged BAM files
+- Memory requirements depend on BAM file sizes
 
 ## Output Structure
 
@@ -341,86 +369,5 @@ You can also:
 If you use this pipeline, please cite:
 - [Citations to be added]
 
-# Mergebam Pipeline
-
-Example of actual paths:
-```
-input_dir/
-├── T10-01/
-│   ├── 20231215_1340_3E_PAM69496_5c1d2ed7/bam_pass/
-│   │   ├── PAM69496_pass_barcode01_*.bam
-│   │   └── PAM69496_pass_barcode01_*.bam.bai
-│   └── 20231216_1420_3E_PAM69496_7d4e9fc2/bam_pass/
-│       ├── PAM69496_pass_barcode01_*.bam
-│       └── PAM69496_pass_barcode01_*.bam.bai
-└── T10-02/
-    └── 20231217_1510_3E_PAM69497_8f3g1hj4/bam_pass/
-        ├── PAM69497_pass_barcode02_*.bam
-        └── PAM69497_pass_barcode02_*.bam.bai
-```
-
-## Configuration
-
-In your `nextflow.config`, specify the input directory:
-
-```nextflow
-params {
-    input_dir = "/path/to/nanopore/data"  // Directory containing sample folders
-    // The pipeline will automatically find all BAM files in */bam_pass/ subdirectories
-}
-```
-
-## Usage
-
-Run the pipeline with:
-
-
-The pipeline will:
-1. Find all BAM files in the `*/bam_pass/` directories for each sample
-2. Merge BAM files for each sample
-3. Create index files for merged BAMs
-4. Extract regions of interest
-
-## Expected Output
-
-```
-results/
-├── merged_bams/
-│   ├── T10-01.merged.bam
-│   ├── T10-01.merged.bam.bai
-│   ├── T10-02.merged.bam
-│   └── T10-02.merged.bam.bai
-└── occ_bam/
-    ├── T10-01_roi.bam
-    ├── T10-01_roi.bam.bai
-    ├── T10-02_roi.bam
-    └── T10-02_roi.bam.bai
-```
-## Requirements
-
-- Nextflow >= 21.04.0
-- SAMtools >= 1.13
-- Sufficient disk space for merged BAM files
-- Memory requirements depend on BAM file sizes
-
-## Input Directory Structure
-
-The pipeline expects Nanopore sequencing data with BAM files in a specific structure:
-
-```
-input_dir/
-├── sample_id1/
-│   └── */bam_pass/
-│       ├── *.bam
-│       └── *.bam.bai
-├── sample_id2/
-│   └── */bam_pass/
-│       ├── *.bam
-│       └── *.bam.bai
-└── sample_id3/
-    └── */bam_pass/
-        ├── *.bam
-        └── *.bam.bai
-```
 
 
