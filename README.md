@@ -229,7 +229,7 @@ sample_id2   flowcell_id2
 
 2. Mergebam 
 
-###input structure:
+#### input structure:
 
 ```
 input_dir/
@@ -246,7 +246,7 @@ input_dir/
         └── PAM69497_pass_barcode02_*.bam.bai
 ```
 
-### Expected Output
+#### Expected from mergebam input:
 
 ```
 results/
@@ -261,14 +261,8 @@ results/
     ├── T10-02_roi.bam
     └── T10-02_roi.bam.bai
 ```
-## Requirements
 
-- Nextflow >= 21.04.0
-- SAMtools >= 1.13
-- Sufficient disk space for merged BAM files
-- Memory requirements depend on BAM file sizes
-
-## Output Structure
+### Output results folder structure:
 
 ```
 results/
