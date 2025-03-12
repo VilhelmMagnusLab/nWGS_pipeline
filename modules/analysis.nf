@@ -616,9 +616,22 @@ process igv_tools {
     
     script:
     """
-    source /opt/conda/etc/profile.d/conda.sh
-    conda init
-    conda activate annotatecnv_env
+   ### source /opt/conda/etc/profile.d/conda.sh
+    ### conda init
+    ### conda activate annotatecnv_env
+
+      #!/bin/bash
+    set -e
+    
+    # Check if we're in a container and use appropriate conda setup
+    if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
+        # Container environment
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate annotatecnv_env
+    else
+        # Local environment
+        source activate annotatecnv_env
+    fi
     cramino $merge_bam --reference $reference_genome > ${sample_id}_cramino_statistics.txt
    """
     }
@@ -657,26 +670,42 @@ process igv_tools {
 }
 
 process ace_tmc {
+    label 'ace_tmc'
     publishDir "${params.output_path}/cnv/ace/", mode: "copy", overwrite: true
     
     input:
-        tuple val(sample_id), path(merge_bam_folder)
+    tuple val(sample_id), path(bam_dir)
     
     output:
-        tuple val(sample_id), path("${sample_id}_ace_results"), emit: aceresults
-        tuple val(sample_id), env(threshold_value), emit: threshold_value
+    tuple val(sample_id), path("${sample_id}_ace_results"), emit: aceresults
+    tuple val(sample_id), env(threshold_value), emit: threshold_value
     
     script:
     """
-    source activate ace_env
-    ace_tmc.R \
-        "${merge_bam_folder}" \
-        "${sample_id}_ace_results" \
-        "${sample_id}"
+    #!/bin/bash
+    set -e
     
-    # Read the threshold value
+    # Check if we're in a container and use appropriate conda setup
+    if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
+        # Container environment
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate ace_env
+    else
+        # Local environment
+        source activate ace_env
+    fi
+    
+    # Debug info
+    echo "Processing sample: ${sample_id}"
+    echo "Input directory: ${bam_dir}"
+    ls -l ${bam_dir}
+    
+    # Run ACE TMC analysis with the directory containing BAM
+    ace_tmc.R "${bam_dir}" "${sample_id}_ace_results" "${sample_id}"
+    
+    # Read and export the threshold value
     threshold_value=\$(cat "${sample_id}_ace_results/threshold_value.txt")
-    echo "Threshold value: \$threshold_value"
+    echo "Threshold value for ${sample_id}: \$threshold_value"
     """
 }
 
@@ -875,7 +904,7 @@ workflow analysis {
         // MGMT analysis
         if (params.run_mode in ['mgmt', 'all']) {
             println "Running MGMT Analysis..."
-            mgmt_ch = Channel.fromPath("${params.bedmethyl_folder}/*.gz")
+            mgmt_ch = Channel.fromPath("${params.bedmethyl_folder}/*.wf_mods.bedmethyl.gz")
                 .map { gz ->
                     def sample_id = gz.getBaseName().split("\\.")[0]
                     tuple(sample_id, gz, file(params.epicsites), file(params.mgmt_cpg_island_hg38))
@@ -982,47 +1011,81 @@ workflow analysis {
             
             // Create channel for ACE input
             ace_input = Channel
-                .fromList(sample_thresholds.keySet().collect())
-                .map { sample_id -> 
-                    tuple(sample_id, file(params.merge_bam_folder))
+                .fromPath("${params.merge_bam_folder}/*.merge.bam")
+                .map { bam -> 
+                    def sample_id = bam.name.toString().split('\\.')[0]
+                    def bam_dir = bam.parent
+                    println "Found BAM file for ACE: ${bam} (sample: ${sample_id}, directory: ${bam_dir})"
+                    tuple(sample_id, bam_dir)
                 }
+                .view { "ACE input: $it" }
 
             // Run ACE analysis to get thresholds
             ace_tmc(ace_input)
-            
+            ace_tmc.out.threshold_value.view { "Threshold value: $it" }
+
             // Create channel for annotatecnv based on run mode
             if (params.run_order_mode) {
-                // Use threshold from ace_tmc
-                annotatecnv_input = boosts_segsfromepi2me_channel
-                    .join(ace_tmc.out.threshold_value)
-                    .map { sample_id, segs_vcf, occ_fusions, bins_bed, segs_bed, threshold ->
+                // Use epi2me output and threshold from ace_tmc
+                def ace_thresholds = ace_tmc.out.threshold_value
+                    .map { sample_id, threshold -> 
+                        println "Threshold for ${sample_id}: ${threshold}"
+                        tuple(sample_id, threshold)
+                    }
+                   // .view { "Threshold value: $it" }
+
+                annotatecnv_input = epi2me_results
+                    .map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
+                        println "Processing epi2me results for sample: ${sample_id}"
                         tuple(
-                            sample_id,
-                            segs_vcf,
-                            occ_fusions,
-                            bins_bed,
-                            segs_bed,
-                            threshold
+                            sample_id, 
+                            file("${params.path}/results/epi2me/epicnv/qdna_seq/${sample_id}_segs.vcf"),
+                            file(params.occ_fusions),
+                            file("${params.path}/results/epi2me/epicnv/qdna_seq/${sample_id}_bins.bed"),
+                            file("${params.path}/results/epi2me/epicnv/qdna_seq/${sample_id}_segs.bed")
                         )
                     }
+                    .combine(ace_thresholds, by: 0)
+                    .map { it -> 
+                        println "Preparing annotatecnv input for ${it[0]} with tumor content ${it[5]}"
+                        tuple(
+                            it[0],              // sample_id
+                            it[1],              // segs_vcf
+                            it[2],              // occ_fusions
+                            it[3],              // bins_bed
+                            it[4],              // segs_bed
+                            it[5].toString()    // threshold value as string
+                        )
+                    }
+                    .view { "Annotatecnv input: $it" }
+
+                // Run annotatecnv with the prepared channel
+                //annotatecnv(annotatecnv_input)
             } else {
-                // Use threshold from sample_thresholds
-                annotatecnv_input = boosts_segsfromepi2me_channel
-                    .map { sample_id, segs_vcf, occ_fusions, bins_bed, segs_bed ->
-                        def threshold = sample_thresholds.get(sample_id, 0.0)
-                        tuple(
-                            sample_id,
-                            segs_vcf,
-                            occ_fusions,
-                            bins_bed,
-                            segs_bed,
-                            threshold
-                        )
+                // Keep existing analysis mode code unchanged
+                annotatecnv_input = Channel
+                    .fromPath("${params.segsfromepi2me_folder}/*_segs.vcf")
+                    .map { vcf -> 
+                        def sample_id = vcf.name.toString().split('_')[0]
+                        if (sample_thresholds.containsKey(sample_id)) {
+                            tuple(
+                                sample_id,
+                                vcf,
+                                file(params.occ_fusions),
+                                file("${params.segsfromepi2me_folder}/${sample_id}_bins.bed"),
+                                file("${params.segsfromepi2me_folder}/${sample_id}_segs.bed"),
+                                sample_thresholds[sample_id].toString()
+                            )
+                        }
                     }
+                    .filter { it != null }
             }
-            
-            // Run annotatecnv once and store results
+
+            // Run annotatecnv with the prepared channel
             annotatecnv(annotatecnv_input)
+        
+            
+            // Store results
             annotatecnv_results = [
                 rmdcnvplot: annotatecnv.out.rmdcnvplot,
                 rmdcnvtumornumber: annotatecnv.out.rmdcnvtumornumber,
@@ -1139,4 +1202,5 @@ workflow analysis {
 //def extractSampleId(file) {
 //    def filename = file.getName()
 //    return filename.split('\\.')[0]  // Get everything before the first dot
+//}
 //}
