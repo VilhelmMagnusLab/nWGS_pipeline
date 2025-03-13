@@ -1,98 +1,749 @@
-Mar-12 14:31:39.774 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --run_mode_analysis mgmt -resume
-Mar-12 14:31:39.933 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 24.10.1
-Mar-12 14:31:39.952 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/chbope/.nextflow/plugins; core-plugins: nf-amazon@2.9.1,nf-azure@1.10.2,nf-cloudcache@0.4.2,nf-codecommit@0.2.2,nf-console@1.1.4,nf-google@1.15.2,nf-tower@1.9.3,nf-wave@1.7.3
-Mar-12 14:31:39.966 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
-Mar-12 14:31:39.967 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
-Mar-12 14:31:39.971 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
-Mar-12 14:31:39.983 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
-Mar-12 14:31:40.006 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
-Mar-12 14:31:40.008 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
-Mar-12 14:31:40.034 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/chbope/.nextflow/secrets/store.json
-Mar-12 14:31:40.038 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@515ebef3] - activable => nextflow.secret.LocalSecretsProvider@515ebef3
-Mar-12 14:31:40.051 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
-Mar-12 14:31:40.833 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declaration
-Mar-12 14:31:40.847 [main] DEBUG nextflow.cli.CmdRun - Launching `main.nf` [furious_picasso] DSL2 - revision: ca667becb2
-Mar-12 14:31:40.848 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
-Mar-12 14:31:40.848 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
-Mar-12 14:31:40.899 [main] DEBUG nextflow.Session - Session UUID: e7c949ad-3cfc-46e0-b578-40f92797a0ec
-Mar-12 14:31:40.900 [main] DEBUG nextflow.Session - Run name: furious_picasso
-Mar-12 14:31:40.900 [main] DEBUG nextflow.Session - Executor pool size: 12
-Mar-12 14:31:40.909 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
-Mar-12 14:31:40.916 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
-Mar-12 14:31:40.940 [main] DEBUG nextflow.cli.CmdRun - 
+Mar-13 16:00:57.222 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --run_order_mode -resume
+Mar-13 16:00:57.402 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 24.10.1
+Mar-13 16:00:57.425 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/chbope/.nextflow/plugins; core-plugins: nf-amazon@2.9.1,nf-azure@1.10.2,nf-cloudcache@0.4.2,nf-codecommit@0.2.2,nf-console@1.1.4,nf-google@1.15.2,nf-tower@1.9.3,nf-wave@1.7.3
+Mar-13 16:00:57.440 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Mar-13 16:00:57.441 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Mar-13 16:00:57.446 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
+Mar-13 16:00:57.458 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Mar-13 16:00:57.482 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
+Mar-13 16:00:57.486 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
+Mar-13 16:00:57.526 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/chbope/.nextflow/secrets/store.json
+Mar-13 16:00:57.531 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@b967222] - activable => nextflow.secret.LocalSecretsProvider@b967222
+Mar-13 16:00:57.552 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Mar-13 16:00:58.638 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declaration
+Mar-13 16:00:58.652 [main] DEBUG nextflow.cli.CmdRun - Launching `main.nf` [fervent_ampere] DSL2 - revision: ca667becb2
+Mar-13 16:00:58.654 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Mar-13 16:00:58.654 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+Mar-13 16:00:58.714 [main] DEBUG nextflow.Session - Session UUID: e7c949ad-3cfc-46e0-b578-40f92797a0ec
+Mar-13 16:00:58.715 [main] DEBUG nextflow.Session - Run name: fervent_ampere
+Mar-13 16:00:58.715 [main] DEBUG nextflow.Session - Executor pool size: 12
+Mar-13 16:00:58.723 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Mar-13 16:00:58.732 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Mar-13 16:00:58.757 [main] DEBUG nextflow.cli.CmdRun - 
   Version: 24.10.1 build 5930
   Created: 18-11-2024 12:21 UTC (13:21 CEST)
   System: Linux 5.4.0-208-generic
   Runtime: Groovy 4.0.23 on OpenJDK 64-Bit Server VM 11.0.15-internal+0-adhoc..src
   Encoding: UTF-8 (UTF-8)
-  Process: 3976750@chbope [127.0.1.1]
-  CPUs: 12 - Mem: 78.2 GB (10.7 GB) - Swap: 6 GB (6 GB)
-Mar-12 14:31:41.002 [main] DEBUG nextflow.Session - Work-dir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work [ext2/ext3]
-Mar-12 14:31:41.047 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
-Mar-12 14:31:41.059 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
-Mar-12 14:31:41.097 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
-Mar-12 14:31:41.108 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 13; maxThreads: 1000
-Mar-12 14:31:41.191 [main] DEBUG nextflow.Session - Session start
-Mar-12 14:31:41.198 [main] DEBUG nextflow.Session - Using default localLib path: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/lib
-Mar-12 14:31:41.199 [main] DEBUG nextflow.Session - Adding to the classpath library: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/lib
-Mar-12 14:31:41.379 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
-Mar-12 14:31:41.819 [main] INFO  nextflow.script.BaseScript - Sample_id T10-01 with Flow Cell ID: PBA69496
-Mar-12 14:31:43.749 [main] INFO  nextflow.script.BaseScript - Analysis run mode: mgmt
-Mar-12 14:31:43.756 [main] INFO  nextflow.script.BaseScript - Sample thresholds: [T10-01:0.73]
-Mar-12 14:31:43.829 [main] INFO  nextflow.script.BaseScript - Running MGMT Analysis...
-Mar-12 14:31:43.926 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Mar-12 14:31:43.926 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Mar-12 14:31:43.932 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
-Mar-12 14:31:43.938 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=12; memory=78.2 GB; capacity=12; pollInterval=100ms; dumpInterval=5m
-Mar-12 14:31:43.941 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
-Mar-12 14:31:44.008 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:sturgeon` matches process analysis:sturgeon
-Mar-12 14:31:44.013 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Mar-12 14:31:44.013 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Mar-12 14:31:44.025 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Mar-12 14:31:44.026 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Mar-12 14:31:44.050 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Mar-12 14:31:44.051 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Mar-12 14:31:44.065 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_nn_classifier` matches process analysis:run_nn_classifier
-Mar-12 14:31:44.067 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Mar-12 14:31:44.068 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Mar-12 14:31:44.090 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: extract_epic, annotesv, analysis:sturgeon, mgmt_promoter, igv_tools, markdown_report, merge_bam_files, run_nn_classifier, clairs_to, analysis:nanodx, analysis:extract_epic, clair3, run_epi2me_cnv, run_epi2me_sv, extract_roi, analysis:mgmt_promoter, circosplot, ace_tmc, svannasv, sturgeon, knotannotsv, analysis:run_nn_classifier, annotatecnv, nanodx, cramino_report, merge_annotation, run_epi2me_modkit
-Mar-12 14:31:44.093 [main] DEBUG nextflow.Session - Igniting dataflow network (25)
-Mar-12 14:31:44.117 [PathVisitor-1] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /home/chbope/extension/results/epi2me/epimodkit/; pattern: *.wf_mods.bedmethyl.gz; options: [:]
-Mar-12 14:31:44.120 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:extract_epic
-Mar-12 14:31:44.120 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:sturgeon
-Mar-12 14:31:44.120 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:mgmt_promoter
-Mar-12 14:31:44.120 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:nanodx
-Mar-12 14:31:44.121 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:run_nn_classifier
-Mar-12 14:31:44.122 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
-  Script_49aa978753d5a0c7: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/./modules/analysis.nf
+  Process: 2023772@chbope [127.0.1.1]
+  CPUs: 12 - Mem: 78.2 GB (20.3 GB) - Swap: 6 GB (6 GB)
+Mar-13 16:00:58.861 [main] DEBUG nextflow.Session - Work-dir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work [ext2/ext3]
+Mar-13 16:00:58.924 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Mar-13 16:00:58.936 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Mar-13 16:00:58.981 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Mar-13 16:00:58.992 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 13; maxThreads: 1000
+Mar-13 16:00:59.093 [main] DEBUG nextflow.Session - Session start
+Mar-13 16:00:59.100 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/output/execution/trace.txt
+Mar-13 16:00:59.110 [main] DEBUG nextflow.Session - Using default localLib path: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/lib
+Mar-13 16:00:59.112 [main] DEBUG nextflow.Session - Adding to the classpath library: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/lib
+Mar-13 16:00:59.360 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Mar-13 16:00:59.806 [main] INFO  nextflow.script.BaseScript - Sample_id T10-01 with Flow Cell ID: PBA69496
+Mar-13 16:01:01.931 [main] INFO  nextflow.Nextflow - 
+        Running pipelines sequentially in strict order:
+        1. Mergebam Pipeline
+        2. Epi2me Pipeline
+        3. Analysis Pipeline
+        
+Mar-13 16:01:01.932 [main] INFO  nextflow.Nextflow - === Starting Mergebam Pipeline ===
+Mar-13 16:01:02.100 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Mar-13 16:01:02.100 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Mar-13 16:01:02.106 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Mar-13 16:01:02.112 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=12; memory=78.2 GB; capacity=1; pollInterval=100ms; dumpInterval=5m
+Mar-13 16:01:02.114 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
+Mar-13 16:01:02.178 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Mar-13 16:01:02.178 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Mar-13 16:01:02.183 [main] INFO  nextflow.Nextflow - === Starting Epi2me Pipeline ===
+Mar-13 16:01:02.191 [main] INFO  nextflow.script.BaseScript - epi2me run mode: modkit
+Mar-13 16:01:02.202 [main] INFO  nextflow.script.BaseScript - Running modkit...
+Mar-13 16:01:02.215 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Mar-13 16:01:02.216 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Mar-13 16:01:02.275 [main] INFO  nextflow.Nextflow - === Starting Analysis Pipeline ===
+Mar-13 16:01:02.279 [main] INFO  nextflow.script.BaseScript - Analysis run mode: mgmt
+Mar-13 16:01:02.283 [main] INFO  nextflow.script.BaseScript - Sample thresholds: [:]
+Mar-13 16:01:02.298 [main] INFO  nextflow.script.BaseScript - Running MGMT Analysis...
+Mar-13 16:01:02.313 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Mar-13 16:01:02.313 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Mar-13 16:01:02.325 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:sturgeon` matches process analysis:sturgeon
+Mar-13 16:01:02.327 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Mar-13 16:01:02.327 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Mar-13 16:01:02.339 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Mar-13 16:01:02.339 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Mar-13 16:01:02.359 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Mar-13 16:01:02.359 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Mar-13 16:01:02.372 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_nn_classifier` matches process analysis:run_nn_classifier
+Mar-13 16:01:02.375 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Mar-13 16:01:02.376 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Mar-13 16:01:02.382 [main] INFO  nextflow.script.BaseScript - Running CNV Analysis...
+Mar-13 16:01:02.397 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:ace_tmc` matches process analysis:ace_tmc
+Mar-13 16:01:02.399 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Mar-13 16:01:02.399 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Mar-13 16:01:02.437 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:annotatecnv` matches process analysis:annotatecnv
+Mar-13 16:01:02.440 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Mar-13 16:01:02.441 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Mar-13 16:01:02.449 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: extract_epic, annotesv, analysis:sturgeon, mgmt_promoter, igv_tools, markdown_report, merge_bam_files, run_nn_classifier, clairs_to, mergebam:extract_roi, analysis:nanodx, analysis:extract_epic, clair3, run_epi2me_cnv, run_epi2me_sv, epi2me:run_epi2me_modkit, extract_roi, mergebam:merge_bam_files, analysis:mgmt_promoter, circosplot, ace_tmc, svannasv, analysis:ace_tmc, sturgeon, knotannotsv, run_nn_classifier_ori, analysis:run_nn_classifier, annotatecnv, nanodx, cramino_report, analysis:annotatecnv, run_epi2me_modkit, merge_annotation
+Mar-13 16:01:02.456 [main] DEBUG nextflow.Session - Igniting dataflow network (29)
+Mar-13 16:01:02.468 [PathVisitor-1] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /home/chbope/extension/Data_for_Bope/single_bam_folder/; pattern: **/bam_pass/*.bam; options: [:]
+Mar-13 16:01:02.470 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > mergebam:merge_bam_files
+Mar-13 16:01:02.471 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > mergebam:extract_roi
+Mar-13 16:01:02.475 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > epi2me:run_epi2me_modkit
+Mar-13 16:01:02.485 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:extract_epic
+Mar-13 16:01:02.485 [PathVisitor-2] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /home/chbope/extension/results/epi2me/epimodkit/; pattern: *.wf_mods.bedmethyl.gz; options: [:]
+Mar-13 16:01:02.486 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:sturgeon
+Mar-13 16:01:02.488 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:mgmt_promoter
+Mar-13 16:01:02.489 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:nanodx
+Mar-13 16:01:02.490 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:run_nn_classifier
+Mar-13 16:01:02.493 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:ace_tmc
+Mar-13 16:01:02.493 [PathVisitor-3] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /home/chbope/extension/results/merge_bam/; pattern: *.merge.bam; options: [:]
+Mar-13 16:01:02.496 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:annotatecnv
+Mar-13 16:01:02.498 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
   Script_dc4ef0d4fbc56b14: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/./modules/epi2me.nf
   Script_fe96802275f59008: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/./modules/mergebam.nf
   Script_f6a448acd690c999: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/main.nf
-Mar-12 14:31:44.124 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
-Mar-12 14:31:44.125 [main] DEBUG nextflow.Session - Session await
-Mar-12 14:31:44.302 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
-Mar-12 14:31:44.304 [Task submitter] INFO  nextflow.Session - [9d/f6df86] Submitted process > analysis:extract_epic (T10-01)
-Mar-12 14:32:38.743 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: analysis:extract_epic (T10-01); status: COMPLETED; exit: 0; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/9d/f6df866de99fff057232685d94569e]
-Mar-12 14:32:38.745 [Task monitor] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'TaskFinalizer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
-Mar-12 14:32:38.801 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
-Mar-12 14:32:38.802 [Task submitter] INFO  nextflow.Session - [c7/39c475] Submitted process > analysis:mgmt_promoter (1)
-Mar-12 14:32:38.804 [TaskFinalizer-1] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'PublishDir' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
-Mar-12 14:32:38.816 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
-Mar-12 14:32:38.817 [Task submitter] INFO  nextflow.Session - [51/6055a2] Submitted process > analysis:nanodx (1)
-Mar-12 14:32:38.838 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
-Mar-12 14:32:38.839 [Task submitter] INFO  nextflow.Session - [f5/44d970] Submitted process > analysis:sturgeon (1)
-Mar-12 14:32:40.590 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 2; name: analysis:mgmt_promoter (1); status: COMPLETED; exit: 0; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/c7/39c475a408f5d960ba1eb5e0d5b3bc]
-Mar-12 14:32:41.400 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 3; name: analysis:nanodx (1); status: COMPLETED; exit: 0; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/51/6055a2b88452e03296c54be17ef5b4]
-Mar-12 14:32:41.455 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
-Mar-12 14:32:41.456 [Task submitter] INFO  nextflow.Session - [8c/8e208f] Submitted process > analysis:run_nn_classifier (1)
-Mar-12 14:33:36.193 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 5; name: analysis:run_nn_classifier (1); status: COMPLETED; exit: 0; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/8c/8e208ff340be0dd1f5e89d3f97df48]
-Mar-12 14:33:43.727 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 4; name: analysis:sturgeon (1); status: COMPLETED; exit: 0; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/f5/44d970f994f06a54b1995e5dfa9c0d]
-Mar-12 14:33:43.737 [main] DEBUG nextflow.Session - Session await > all processes finished
-Mar-12 14:33:43.827 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
-Mar-12 14:33:43.828 [main] DEBUG nextflow.Session - Session await > all barriers passed
-Mar-12 14:33:43.836 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'TaskFinalizer' shutdown completed (hard=false)
-Mar-12 14:33:43.839 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'PublishDir' shutdown completed (hard=false)
-Mar-12 14:33:43.851 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=5; failedCount=0; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=11m 53s; failedDuration=0ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=3; peakCpus=12; peakMemory=20 GB; ]
-Mar-12 14:33:44.028 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
-Mar-12 14:33:44.058 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'FileTransfer' shutdown completed (hard=false)
-Mar-12 14:33:44.059 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye
+  Script_9af263512b3d996a: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/./modules/analysis.nf
+Mar-13 16:01:02.498 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Mar-13 16:01:02.498 [main] DEBUG nextflow.Session - Session await
+Mar-13 16:01:02.499 [Actor Thread 11] INFO  nextflow.script.BaseScript - Processing MGMT for sample: T10-01 from epi2me output
+Mar-13 16:01:02.500 [Actor Thread 9] INFO  nextflow.script.BaseScript - Found BAM file for ACE: /home/chbope/extension/results/merge_bam/T10-01.merge.bam (sample: T10-01, directory: /home/chbope/extension/results/merge_bam)
+Mar-13 16:01:02.506 [Actor Thread 11] INFO  nextflow.script.BaseScript - Processing MGMT for sample: Dummy from epi2me output
+Mar-13 16:01:02.751 [Actor Thread 12] INFO  nextflow.processor.TaskProcessor - [7d/fa7ccb] Cached process > mergebam:merge_bam_files (1)
+Mar-13 16:01:02.757 [Actor Thread 13] INFO  nextflow.processor.TaskProcessor - [c1/a3be5c] Cached process > analysis:ace_tmc (1)
+Mar-13 16:01:02.757 [Actor Thread 7] INFO  nextflow.processor.TaskProcessor - [47/83f011] Cached process > analysis:extract_epic (Dummy)
+Mar-13 16:01:02.782 [Actor Thread 2] INFO  nextflow.script.BaseScript - Threshold for T10-01: 0.4400
+Mar-13 16:01:02.802 [Actor Thread 13] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'PublishDir' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Mar-13 16:01:02.804 [Actor Thread 14] INFO  nextflow.processor.TaskProcessor - [57/1f0ec1] Cached process > analysis:sturgeon (1)
+Mar-13 16:01:02.804 [Actor Thread 6] INFO  nextflow.processor.TaskProcessor - [25/e9992b] Cached process > analysis:mgmt_promoter (1)
+Mar-13 16:01:02.808 [Actor Thread 17] INFO  nextflow.processor.TaskProcessor - [fa/f5e807] Cached process > analysis:nanodx (1)
+Mar-13 16:01:02.811 [Actor Thread 8] INFO  nextflow.processor.TaskProcessor - [e9/8f26ac] Cached process > mergebam:extract_roi (1)
+Mar-13 16:01:02.824 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Mar-13 16:01:02.831 [Task submitter] INFO  nextflow.Session - [a1/403857] Submitted process > analysis:extract_epic (T10-01)
+Mar-13 16:01:02.844 [Actor Thread 15] INFO  nextflow.script.BaseScript - Processing epi2me results for sample: T10-01
+Mar-13 16:01:02.849 [Actor Thread 15] INFO  nextflow.script.BaseScript - Preparing annotatecnv input for T10-01 with tumor content 0.4400
+Mar-13 16:01:02.874 [Actor Thread 10] INFO  nextflow.processor.TaskProcessor - [31/80a79a] Cached process > analysis:annotatecnv (1)
+Mar-13 16:02:21.883 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 2; name: analysis:extract_epic (T10-01); status: COMPLETED; exit: 0; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/a1/40385728f6643b0b68f62fef41c15a]
+Mar-13 16:02:21.885 [Task monitor] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'TaskFinalizer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Mar-13 16:02:21.914 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Mar-13 16:02:21.923 [Task submitter] INFO  nextflow.Session - [37/4b532b] Submitted process > epi2me:run_epi2me_modkit (1)
+Mar-13 16:06:02.286 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 9; name: epi2me:run_epi2me_modkit (1); status: RUNNING; exit: -; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/37/4b532b31adc2991c748fea5d0ec9ad]
+Mar-13 16:06:03.057 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 4 -- tasks to be submitted are shown below
+~> TaskHandler[id: 10; name: analysis:run_nn_classifier (1); status: NEW; exit: -; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/72/30c4c4b562eab194c616b14a7c2ffd]
+~> TaskHandler[id: 12; name: analysis:mgmt_promoter (2); status: NEW; exit: -; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/6d/91ba974d24c7d2b0214ced24ae9423]
+~> TaskHandler[id: 14; name: analysis:sturgeon (2); status: NEW; exit: -; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/6a/a4f15531246bdc3a25d46dc26162be]
+~> TaskHandler[id: 13; name: analysis:nanodx (2); status: NEW; exit: -; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/22/b7de2c108fbf3602f94fd32dddcae1]
+Mar-13 16:11:02.351 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 9; name: epi2me:run_epi2me_modkit (1); status: RUNNING; exit: -; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/37/4b532b31adc2991c748fea5d0ec9ad]
+Mar-13 16:11:03.168 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 4 -- tasks to be submitted are shown below
+~> TaskHandler[id: 10; name: analysis:run_nn_classifier (1); status: NEW; exit: -; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/72/30c4c4b562eab194c616b14a7c2ffd]
+~> TaskHandler[id: 12; name: analysis:mgmt_promoter (2); status: NEW; exit: -; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/6d/91ba974d24c7d2b0214ced24ae9423]
+~> TaskHandler[id: 14; name: analysis:sturgeon (2); status: NEW; exit: -; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/6a/a4f15531246bdc3a25d46dc26162be]
+~> TaskHandler[id: 13; name: analysis:nanodx (2); status: NEW; exit: -; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/22/b7de2c108fbf3602f94fd32dddcae1]
+Mar-13 16:15:32.731 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 9; name: epi2me:run_epi2me_modkit (1); status: COMPLETED; exit: 0; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/37/4b532b31adc2991c748fea5d0ec9ad]
+Mar-13 16:15:32.751 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Mar-13 16:15:32.752 [Task submitter] INFO  nextflow.Session - [72/30c4c4] Submitted process > analysis:run_nn_classifier (1)
+Mar-13 16:15:35.450 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 10; name: analysis:run_nn_classifier (1); status: COMPLETED; exit: 1; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/72/30c4c4b562eab194c616b14a7c2ffd]
+Mar-13 16:15:35.462 [TaskFinalizer-3] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=analysis:run_nn_classifier (1); work-dir=/home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/72/30c4c4b562eab194c616b14a7c2ffd
+  error [nextflow.exception.ProcessFailedException]: Process `analysis:run_nn_classifier (1)` terminated with an error exit status (1)
+Mar-13 16:15:35.466 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Mar-13 16:15:35.467 [Task submitter] INFO  nextflow.Session - [6d/91ba97] Submitted process > analysis:mgmt_promoter (2)
+Mar-13 16:15:35.485 [TaskFinalizer-3] ERROR nextflow.processor.TaskProcessor - Error executing process > 'analysis:run_nn_classifier (1)'
+
+Caused by:
+  Process `analysis:run_nn_classifier (1)` terminated with an error exit status (1)
+
+
+Command executed:
+
+  #!/bin/bash
+      
+      # Set up temporary directory
+      export TMPDIR="/home/chbope/extension/trash/tmp"
+      mkdir -p $TMPDIR
+  
+      # Check Python and environment
+      which python3
+      python3 --version
+      
+      # Create Snakefile with correct paths
+      cat << EOF > Snakefile
+  rule all:
+      input:
+          "Dummy_nanodx_classifier.txt",
+          "Dummy_nanodx_classifier.tsv"
+  
+  rule NN_classifier:
+      input:
+          bed = "Dummy_nanodx_bedmethyl.bed",
+          model = "Capper_et_al_NN.pkl"
+      output:
+          txt = "Dummy_nanodx_classifier.txt",
+          votes = "Dummy_nanodx_classifier.tsv"
+      threads: 4
+      resources: 
+          mem_mb = 16384
+      script: "/home/chbope/Documents/nanopore/packages/nanoDx/workflow/scripts/classify_NN_bedMethyl.py"
+  EOF
+  
+      # Run snakemake directly (assuming Python environment is already set up in container)
+      snakemake --cores 4 --verbose --nolock
+
+Command exit status:
+  1
+
+Command output:
+  /home/chbope/miniconda3/envs/mut_env/bin/python3
+  Python 3.10.6
+
+Command error:
+      from . import transport
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/smart_open/transport.py", line 98, in <module>
+      register_transport('smart_open.gcs')
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/smart_open/transport.py", line 49, in register_transport
+      submodule = importlib.import_module(submodule)
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/importlib/__init__.py", line 126, in import_module
+      return _bootstrap._gcd_import(name[level:], package, level)
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/smart_open/gcs.py", line 15, in <module>
+      import google.cloud.exceptions
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/google/cloud/exceptions/__init__.py", line 24, in <module>
+      from google.api_core import exceptions
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/google/api_core/exceptions.py", line 29, in <module>
+      from google.rpc import error_details_pb2
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/google/rpc/__init__.py", line 20, in <module>
+      pkg_resources.declare_namespace(__name__)
+  AttributeError: module 'pkg_resources' has no attribute 'declare_namespace'
+  
+  Traceback (most recent call last):
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/snakemake/__init__.py", line 623, in snakemake
+      workflow.include(
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/snakemake/workflow.py", line 1185, in include
+      snakefile = infer_source_file(snakefile, basedir)
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/snakemake/sourcecache.py", line 306, in infer_source_file
+      if is_local_file(path_or_uri):
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/snakemake/common/__init__.py", line 67, in is_local_file
+      return parse_uri(path_or_uri).scheme == "file"
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/snakemake/common/__init__.py", line 71, in parse_uri
+      from smart_open import parse_uri
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/smart_open/__init__.py", line 34, in <module>
+      from .smart_open_lib import open, parse_uri, smart_open, register_compressor  # noqa: E402
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/smart_open/smart_open_lib.py", line 35, in <module>
+      from smart_open import doctools
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/smart_open/doctools.py", line 21, in <module>
+      from . import transport
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/smart_open/transport.py", line 98, in <module>
+      register_transport('smart_open.gcs')
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/smart_open/transport.py", line 49, in register_transport
+      submodule = importlib.import_module(submodule)
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/importlib/__init__.py", line 126, in import_module
+      return _bootstrap._gcd_import(name[level:], package, level)
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/smart_open/gcs.py", line 15, in <module>
+      import google.cloud.exceptions
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/google/cloud/exceptions/__init__.py", line 24, in <module>
+      from google.api_core import exceptions
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/google/api_core/exceptions.py", line 29, in <module>
+      from google.rpc import error_details_pb2
+    File "/home/chbope/miniconda3/envs/mut_env/lib/python3.10/site-packages/google/rpc/__init__.py", line 20, in <module>
+      pkg_resources.declare_namespace(__name__)
+  AttributeError: module 'pkg_resources' has no attribute 'declare_namespace'
+  INFO:    Cleaning up image...
+
+Work dir:
+  /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/72/30c4c4b562eab194c616b14a7c2ffd
+
+Container:
+  /home/chbope/extension/images/nanodx_images_29jan25_latest.sif
+
+Tip: view the complete command output by changing to the process work dir and entering the command `cat .command.out`
+Mar-13 16:15:35.495 [TaskFinalizer-3] DEBUG nextflow.Session - Session aborted -- Cause: Process `analysis:run_nn_classifier (1)` terminated with an error exit status (1)
+Mar-13 16:15:35.508 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
+Mar-13 16:15:35.519 [TaskFinalizer-3] DEBUG nextflow.Session - The following nodes are still active:
+[process] analysis:run_nn_classifier
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+Mar-13 16:15:35.525 [TaskFinalizer-3] DEBUG nextflow.Session - 
+Thread[main,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  app//nextflow.util.Barrier$_awaitCompletion_closure3.doCall(Barrier.groovy:92)
+  app//nextflow.util.Barrier$_awaitCompletion_closure3.call(Barrier.groovy)
+  app//nextflow.extension.Bolts.withLock(Bolts.groovy:337)
+  app//nextflow.extension.Bolts.withLock(Bolts.groovy)
+  app//nextflow.util.Barrier.awaitCompletion(Barrier.groovy:89)
+  app//nextflow.Session.await(Session.groovy:676)
+  app//nextflow.script.ScriptRunner.await(ScriptRunner.groovy:256)
+  app//nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:144)
+  app//nextflow.cli.CmdRun.run(CmdRun.groovy:376)
+  app//nextflow.cli.Launcher.run(Launcher.groovy:503)
+  app//nextflow.cli.Launcher.main(Launcher.groovy:658)
+
+Thread[PublishDir-5,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Task submitter,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:234)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2211)
+  app//nextflow.processor.TaskPollingMonitor.awaitSlots(TaskPollingMonitor.groovy:399)
+  app//nextflow.processor.TaskPollingMonitor.submitLoop(TaskPollingMonitor.groovy:420)
+  java.base@11.0.15-internal/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+  java.base@11.0.15-internal/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+  java.base@11.0.15-internal/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+  java.base@11.0.15-internal/java.lang.reflect.Method.invoke(Method.java:566)
+  app//org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+  app//groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1333)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethodClosure(MetaClassImpl.java:1017)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1207)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+  app//groovy.lang.Closure.call(Closure.java:433)
+  app//groovy.lang.Closure.call(Closure.java:412)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-2,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Thread-1,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:234)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2123)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingDeque.pollFirst(LinkedBlockingDeque.java:513)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingDeque.poll(LinkedBlockingDeque.java:675)
+  app//nextflow.util.SimpleAgent.run(SimpleAgent.groovy:89)
+  java.base@11.0.15-internal/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+  java.base@11.0.15-internal/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+  java.base@11.0.15-internal/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+  java.base@11.0.15-internal/java.lang.reflect.Method.invoke(Method.java:566)
+  app//org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+  app//groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1333)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethodClosure(MetaClassImpl.java:1017)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1207)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+  app//groovy.lang.Closure.call(Closure.java:433)
+  app//groovy.lang.Closure.call(Closure.java:412)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 13,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 10,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-4,5,main]
+  java.base@11.0.15-internal/java.lang.Object.wait(Native Method)
+  java.base@11.0.15-internal/java.lang.Object.wait(Object.java:328)
+  java.base@11.0.15-internal/java.lang.ProcessImpl.waitFor(ProcessImpl.java:495)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.doCall(LocalTaskHandler.groovy:109)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.call(LocalTaskHandler.groovy)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.15-internal/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+  java.base@11.0.15-internal/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 4,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[PublishDir-1,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 17,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-1,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 11,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 15,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[PublishDir-9,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 12,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Signal Dispatcher,9,system]
+
+Thread[Reference Handler,10,system]
+  java.base@11.0.15-internal/java.lang.ref.Reference.waitForReferencePendingList(Native Method)
+  java.base@11.0.15-internal/java.lang.ref.Reference.processPendingReferences(Reference.java:241)
+  java.base@11.0.15-internal/java.lang.ref.Reference$ReferenceHandler.run(Reference.java:213)
+
+Thread[PublishDir-6,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 18,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-2,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[process reaper,10,system]
+  java.base@11.0.15-internal/java.lang.ProcessHandleImpl.waitForProcessExit0(Native Method)
+  java.base@11.0.15-internal/java.lang.ProcessHandleImpl$1.run(ProcessHandleImpl.java:138)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Common-Cleaner,8,InnocuousThreadGroup]
+  java.base@11.0.15-internal/java.lang.Object.wait(Native Method)
+  java.base@11.0.15-internal/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155)
+  java.base@11.0.15-internal/jdk.internal.ref.CleanerImpl.run(CleanerImpl.java:148)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+  java.base@11.0.15-internal/jdk.internal.misc.InnocuousThread.run(InnocuousThread.java:161)
+
+Thread[PublishDir-2,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[AnsiLogObserver,5,main]
+  java.base@11.0.15-internal/java.lang.Object.wait(Native Method)
+  app//nextflow.trace.AnsiLogObserver.render0(AnsiLogObserver.groovy:185)
+  java.base@11.0.15-internal/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+  java.base@11.0.15-internal/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+  java.base@11.0.15-internal/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+  java.base@11.0.15-internal/java.lang.reflect.Method.invoke(Method.java:566)
+  app//org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+  app//groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1333)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethodClosure(MetaClassImpl.java:1017)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1207)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+  app//groovy.lang.Closure.call(Closure.java:433)
+  app//groovy.lang.Closure.call(Closure.java:412)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 7,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Finalizer,8,system]
+  java.base@11.0.15-internal/java.lang.Object.wait(Native Method)
+  java.base@11.0.15-internal/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155)
+  java.base@11.0.15-internal/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:176)
+  java.base@11.0.15-internal/java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:170)
+
+Thread[Actor Thread 5,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[PublishDir-3,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 8,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-3,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[process reaper,10,system]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:234)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:462)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:937)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1053)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-3,5,main]
+  java.base@11.0.15-internal/java.lang.Thread.dumpThreads(Native Method)
+  java.base@11.0.15-internal/java.lang.Thread.getAllStackTraces(Thread.java:1653)
+  app//nextflow.util.SysHelper.dumpThreads(SysHelper.groovy:188)
+  app//nextflow.Session.abort(Session.groovy:800)
+  app//nextflow.Session.fault(Session.groovy:766)
+  app//nextflow.processor.TaskPollingMonitor.finalizeTask(TaskPollingMonitor.groovy:695)
+  app//nextflow.processor.TaskPollingMonitor.safeFinalizeTask(TaskPollingMonitor.groovy:678)
+  java.base@11.0.15-internal/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+  java.base@11.0.15-internal/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+  java.base@11.0.15-internal/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+  java.base@11.0.15-internal/java.lang.reflect.Method.invoke(Method.java:566)
+  app//org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+  app//groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1333)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+  app//org.codehaus.groovy.runtime.InvokerHelper.invokePogoMethod(InvokerHelper.java:645)
+  app//org.codehaus.groovy.runtime.InvokerHelper.invokeMethod(InvokerHelper.java:628)
+  app//org.codehaus.groovy.runtime.InvokerHelper.invokeMethodSafe(InvokerHelper.java:82)
+  app//nextflow.processor.TaskPollingMonitor$_checkTaskStatus_lambda8.doCall(TaskPollingMonitor.groovy:668)
+  app//nextflow.processor.TaskPollingMonitor$$Lambda$455/0x000000080064e840.run(Unknown Source)
+  java.base@11.0.15-internal/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+  java.base@11.0.15-internal/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[FinalizerQueueProcessor-0,5,main]
+  java.base@11.0.15-internal/java.lang.Object.wait(Native Method)
+  java.base@11.0.15-internal/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155)
+  java.base@11.0.15-internal/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:176)
+  app//org.iq80.leveldb.util.Finalizer$FinalizerQueueProcessor.run(Finalizer.java:149)
+  java.base@11.0.15-internal/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+  java.base@11.0.15-internal/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[PublishDir-4,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[PublishDir-10,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 6,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[PublishDir-8,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[leveldb-compaction-0,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-1,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 16,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.15-internal/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Thread[PublishDir-7,5,main]
+  java.base@11.0.15-internal/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.15-internal/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.15-internal/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.15-internal/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.15-internal/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.15-internal/java.lang.Thread.run(Thread.java:829)
+
+Mar-13 16:15:35.528 [main] DEBUG nextflow.Session - Session await > all processes finished
+Mar-13 16:15:35.528 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Mar-13 16:15:35.539 [main] WARN  n.processor.TaskPollingMonitor - Killing running tasks (1)
+Mar-13 16:15:35.557 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=2; failedCount=1; ignoredCount=0; cachedCount=8; pendingCount=2; submittedCount=1; runningCount=-1; retriesCount=0; abortedCount=1; succeedDuration=1h 47m 49s; failedDuration=10.5s; cachedDuration=1h 4m 56s;loadCpus=-4; loadMemory=0; peakRunning=1; peakCpus=8; peakMemory=16 GB; ]
+Mar-13 16:15:35.557 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow completed -- saving trace file
+Mar-13 16:15:35.559 [main] DEBUG nextflow.trace.ReportObserver - Workflow completed -- rendering execution report
+Mar-13 16:15:36.161 [main] DEBUG nextflow.trace.TimelineObserver - Workflow completed -- rendering execution timeline
+Mar-13 16:15:36.238 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Mar-13 16:15:36.266 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

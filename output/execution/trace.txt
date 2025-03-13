@@ -1,8 +1,13 @@
 task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
-1	d3/1d4f2d	3968485	analysis:ace_tmc (1)	CACHED	0	2025-03-12 14:22:46.990	2m 19s	2m 7s	102.7%	633.4 MB	2.5 GB	8.9 GB	3 MB
-2	7d/fa7ccb	3257652	mergebam:merge_bam_files (1)	CACHED	0	2025-03-11 14:23:14.401	2m 37s	2m 25s	866.9%	28.4 MB	982 MB	9.6 GB	4.4 GB
-3	2c/d20acd	3262144	mergebam:extract_roi (1)	CACHED	0	2025-03-11 14:26:25.559	1m 38s	1m 15s	100.8%	13.4 MB	27.1 MB	4.4 GB	32 MB
-6	63/cb46c9	3796463	epi2me:run_epi2me_sv (1)	CACHED	0	2025-03-12 09:26:53.976	12.1s	12s	-	-	-	-	-
-5	76/f707e5	3796985	epi2me:run_epi2me_modkit (1)	CACHED	0	2025-03-12 09:27:18.484	12s	11.9s	-	-	-	-	-
-7	86/effddd	3971727	analysis:annotatecnv (1)	CACHED	0	2025-03-12 14:25:05.999	18.3s	9.2s	162.5%	191.6 MB	23 GB	105.2 MB	8.1 MB
-4	91/b10274	3796690	epi2me:run_epi2me_cnv (1)	CACHED	0	2025-03-12 09:27:06.084	12.4s	12.3s	-	-	-	-	-
+4	7d/fa7ccb	3984437	mergebam:merge_bam_files (1)	CACHED	0	2025-03-12 14:39:17.110	3m 23s	3m 10s	668.8%	18.1 MB	971.1 MB	9.6 GB	4.4 GB
+3	47/83f011	110565	analysis:extract_epic (Dummy)	CACHED	0	2025-03-12 15:22:20.758	15.4s	2.1s	103.4%	114.2 MB	143.8 MB	70.3 MB	2.6 MB
+1	c1/a3be5c	1442152	analysis:ace_tmc (1)	CACHED	0	2025-03-13 13:12:24.116	3m 54s	2m 22s	101.9%	633.2 MB	23 GB	8.9 GB	3 MB
+7	57/1f0ec1	437697	analysis:sturgeon (2)	CACHED	0	2025-03-12 15:59:41.202	14s	11.7s	121.3%	5.1 GB	6.5 GB	2 GB	22.8 MB
+8	25/e9992b	1446196	analysis:mgmt_promoter (1)	CACHED	0	2025-03-13 13:16:17.881	1m 5s	1.3s	139.0%	122.4 MB	1.7 GB	16.4 MB	2.1 KB
+6	fa/f5e807	438614	analysis:nanodx (2)	CACHED	0	2025-03-12 15:59:55.229	13.8s	580ms	97.9%	13.8 MB	29 MB	18.9 MB	89.9 KB
+5	e9/8f26ac	3988353	mergebam:extract_roi (1)	CACHED	0	2025-03-12 14:42:40.304	1m 37s	1m 16s	100.2%	13.6 MB	27.1 MB	4.4 GB	32 MB
+11	31/80a79a	1734168	analysis:annotatecnv (1)	CACHED	0	2025-03-13 14:44:50.107	29.2s	17.8s	90.1%	191.8 MB	23 GB	105.2 MB	8.1 MB
+2	a1/403857	2023990	analysis:extract_epic (T10-01)	COMPLETED	0	2025-03-13 16:01:02.831	1m 19s	1m 3s	107.8%	303 MB	332.5 MB	745.5 MB	338.2 MB
+9	37/4b532b	2027282	epi2me:run_epi2me_modkit (1)	COMPLETED	0	2025-03-13 16:02:21.922	13m 11s	12m 57s	283.3%	4.2 GB	53.3 GB	148.6 GB	83 GB
+10	72/30c4c4	2155880	analysis:run_nn_classifier (1)	FAILED	1	2025-03-13 16:15:32.752	2.7s	2.6s	-	-	-	-	-
+12	6d/91ba97	2156121	analysis:mgmt_promoter (2)	ABORTED	-	2025-03-13 16:15:35.466	-	-	-	-	-	-	-

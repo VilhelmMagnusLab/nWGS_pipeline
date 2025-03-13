@@ -206,17 +206,22 @@ $(function() {
 
   // Nextflow report data
   window.data = {
-    "elapsed": "4s",
-    "beginningMillis": 1741699394401,
-    "endingMillis": 1741786244019,
+    "elapsed": "14m 37s",
+    "beginningMillis": 1741786757110,
+    "endingMillis": 1741878936161,
     "processes": [
-        {"label": "analysis:ace_tmc (1)", "cached": true, "index": 0, "times": [{"starting_time": 1741785766990, "ending_time": 1741785767035}, {"starting_time": 1741785767035, "ending_time": 1741785894270, "label": "2m 19s \/ 633.4 MB \/ CACHED"}, {"starting_time": 1741785894270, "ending_time": 1741785905918}]},
-        {"label": "mergebam:merge_bam_files (1)", "cached": true, "index": 1, "times": [{"starting_time": 1741699394401, "ending_time": 1741699394470}, {"starting_time": 1741699394470, "ending_time": 1741699539070, "label": "2m 37s \/ 28.4 MB \/ CACHED"}, {"starting_time": 1741699539070, "ending_time": 1741699551635}]},
-        {"label": "mergebam:extract_roi (1)", "cached": true, "index": 2, "times": [{"starting_time": 1741699585559, "ending_time": 1741699585643}, {"starting_time": 1741699585643, "ending_time": 1741699660609, "label": "1m 38s \/ 13.4 MB \/ CACHED"}, {"starting_time": 1741699660609, "ending_time": 1741699683724}]},
-        {"label": "epi2me:run_epi2me_modkit (1)", "cached": true, "index": 3, "times": [{"starting_time": 1741768038484, "ending_time": 1741768038567}, {"starting_time": 1741768038567, "ending_time": 1741768050455, "label": "12s \/ - \/ CACHED"}]},
-        {"label": "epi2me:run_epi2me_sv (1)", "cached": true, "index": 4, "times": [{"starting_time": 1741768013976, "ending_time": 1741768014019}, {"starting_time": 1741768014019, "ending_time": 1741768026053, "label": "12.1s \/ - \/ CACHED"}]},
-        {"label": "analysis:annotatecnv (1)", "cached": true, "index": 5, "times": [{"starting_time": 1741785905999, "ending_time": 1741785906018}, {"starting_time": 1741785906018, "ending_time": 1741785915266, "label": "18.3s \/ 191.6 MB \/ CACHED"}, {"starting_time": 1741785915266, "ending_time": 1741785924294}]},
-        {"label": "epi2me:run_epi2me_cnv (1)", "cached": true, "index": 6, "times": [{"starting_time": 1741768026084, "ending_time": 1741768026154}, {"starting_time": 1741768026154, "ending_time": 1741768038466, "label": "12.4s \/ - \/ CACHED"}]}
+        {"label": "analysis:extract_epic (Dummy)", "cached": true, "index": 0, "times": [{"starting_time": 1741789340758, "ending_time": 1741789340829}, {"starting_time": 1741789340829, "ending_time": 1741789342936, "label": "15.4s \/ 114.2 MB \/ CACHED"}, {"starting_time": 1741789342936, "ending_time": 1741789356111}]},
+        {"label": "analysis:ace_tmc (1)", "cached": true, "index": 1, "times": [{"starting_time": 1741867944116, "ending_time": 1741867944182}, {"starting_time": 1741867944182, "ending_time": 1741868086540, "label": "3m 54s \/ 633.2 MB \/ CACHED"}, {"starting_time": 1741868086540, "ending_time": 1741868177862}]},
+        {"label": "mergebam:merge_bam_files (1)", "cached": true, "index": 2, "times": [{"starting_time": 1741786757110, "ending_time": 1741786757184}, {"starting_time": 1741786757184, "ending_time": 1741786947009, "label": "3m 23s \/ 18.1 MB \/ CACHED"}, {"starting_time": 1741786947009, "ending_time": 1741786960227}]},
+        {"label": "analysis:sturgeon (2)", "cached": true, "index": 3, "times": [{"starting_time": 1741791581202, "ending_time": 1741791581289}, {"starting_time": 1741791581289, "ending_time": 1741791592941, "label": "14s \/ 5.1 GB \/ CACHED"}, {"starting_time": 1741791592941, "ending_time": 1741791595216}]},
+        {"label": "analysis:mgmt_promoter (1)", "cached": true, "index": 4, "times": [{"starting_time": 1741868177881, "ending_time": 1741868177961}, {"starting_time": 1741868177961, "ending_time": 1741868179302, "label": "1m 5s \/ 122.4 MB \/ CACHED"}, {"starting_time": 1741868179302, "ending_time": 1741868242574}]},
+        {"label": "analysis:nanodx (2)", "cached": true, "index": 5, "times": [{"starting_time": 1741791595229, "ending_time": 1741791595316}, {"starting_time": 1741791595316, "ending_time": 1741791595896, "label": "13.8s \/ 13.8 MB \/ CACHED"}, {"starting_time": 1741791595896, "ending_time": 1741791609061}]},
+        {"label": "mergebam:extract_roi (1)", "cached": true, "index": 6, "times": [{"starting_time": 1741786960304, "ending_time": 1741786960327}, {"starting_time": 1741786960327, "ending_time": 1741787036571, "label": "1m 37s \/ 13.6 MB \/ CACHED"}, {"starting_time": 1741787036571, "ending_time": 1741787057431}]},
+        {"label": "analysis:annotatecnv (1)", "cached": true, "index": 7, "times": [{"starting_time": 1741873490107, "ending_time": 1741873490190}, {"starting_time": 1741873490190, "ending_time": 1741873508008, "label": "29.2s \/ 191.8 MB \/ CACHED"}, {"starting_time": 1741873508008, "ending_time": 1741873519337}]},
+        {"label": "analysis:extract_epic (T10-01)", "cached": false, "index": 0, "times": [{"starting_time": 1741878062831, "ending_time": 1741878062929}, {"starting_time": 1741878062929, "ending_time": 1741878125672, "label": "1m 19s \/ 303 MB"}, {"starting_time": 1741878125672, "ending_time": 1741878141876}]},
+        {"label": "epi2me:run_epi2me_modkit (1)", "cached": false, "index": 8, "times": [{"starting_time": 1741878141922, "ending_time": 1741878141975}, {"starting_time": 1741878141975, "ending_time": 1741878919269, "label": "13m 11s \/ 4.2 GB"}, {"starting_time": 1741878919269, "ending_time": 1741878932731}]},
+        {"label": "analysis:run_nn_classifier (1)", "cached": false, "index": 9, "times": [{"starting_time": 1741878932752, "ending_time": 1741878932831}, {"starting_time": 1741878932831, "ending_time": 1741878935449, "label": "2.7s \/ -"}]},
+        {"label": "analysis:mgmt_promoter (2)", "cached": false, "index": 4, "times": []}
     ]
 }
 ;

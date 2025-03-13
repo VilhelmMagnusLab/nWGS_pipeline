@@ -125,37 +125,45 @@ process nanodx {
 process run_nn_classifier {
     label 'snakemake'
     publishDir "${params.output_path}/classifier/nanodx", mode: 'copy'
+    
     cpus 4
     memory '12 GB'
 
     input:
-    tuple val(sample_id), path(bed_file), path(model_file), path(nn_model), path(snakefile_nanodx)
+    tuple val(sample_id), path(bed_file), path(model_file), path(snakefile_nanodx), path(nn_model)
 
     output:
-    tuple val(sample_id), path("${sample_id}_nanodx_classifier.txt")
+    tuple val(sample_id), path("${sample_id}_nanodx_classifier.txt"), path("${sample_id}_nanodx_classifier.tsv")
     tuple val(sample_id), path("${sample_id}_nanodx_classifier.tsv"), emit:rmdnanodx
 
-    containerOptions = "-B /home/chbope/extension/trash/tmp:/home/chbope/extension/trash/tmp/"
+    //containerOptions = "-B /data/pipeline/trash/tmp:/data/pipeline/trash/tmp"
 
     script:
     """
-    export TMPDIR="/home/chbope/extension/trash/tmp/"
-    mkdir -p \$TMPDIR
-    echo "Testing write permissions in \$TMPDIR"
+    # Set up all necessary environment variables and directories
+    export TMPDIR="/home/chbope/extension/trash/tmp"
+    export CONDA_PKGS_DIRS="\$TMPDIR/conda_pkgs"
+    export CONDA_ENVS_PATH="\$TMPDIR/conda_envs"
+    export HOME="\$TMPDIR/home"
+    export XDG_CACHE_HOME="\$TMPDIR/cache"
+    export XDG_DATA_HOME="\$TMPDIR/local"
+
+    # Create all necessary directories
+    mkdir -p \$TMPDIR \$CONDA_PKGS_DIRS \$CONDA_ENVS_PATH \$HOME \$XDG_CACHE_HOME \$XDG_DATA_HOME
+
+    # Verify that the directories are writable
+    echo "Testing write permissions"
     touch \$TMPDIR/test_file
     if [ -f \$TMPDIR/test_file ]; then
         echo "Write permissions are working."
     else
         echo "Write permissions are NOT working."
     fi
-    source /opt/conda/etc/profile.d/conda.sh
-    conda activate nanodx_environ
-    conda info --envs
-    conda env list 
-    echo \$CONDA_PREFIX
-    which conda
-    which python
-    python -c "import pandas; print(pandas.__version__)"
+
+   source /opt/conda/etc/profile.d/conda.sh
+   conda activate nanodx_env2feb
+    
+    # Create a temporary Snakefile with the dynamic inputs
     cat << EOF > Snakefile
 rule all:
     input:
@@ -174,7 +182,60 @@ rule NN_classifier:
         mem_mb = 16384
     script: "${params.nanodx_workflow_dir}/scripts/classify_NN_bedMethyl.py"
 EOF
-    snakemake --use-conda --conda-prefix \$TMPDIR/.snakemake/conda --cores ${task.cpus} --verbose NN_classifier
+
+    # Run snakemake within the container
+    snakemake --use-conda \
+        --conda-prefix \$TMPDIR/.snakemake/conda \
+        --cores ${task.cpus} \
+        --verbose \
+        NN_classifier
+    """
+}
+
+process run_nn_classifier_ori {
+    label 'nanodx'
+    publishDir "${params.output_path}/methylation/", mode: "copy", overwrite: true
+    
+    input:
+    tuple val(sample_id), path(bed_file), path(model_file), path(snakefile), path(nn_model)
+    
+    output:
+    tuple val(sample_id), path("${sample_id}_nanodx_classifier.txt")
+    tuple val(sample_id), path("${sample_id}_nanodx_classifier.tsv"), emit: rmdnanodx
+    
+    script:
+    """
+    #!/bin/bash
+    export TMPDIR="/home/chbope/extension/trash/tmp/"
+    mkdir -p \$TMPDIR
+    
+    # Use container's conda environment
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate base
+    conda activate nanodx_env2feb
+    
+    # Create Snakefile with correct paths
+    cat << EOF > Snakefile
+rule all:
+    input:
+        "${sample_id}_nanodx_classifier.txt",
+        "${sample_id}_nanodx_classifier.tsv"
+
+rule NN_classifier:
+    input:
+        bed = "${bed_file}",
+        model = "${model_file}"
+    output:
+        txt = "${sample_id}_nanodx_classifier.txt",
+        votes = "${sample_id}_nanodx_classifier.tsv"
+    threads: 4
+    resources: 
+        mem_mb = 16384
+    script: "${params.nanodx_workflow_dir}/scripts/classify_NN_bedMethyl.py"
+EOF
+
+    # Run snakemake
+    snakemake --cores ${task.cpus} --verbose NN_classifier
     """
 }
 
@@ -191,7 +252,7 @@ process mgmt_promoter {
     tuple val(sample_id), path("${sample_id}_MGMT_results.csv"), emit: mgmtresultsout
     
     script:
-    """
+  """
     #!/bin/bash
     set -e  # Exit on error
     
@@ -336,10 +397,10 @@ process circosplot {
 process annotatecnv {
     cpus 4
     memory '2 GB'
-    label 'annotatecnv'
+   label 'annotatecnv'
     publishDir "${params.output_path}/cnv/", mode: "copy", overwrite: true
 
-    input:
+   input:
     tuple val(sample_id), 
           path(vcf_file), 
           path(occ_fusions), 
@@ -347,18 +408,28 @@ process annotatecnv {
           path(seg_bed),
           val(threshold)  // Now explicitly receiving threshold
 
-    output:
+   output:
     tuple val(sample_id), path("${sample_id}_CNV_plot.pdf"), emit: rmdcnvplot
     tuple val(sample_id), path("${sample_id}_tumor_copy_number.txt"), emit: rmdcnvtumornumber
     tuple val(sample_id), path("${sample_id}_annotatedcnv_filter_header.csv"), emit: rmdcnvfilterheader
     tuple val(sample_id), path("${sample_id}_cnv_chr9.pdf"), emit: rmdcnvchr9
     tuple val(sample_id), path("${sample_id}_cnv_chr7.pdf"), emit: rmdcnvchr7
 
-    script:
-    """
+   script:
+   """
     #!/bin/bash
-    source /opt/conda/etc/profile.d/conda.sh
-    conda activate annotatecnv_env
+    ##source /opt/conda/etc/profile.d/conda.sh
+    ##conda activate annotatecnv_env
+
+    # Check if we're in a container and use appropriate conda setup
+    if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
+        # Container environment
+   source /opt/conda/etc/profile.d/conda.sh
+   conda activate annotatecnv_env
+    else
+        # Local environment
+        source activate annotatecnv_env
+    fi
 
     # Debug output
     echo "Processing sample: ${sample_id}"
@@ -372,10 +443,10 @@ process annotatecnv {
         cut -f1,2,5,8,20 | awk '/protein_coding/' | \
         awk -v OFS=";" '\$1=\$1' | \
         awk 'BEGIN { FS=";"; OFS="\\t"} {\$1=\$1; print}' | \
-        cut -f1,2,3,5,6,8,9,13 > ${sample_id}_annotatedcnv.csv
+   cut -f1,2,3,5,6,8,9,13 > ${sample_id}_annotatedcnv.csv
 
     # Generate plots and reports
-    cnv_html.R $calls_bed ${sample_id}_annotatedcnv.csv ${sample_id}_CNV_plot.pdf ${sample_id}_CNV_plot.html $sample_id
+   cnv_html.R $calls_bed ${sample_id}_annotatedcnv.csv ${sample_id}_CNV_plot.pdf ${sample_id}_CNV_plot.html $sample_id
     
     CNV_function_new_update.R $calls_bed ${sample_id}_annotatedcnv.csv $seg_bed \
         ${sample_id}_cnv_plot_full.pdf ${sample_id}_cnv_chr9.pdf ${sample_id}_cnv_chr7.pdf $sample_id 
@@ -626,8 +697,8 @@ process igv_tools {
     # Check if we're in a container and use appropriate conda setup
     if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
         # Container environment
-        source /opt/conda/etc/profile.d/conda.sh
-        conda activate annotatecnv_env
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate annotatecnv_env
     else
         # Local environment
         source activate annotatecnv_env
@@ -677,7 +748,7 @@ process ace_tmc {
     tuple val(sample_id), path(bam_dir)
     
     output:
-    tuple val(sample_id), path("${sample_id}_ace_results"), emit: aceresults
+        tuple val(sample_id), path("${sample_id}_ace_results"), emit: aceresults
     tuple val(sample_id), env(threshold_value), emit: threshold_value
     
     script:
@@ -692,7 +763,7 @@ process ace_tmc {
         conda activate ace_env
     else
         # Local environment
-        source activate ace_env
+    source activate ace_env
     fi
     
     # Debug info
@@ -730,7 +801,7 @@ workflow analysis {
         def knotannotsv_out = Channel.empty()
         def igv_tools_out = Channel.empty()
         def cramino_report_out = Channel.empty()
-
+        
         // Initialize sample_thresholds based on run mode
         def sample_thresholds = params.run_order_mode ? [:] : loadSampleThresholds()
         println "Sample thresholds: ${sample_thresholds}"
@@ -797,7 +868,7 @@ workflow analysis {
                     tuple(sample_id, vcf, tbi, file(params.occ_fusions), file(params.occ_fusion_genes_list))
                 }
 
-                boosts_clair3_channel = params.run_order_mode ?
+        boosts_clair3_channel = params.run_order_mode ?
             epi2me_results.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
                 tuple(
                     sample_id, 
@@ -866,7 +937,7 @@ workflow analysis {
                     )
                 }
 
-          boosts_igv_channel = params.run_order_mode ?
+        boosts_igv_channel = params.run_order_mode ?
             epi2me_results.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
                 tuple(sample_id, bam, bai, file(params.tertp_variants), file(params.ncbirefseq), ref, ref_bai)
             } :
@@ -904,48 +975,66 @@ workflow analysis {
         // MGMT analysis
         if (params.run_mode in ['mgmt', 'all']) {
             println "Running MGMT Analysis..."
-            mgmt_ch = Channel.fromPath("${params.bedmethyl_folder}/*.wf_mods.bedmethyl.gz")
-                .map { gz ->
-                    def sample_id = gz.getBaseName().split("\\.")[0]
-                    tuple(sample_id, gz, file(params.epicsites), file(params.mgmt_cpg_island_hg38))
-                }
-                .filter { it[0] in sample_thresholds }
             
-            // Run extract_epic process
+            // Create MGMT input channel based on run mode
+            if (params.run_order_mode) {
+                // Use epi2me modkit output
+                mgmt_ch = Channel
+                    .fromPath("${params.bedmethyl_folder}/*.wf_mods.bedmethyl.gz")
+                    .map { gz ->
+                        def sample_id = gz.name.toString().split('\\.')[0]
+                        println "Processing MGMT for sample: ${sample_id} from epi2me output"
+                        tuple(
+                            sample_id, 
+                            gz, 
+                            file(params.epicsites), 
+                            file(params.mgmt_cpg_island_hg38)
+                        )
+                    }
+                    .view { "MGMT input (run_order_mode): $it" }
+            } else {
+                // Use sample_id_file for analysis mode
+                mgmt_ch = Channel
+                    .fromPath("${params.bedmethyl_folder}/*.wf_mods.bedmethyl.gz")
+                    .map { gz ->
+                        def sample_id = gz.getBaseName().split("\\.")[0]
+                        if (sample_thresholds.containsKey(sample_id)) {
+                            println "Processing MGMT for sample: ${sample_id} from sample_id_file"
+                            tuple(
+                                sample_id, 
+                                gz, 
+                                file(params.epicsites), 
+                                file(params.mgmt_cpg_island_hg38)
+                            )
+                        }
+                    }
+                    .filter { it != null }
+                    .view { "MGMT input (analysis mode): $it" }
+            }
+            
+            // Run MGMT related processes
             extract_epic(mgmt_ch)
-            
-            // Process MGMT output
             MGMT_output = extract_epic.out.MGMTheaderout
-            
-            // Process Sturgeon analysis
             MGMT_sturgeon = extract_epic.out.sturgeonbedinput
                 .map { sample_id, sturgeoninput -> 
-                    tuple(sample_id, sturgeoninput, params.sturgeon_model)
+                    tuple(sample_id, sturgeoninput, params.sturgeon_model) 
                 }
+            
+            // Continue with rest of MGMT pipeline
             sturgeon(MGMT_sturgeon)
-            
-            // Process MGMT promoter analysis
             mgmt_promoter(MGMT_output)
-            mgmt_promoter_out = mgmt_promoter.out.mgmtresultsout
             
-            // Process nanodx analysis
+            // NanoDx processing
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
                 .map { sample_id, epicselectnanodxinput -> 
-                    tuple(sample_id, epicselectnanodxinput, params.hg19_450model)
+                    tuple(sample_id, epicselectnanodxinput, params.hg19_450model) 
                 }
             nanodx(mgmt_nanodx)
-            
-            // Process neural network classifier
             nanodx_out = nanodx.out.nanodx450out
                 .map { sample_id, nanodx450out -> 
-                    tuple(sample_id, nanodx450out, params.nanodx_450model, params.snakefile_nanodx, params.nn_model)
+                    tuple(sample_id, nanodx450out, params.nanodx_450model, params.snakefile_nanodx, params.nn_model) 
                 }
             run_nn_classifier(nanodx_out)
-
-            // For debugging specific channels
-            mgmt_ch.view { "MGMT Channel: $it" }
-            MGMT_output.view { "MGMT Output: $it" }
-            mgmt_promoter_out.view { "MGMT Promoter Output: $it" }
         }
 
         // AnnotSV analysis
@@ -1023,7 +1112,7 @@ workflow analysis {
             // Run ACE analysis to get thresholds
             ace_tmc(ace_input)
             ace_tmc.out.threshold_value.view { "Threshold value: $it" }
-
+            
             // Create channel for annotatecnv based on run mode
             if (params.run_order_mode) {
                 // Use epi2me output and threshold from ace_tmc
@@ -1038,7 +1127,7 @@ workflow analysis {
                     .map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
                         println "Processing epi2me results for sample: ${sample_id}"
                         tuple(
-                            sample_id, 
+                            sample_id,
                             file("${params.path}/results/epi2me/epicnv/qdna_seq/${sample_id}_segs.vcf"),
                             file(params.occ_fusions),
                             file("${params.path}/results/epi2me/epicnv/qdna_seq/${sample_id}_bins.bed"),
@@ -1109,47 +1198,47 @@ workflow analysis {
             
             // Run MGMT related processes
             extract_epic(mgmt_ch)
-            MGMT_output = extract_epic.out.MGMTheaderout
+        MGMT_output = extract_epic.out.MGMTheaderout
             MGMT_sturgeon = extract_epic.out.sturgeonbedinput
                 .map { sample_id, sturgeoninput -> tuple(sample_id, sturgeoninput, params.sturgeon_model) }
-            sturgeon(MGMT_sturgeon)
-            mgmt_promoter(MGMT_output)
+        sturgeon(MGMT_sturgeon)
+        mgmt_promoter(MGMT_output)
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
                 .map { sample_id, epicselectnanodxinput -> tuple(sample_id, epicselectnanodxinput, params.hg19_450model) }
-            nanodx(mgmt_nanodx)
+        nanodx(mgmt_nanodx)
             nanodx_out = nanodx.out.nanodx450out
                 .map { sample_id, nanodx450out -> tuple(sample_id, nanodx450out, params.nanodx_450model, params.snakefile_nanodx, params.nn_model) }
-            run_nn_classifier(nanodx_out)
+        run_nn_classifier(nanodx_out)
             rmd_nanodx_out = run_nn_classifier.out.rmdnanodx
 
             // SV analysis
-            svannasv(boosts_svanna_channel)
-            rmd_svanna_html = svannasv.out.rmdsvannahtml
+        svannasv(boosts_svanna_channel)
+        rmd_svanna_html = svannasv.out.rmdsvannahtml
             svannasv_out = svannasv.out.occsvannaannotationannotationvcf
                 .map { sample_id, svannavcfoutput -> tuple(sample_id, svannavcfoutput, params.vcf2circos_json) }
-            circosplot(svannasv_out)
+        circosplot(svannasv_out)
 
             // AnnotSV analysis
-            annotesv(boosts_annotsv_channel)
+        annotesv(boosts_annotsv_channel)
             annotsv_output = annotesv.out.annotatedvariantsout
                 .map { sample_id, annotated_variants -> tuple(sample_id, annotated_variants, file(params.knotannotsv_conf)) }
-            knotannotsv(annotsv_output)
-            rmd_knotannotsv_html = knotannotsv.out.rmdannotsvhtml
+        knotannotsv(annotsv_output)
+        rmd_knotannotsv_html = knotannotsv.out.rmdannotsvhtml
 
             // OCC analysis
-            clair3(boosts_clair3_channel)
-            clair3_out = clair3.out.clair3output
-            clairs_to(boosts_clairSTo_channel)
-            clairs_to_out = clairs_to.out.annotateandfilter_clairstoout
+        clair3(boosts_clair3_channel)
+        clair3_out = clair3.out.clair3output
+        clairs_to(boosts_clairSTo_channel)
+        clairs_to_out = clairs_to.out.annotateandfilter_clairstoout
             combine_file = clair3_out.combine(clairs_to_out)
                 .map { occ_pileup_annotateandfilter, merge_annotateandfilter, sample_id, annotateandfilter_clairsto ->
                     tuple(sample_id, merge_annotateandfilter, occ_pileup_annotateandfilter, annotateandfilter_clairsto, file(params.occ_genes))
-                }
-            merge_annotation(combine_file)
+    }
+        merge_annotation(combine_file)
 
             // Other tools
-            igv_tools(boosts_igv_channel)
-            cramino_report(boosts_cramino)
+        igv_tools(boosts_igv_channel)
+        cramino_report(boosts_cramino)
 
             // Combine all results for markdown report
             // Use the stored annotatecnv results from earlier CNV analysis
