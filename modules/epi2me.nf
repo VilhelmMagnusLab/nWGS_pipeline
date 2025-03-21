@@ -44,7 +44,7 @@ nextflow.enable.dsl=2
 //epi2me pipeline to run modkit
 
 process run_epi2me_modkit {
-    cpus 8
+    cpus 4
     memory '16 GB'
     label 'pipeline1'
    // publishDir "${params.output_path}/epi2me/modkit/", mode: "copy", pattern: "epimodkit/*"
@@ -74,7 +74,7 @@ process run_epi2me_modkit {
 
 //epi2me pipeline to run sv with sniffles2 with mosaic option
 process run_epi2me_sv {
-    cpus 8
+    cpus 4
     memory '16 GB'
     label 'pipeline1'
    // publishDir "${params.output_path}/epi2me/sv/", mode: "copy", pattern: "episv/*"
@@ -103,7 +103,7 @@ process run_epi2me_sv {
 
 //epi2me pipeline to run cnv qdnaseq
 process run_epi2me_cnv {
-    cpus 8
+    cpus 4
     memory '8 GB'
     label 'epi2me'
     //publishDir "${params.output_path}/epi2me/cnv/", mode: "copy", pattern: "epicnv/**"
@@ -133,7 +133,7 @@ process run_epi2me_cnv {
 
 workflow epi2me {
     take:
-        merged_data   // Input channel from mergebam (optional)
+        merged_data
         
     main:
         params.run_mode = params.run_mode_epi2me ?: 'all'
@@ -258,6 +258,9 @@ workflow epi2me {
                     file("${params.episv}")
                 )
             } | run_epi2me_sv
+            
+            // Wait for SV completion
+    
         }
 
         // Create default channels for empty processes
@@ -305,7 +308,6 @@ workflow epi2me {
         }
 
     emit:
-        complete = Channel.of(true)
         results = results_ch
 }
     

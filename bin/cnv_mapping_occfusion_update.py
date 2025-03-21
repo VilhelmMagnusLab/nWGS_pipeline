@@ -123,8 +123,8 @@ def process_file(input_file, output_file, f_T):
 
     # Add new columns to the DataFrame
     df['Tumor Copy'] = tumor_copies
-    df['Event Type'] = event_types
-    df['Change Value'] = change_values
+    df['Event.Type'] = event_types
+    df['Change.Value'] = change_values
 
     # Create a new DataFrame with the desired columns and headers
     output_df = pd.DataFrame({
@@ -133,8 +133,8 @@ def process_file(input_file, output_file, f_T):
         'End': df[2],
         'Log ratio': df[4],
         'Tumor Copy': tumor_copies,
-        'Event Type': event_types,
-        'Change Value': change_values
+        'Event.Type': event_types,
+        'Change.Value': change_values
     })
 
     # Replace negative values in 'Tumor Copy' with "Indeterminated" and update corresponding columns

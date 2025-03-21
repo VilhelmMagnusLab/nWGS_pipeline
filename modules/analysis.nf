@@ -123,76 +123,6 @@ process nanodx {
 }
 
 process run_nn_classifier {
-    label 'snakemake'
-    publishDir "${params.output_path}/classifier/nanodx", mode: 'copy'
-    
-    cpus 4
-    memory '12 GB'
-
-    input:
-    tuple val(sample_id), path(bed_file), path(model_file), path(snakefile_nanodx), path(nn_model)
-
-    output:
-    tuple val(sample_id), path("${sample_id}_nanodx_classifier.txt"), path("${sample_id}_nanodx_classifier.tsv")
-    tuple val(sample_id), path("${sample_id}_nanodx_classifier.tsv"), emit:rmdnanodx
-
-    //containerOptions = "-B /data/pipeline/trash/tmp:/data/pipeline/trash/tmp"
-
-    script:
-    """
-    # Set up all necessary environment variables and directories
-    export TMPDIR="/home/chbope/extension/trash/tmp"
-    export CONDA_PKGS_DIRS="\$TMPDIR/conda_pkgs"
-    export CONDA_ENVS_PATH="\$TMPDIR/conda_envs"
-    export HOME="\$TMPDIR/home"
-    export XDG_CACHE_HOME="\$TMPDIR/cache"
-    export XDG_DATA_HOME="\$TMPDIR/local"
-
-    # Create all necessary directories
-    mkdir -p \$TMPDIR \$CONDA_PKGS_DIRS \$CONDA_ENVS_PATH \$HOME \$XDG_CACHE_HOME \$XDG_DATA_HOME
-
-    # Verify that the directories are writable
-    echo "Testing write permissions"
-    touch \$TMPDIR/test_file
-    if [ -f \$TMPDIR/test_file ]; then
-        echo "Write permissions are working."
-    else
-        echo "Write permissions are NOT working."
-    fi
-
-   source /opt/conda/etc/profile.d/conda.sh
-   conda activate nanodx_env2feb
-    
-    # Create a temporary Snakefile with the dynamic inputs
-    cat << EOF > Snakefile
-rule all:
-    input:
-        "${sample_id}_nanodx_classifier.txt",
-        "${sample_id}_nanodx_classifier.tsv"
-
-rule NN_classifier:
-    input:
-        bed = "${bed_file}",
-        model = "${model_file}"
-    output:
-        txt = "${sample_id}_nanodx_classifier.txt",
-        votes = "${sample_id}_nanodx_classifier.tsv"
-    threads: 4
-    resources: 
-        mem_mb = 16384
-    script: "${params.nanodx_workflow_dir}/scripts/classify_NN_bedMethyl.py"
-EOF
-
-    # Run snakemake within the container
-    snakemake --use-conda \
-        --conda-prefix \$TMPDIR/.snakemake/conda \
-        --cores ${task.cpus} \
-        --verbose \
-        NN_classifier
-    """
-}
-
-process run_nn_classifier_ori {
     label 'nanodx'
     publishDir "${params.output_path}/methylation/", mode: "copy", overwrite: true
     
@@ -309,43 +239,129 @@ process svannasv {
 
 process annotesv {
     cpus 4
-    memory '2 GB'
+    memory '4 GB'
     label 'annotesv'
+    time = '4h'
     publishDir "${params.output_path}/structure_variant/annotsv/", mode: "copy", overwrite: true
 
-   input:
-    tuple val(sample_id), path(sv_file), path(sv_file_tbi), path(occ_fusions), path(occ_fusion_genes_list)
+    input:
+        tuple val(sample_id), path(sv_file), path(sv_file_tbi), path(occ_fusions), path(occ_fusion_genes_list)
 
-   output:
+    output:
         path("${sample_id}_OCC_SVs.vcf")
         tuple val(sample_id), path("annotated_variants.tsv"), emit: annotatedvariantsout
         tuple val(sample_id), path("${sample_id}_annotSV_fusion_extraction.csv"), emit: annotsvfusion
         path("${sample_id}_annotated_variants.tsv")
 
-   script:
-   """
+    script:
+    """
+    # Prepare input file
     if [[ "${sv_file}" == *.gz && "${sv_file_tbi}" != "NO_INDEX_NEEDED" ]]; then
         gunzip -c ${sv_file} > tmp.vcf
         SV_INPUT="tmp.vcf"
     else
         SV_INPUT="${sv_file}"
     fi
-    intersectBed -a \$SV_INPUT -b $occ_fusions -header > ${sample_id}_OCC_SVs.vcf
-   if [ \$(grep -v '^#' ${sample_id}_OCC_SVs.vcf | wc -l) -eq 0 ]; then
+    
+    intersectBed -a \$SV_INPUT -b ${occ_fusions} -header > ${sample_id}_OCC_SVs.vcf
+    
+    if [ \$(grep -v '^#' ${sample_id}_OCC_SVs.vcf | wc -l) -eq 0 ]; then
         INPUT_FILE=\$SV_INPUT
-   else
-      INPUT_FILE=${sample_id}_OCC_SVs.vcf
-   fi
-    AnnotSV -SVinputFile \$INPUT_FILE -annotationsDir ${params.annotate_dir} -hpo "HPO:0100836" -vcf 1 -genomeBuild GRCh38 -outputFile ./annotated_variants.tsv
-   annotsv_fusion_filter.py ./annotated_variants.tsv $occ_fusion_genes_list ${sample_id}_annotSV_fusion_extraction.csv
-   cp ./annotated_variants.tsv ${sample_id}_annotated_variants.tsv
-   if [ ! -f "${sample_id}_annotated_variants.tsv" ]; then
-      echo "Error: Copy failed. Debugging information:"
-      ls -la
-      pwd
-      exit 1
-   fi
-   """
+    else
+        INPUT_FILE=${sample_id}_OCC_SVs.vcf
+    fi
+
+    # Copy candidate genes file to local directory
+    cp ${occ_fusion_genes_list} ./candidate_genes.txt
+
+    # Create directory for split files
+    mkdir -p split_files
+
+    # Extract header and variants separately
+    grep '^#' \$INPUT_FILE > split_files/header.vcf
+    grep -v '^#' \$INPUT_FILE > split_files/variants.vcf
+
+    # Calculate optimal split size based on file characteristics
+    total_variants=\$(wc -l < split_files/variants.vcf)
+    max_line_size=\$(awk '{print length}' split_files/variants.vcf | sort -nr | head -1)
+    tcl_limit=2147483647
+    
+    # Calculate optimal number of variants per split
+    # Using 80% of TCL limit to be safe
+    safe_limit=\$(( tcl_limit * 8 / 10 ))
+    optimal_split=\$(( safe_limit / max_line_size ))
+    
+    # Ensure split size is at least 1 and no more than 100
+    if [ \$optimal_split -lt 1 ]; then
+        optimal_split=1
+    elif [ \$optimal_split -gt 100 ]; then
+        optimal_split=100
+    fi
+    
+    echo "Total variants: \$total_variants"
+    echo "Max line size: \$max_line_size bytes"
+    echo "Optimal split size: \$optimal_split variants"
+
+    # Split variants using calculated optimal size
+    cd split_files
+    split -l \$optimal_split variants.vcf split_variant_
+    
+    # Process each split file
+    for split_file in split_variant_*; do
+        # Add header to each split file
+        cat header.vcf \$split_file > \${split_file}.vcf
+        
+        # Run AnnotSV on each split file with error handling
+        if ! AnnotSV \
+            -SVinputFile \${split_file}.vcf \
+            -annotationsDir ${params.annotate_dir} \
+            -vcf 1 \
+            -genomeBuild GRCh38 \
+            -candidateGenesFile ../candidate_genes.txt \
+            -candidateGenesFiltering 1 \
+            -outputFile \${split_file}_annotated.tsv 2> \${split_file}.error; then
+            
+            # If failed, try with smaller split size
+            echo "Failed with \$optimal_split variants, trying with half..."
+            half_split=\$(( optimal_split / 2 ))
+            split -l \$half_split \$split_file retry_split_
+            for retry_file in retry_split_*; do
+                cat header.vcf \$retry_file > \${retry_file}.vcf
+                AnnotSV \
+                    -SVinputFile \${retry_file}.vcf \
+                    -annotationsDir ${params.annotate_dir} \
+                    -vcf 1 \
+                    -genomeBuild GRCh38 \
+                    -candidateGenesFile ../candidate_genes.txt \
+                    -candidateGenesFiltering 1 \
+                    -outputFile \${retry_file}_annotated.tsv || true
+            done
+        fi
+    done
+    cd ..
+
+    # Merge results - keep header from first file only
+    head -n 1 \$(ls split_files/*/split_variant_*.annotated.tsv split_files/*/retry_split_*.annotated.tsv 2>/dev/null | head -n 1) > annotated_variants.tsv
+    for f in split_files/*/split_variant_*.annotated.tsv split_files/*/retry_split_*.annotated.tsv; do
+        if [ -f "\$f" ]; then
+            tail -n +2 \$f >> annotated_variants.tsv
+        fi
+    done
+
+    # Run fusion filter on merged results
+    annotsv_fusion_filter.py ./annotated_variants.tsv ${occ_fusion_genes_list} ${sample_id}_annotSV_fusion_extraction.csv
+    cp ./annotated_variants.tsv ${sample_id}_annotated_variants.tsv
+
+    # Cleanup
+    rm -rf split_files candidate_genes.txt
+
+    if [ ! -f "${sample_id}_annotated_variants.tsv" ]; then
+        echo "Error: Processing failed. Debugging information:"
+        ls -la
+        pwd
+        exit 1
+    fi
+    """
 }
 
 process knotannotsv {
@@ -583,13 +599,15 @@ process clairs_to {
    # Debug: Print environment info
    echo "Current PATH: \$PATH"
    which run_clairs_to || echo "run_clairs_to not found in PATH"
-   run_clairs_to \
+   /opt/bin/run_clairs_to \
     --tumor_bam_fn=$occ_bam \
     --ref_fn=$reference_genome  \
     --threads=8 \
     --platform="ont_r10_dorado_4khz" \
     --output_dir=clairsto_output \
     --bed_fn=$occ_snv_screening \
+    --conda_prefix /opt/conda/envs/clairs
+    
 
 
     bcftools merge --force-samples clairsto_output/snv.vcf.gz clairsto_output/indel.vcf.gz -o ${sample_id}_merge_snv_indel_claisto.vcf.gz
@@ -617,7 +635,6 @@ process clairs_to {
 
     """
    }
-
 
 process merge_annotation {
     debug true
@@ -790,6 +807,17 @@ workflow analysis {
         
     main:
         validateParameters()
+        
+        if (params.run_order_mode) {
+            // Ensure epi2me results exist before proceeding
+            epi2me_results
+                .map { sample_id, sv_file ->
+                    if (!file(sv_file).exists()) {
+                        error "Epi2me output not found: ${sv_file}. Pipeline must run in order."
+                    }
+                    tuple(sample_id, sv_file)
+                }
+        }
         
         // Initialize channels as empty by default
         def annotatecnv_out = Channel.empty()
