@@ -49,10 +49,11 @@ The pipeline consists of three main modules that can be run independently or seq
   - Circos plots
 
 ## Required Containers
-### Epi2me Containers: The following containers are required to run the Epi2me pipeline. The containers are downloaded from epi2me docker hub repository (https://hub.docker.com/r/epi2me/epi2me-workflows).
+### Epi2me Containers: 
 
 ```bash
 # Epi2me Containers
+# The following containers are required to run the Epi2me pipeline. The containers are downloaded from epi2me docker hub repository (https://hub.docker.com/r/epi2me/epi2me-workflows).
 wget https://hub.docker.com/r/ontresearch/wf-common
 wget https://hub.docker.com/r/ontresearch/wf-human-variation
 wget https://hub.docker.com/r/ontresearch/wf-human-variation-snp
@@ -63,12 +64,15 @@ wget https://hub.docker.com/r/ontresearch/wf-cnv
 
  ```
 
-### Analysis Containers: The following containers are required to run the analysis pipeline. The containers are downloaded from the container registry (https://hub.docker.com/repositories/vilhelmmagnuslab/).
+### Analysis Containers: 
+
+.
 
 ```bash
 # Analysis Containers
+# The following containers are required to run the analysis pipeline. The containers are downloaded from the container registry (https://hub.docker.com/repositories/vilhelmmagnuslab/)
 wget https://hub.docker.com/repositories/vilhelmmagnuslab/ace_1.24.0
-wget https://hub.docker.com/repositories/vilhelmmagnuslab/annotsv_3.3.4--py311hdfd78af_1.sif
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/annotsv_3.3.4--py311hdfd78af_1
 wget https://hub.docker.com/repositories/vilhelmmagnuslab/clair3_amd64
 wget https://hub.docker.com/repositories/vilhelmmagnuslab/clairsto_amd64
 wget https://hub.docker.com/repositories/vilhelmmagnuslab/igv_report_amd64
@@ -103,7 +107,9 @@ These files are essential for:
 
 # Classifier Models
 
-wget https://[reference-data]/nanoDx/static/Capper_et_al_NN.pkl  # NanoDx model
+```bash
+# The NanoDx model is downloaded from the following link: https://gitlab.com/pesk/nanoDx. The user need to download the model from the link and provide the path to the model in the analysis.config file (nanodx_workflow_dir). It is also required to make sure that the file Capper_et_al_NN.pkl is in the /$Path/nanoDx/static.
+
 ```
 
 ## Quick Start
@@ -162,6 +168,7 @@ params {
 ```
 
 #### In conf/epi2me.config:
+The epi2me folder need to download the epi2me workflow from the following link: https://github.com/epi2me-labs/wf-human-variation. In the epi2me.config file the user need to specify the path to the epi2me workflow.
 ```nextflow
 params {
     // Base path
