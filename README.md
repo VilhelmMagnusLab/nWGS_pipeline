@@ -353,7 +353,7 @@ This work was supported by:
 ### Download
 The latest version of the pipeline can be downloaded from:
 ```bash
-git clone https://github.com/yourusername/nWGS_pipeline.git
+git clone https://github.com/VilhelmMagnusLab/nWGS_pipeline.git
 ```
 
 ## Questions and Feedback
