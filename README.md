@@ -96,6 +96,7 @@ refdata/
 ├── OCC.SNV.screening.bed    # SNV screening regions
 ├── TERTp_variants.bed       # TERT promoter variants
 └── human_GRCh38_trf.bed    # Tandem repeat regions
+reference_genome = "${params.ref_dir}/ref.fa" need to be provided or downloaded from the following link: https://www.ncbi.nlm.nih.gov/datasets/docs/v2/reference-docs/reference-genomes/human-reference-genomes/
 ```
 
 These files are essential for:
