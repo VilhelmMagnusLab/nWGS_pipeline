@@ -25,7 +25,6 @@ The pipeline consists of three main modules that can be run independently or seq
   - Bin size: 50kb
   - Output: segs.bed, bins.bed, segs.vcf
 - Structural variant calling using Sniffles2
-  - Mosaic mode enabled
   - Output: *_wf_sv.vcf.gz
 - Modified base calling using Modkit
   - Output: *_wf_mods.bedmethyl.gz
@@ -35,14 +34,13 @@ The pipeline consists of three main modules that can be run independently or seq
   - Uses EPIC array sites
   - Methylation level calculation
 - Methylation-based classification
-  - Sturgeon classifier
   - NanoDx neural network classifier
 - Structural variant annotation
   - AnnotSV annotation
-  - SvANNA pathogenicity prediction
+  - Svanna pathogenicity prediction
   - Fusion gene detection
 - CNV analysis
-  - ACE threshold determination
+  - ACE to determine tumor content
   - Copy number annotation
   - Chromosome visualization
 - Report generation
@@ -51,47 +49,60 @@ The pipeline consists of three main modules that can be run independently or seq
   - Circos plots
 
 ## Required Containers
+### Epi2me Containers: The following containers are required to run the Epi2me pipeline. The containers are downloaded from epi2me docker hub repository (https://hub.docker.com/r/epi2me/epi2me-workflows).
 
 ```bash
 # Epi2me Containers
-wget https://[container-registry]/wf-human-variation_latest.sif
-wget https://[container-registry]/snifflesv252_update_latest.sif
-wget https://[container-registry]/modkit_latest.sif
-wget https://[container-registry]/wf-cnv_latest.sif
-wget https://[container-registry]/wf-human-variation-snp_latest.sif
-wget https://[container-registry]/wf-human-variation-str_latest.sif
-wget https://[container-registry]/snpeff_latest.sif
+wget https://hub.docker.com/r/ontresearch/wf-common
+wget https://hub.docker.com/r/ontresearch/wf-human-variation
+wget https://hub.docker.com/r/ontresearch/wf-human-variation-snp
+wget https://hub.docker.com/r/ontresearch/wf-human-variation-str
+wget https://hub.docker.com/r/ontresearch/wf-human-variation-sv
+wget https://hub.docker.com/r/ontresearch/modkit
+wget https://hub.docker.com/r/ontresearch/wf-cnv
 
+ ```
+
+### Analysis Containers: The following containers are required to run the analysis pipeline. The containers are downloaded from the container registry (https://hub.docker.com/repositories/vilhelmmagnuslab/).
+
+```bash
 # Analysis Containers
-wget https://[container-registry]/ace_images_6mars2025_latest.sif
-wget https://[container-registry]/annotsv_3.3.4--py311hdfd78af_1.sif
-wget https://[container-registry]/clair3_latest.sif
-wget https://[container-registry]/clairs-to_latest.sif
-wget https://[container-registry]/sturgeon_amd64_21jan_latest.sif
-wget https://[container-registry]/igv_report_amd64_latest.sif
-wget https://[container-registry]/vcf2circos_latest.sif
-wget https://[container-registry]/nanodx_env_latest.sif
-wget https://[container-registry]/markdown_images_28feb2025_latest.sif
-wget https://[container-registry]/annotcnv_images_27feb1025_latest.sif
-wget https://[container-registry]/mgmt_nanopipe_amd64_18feb2025_cramoni_latest.sif
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/ace_1.24.0
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/annotsv_3.3.4--py311hdfd78af_1.sif
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/clair3_amd64
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/clairsto_amd64
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/igv_report_amd64
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/vcf2circos
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/nanodx_env
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/markdown_images_28feb2025
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/annotcnv_images_27feb1025
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni
+wget https://hub.docker.com/repositories/vilhelmmagnuslab/nwgs_default_images_latest
 ```
 
 ## Required Reference Data
 
-```bash
-# Reference Genome
-wget https://[reference-data]/GRCh38/GCF_000001405.39_GRCh38.p13_genomic_chr_only_plus_mt.fa
+The required reference files are provided in the `refdata` folder:
 
-# Annotation Files
-wget https://[reference-data]/OCC.fusions.bed
-wget https://[reference-data]/EPIC_sites_NEW.bed
-wget https://[reference-data]/MGMT_CpG_Island.hg38.bed
-wget https://[reference-data]/OCC.SNV.screening.bed
-wget https://[reference-data]/TERTp_variants.bed
-wget https://[reference-data]/human_GRCh38_trf.bed
+```bash
+refdata/
+├── OCC.fusions.bed           # Fusion genes bed file
+├── EPIC_sites_NEW.bed       # EPIC methylation sites
+├── MGMT_CpG_Island.hg38.bed # MGMT CpG islands
+├── OCC.SNV.screening.bed    # SNV screening regions
+├── TERTp_variants.bed       # TERT promoter variants
+└── human_GRCh38_trf.bed    # Tandem repeat regions
+```
+
+These files are essential for:
+- Methylation analysis (EPIC sites, MGMT)
+- Structural variant analysis (Fusions)
+- Copy number analysis
+- SNV detection
+- TERT promoter analysis
 
 # Classifier Models
-wget https://[reference-data]/general.zip  # Sturgeon model
+
 wget https://[reference-data]/nanoDx/static/Capper_et_al_NN.pkl  # NanoDx model
 ```
 
@@ -145,7 +156,6 @@ params {
     humandb_dir = "/path/to/annovar/humandb"
 
     // Tool-specific directories
-    svanna_dir = "/path/to/svanna-cli-1.0.4/"
     bin_dir = "/path/to/bin/"
     epi2me_dir = "/path/to/epi2me/wf-human-variation-master/"
 }
@@ -177,7 +187,7 @@ Update container paths in both config files:
 // In conf/analysis.config
 process {
     withName:annotesv {
-        container = '/path/to/containers/annotsv_3.3.4--py311hdfd78af_1.sif'
+        container = '/path/to/containers/annotsv*.sif'
     }
     // ... other container paths
 }
@@ -224,14 +234,14 @@ sample_id2   flowcell_id2
 
 ```
 input_dir/
-├── T10-01/
+├── V1001/
 │   ├── 20231215_1340_3E_PAM69496_5c1d2ed7/bam_pass/
 │   │   ├── PAM69496_pass_barcode01_*.bam
 │   │   └── PAM69496_pass_barcode01_*.bam.bai
 │   └── 20231216_1420_3E_PAM69496_7d4e9fc2/bam_pass/
 │       ├── PAM69496_pass_barcode01_*.bam
 │       └── PAM69496_pass_barcode01_*.bam.bai
-└── T10-02/
+└── V1002/
     └── 20231217_1510_3E_PAM69497_8f3g1hj4/bam_pass/
         ├── PAM69497_pass_barcode02_*.bam
         └── PAM69497_pass_barcode02_*.bam.bai
@@ -242,15 +252,15 @@ input_dir/
 ```
 results/
 ├── merged_bams/
-│   ├── T10-01.merged.bam
-│   ├── T10-01.merged.bam.bai
-│   ├── T10-02.merged.bam
-│   └── T10-02.merged.bam.bai
+│   ├── V1001.merged.bam
+│   ├── V1001.merged.bam.bai
+│   ├── V1002.merged.bam
+│   └── V1002.merged.bam.bai
 └── occ_bam/
-    ├── T10-01_roi.bam
-    ├── T10-01_roi.bam.bai
-    ├── T10-02_roi.bam
-    └── T10-02_roi.bam.bai
+    ├── V1001_roi.bam
+    ├── V1001_roi.bam.bai
+    ├── V1002_roi.bam
+    └── V1002_roi.bam.bai
 ```
 
 ### Output results folder structure:
@@ -285,10 +295,6 @@ results/
 # Run complete workflow in order
 nextflow run main.nf --run_order_mode
 
-# Run individual modules
-nextflow run main.nf --run_mode_mergebam
-nextflow run main.nf --run_mode_epi2me all
-nextflow run main.nf --run_mode_analysis rmd
 ```
 #### Epi2me Pipeline Modes
 ```bash
@@ -311,7 +317,7 @@ nextflow run main.nf --run_mode_analysis occ     # Run only OCC analysis
 nextflow run main.nf --run_mode_analysis mgmt    # Run only MGMT analysis
 nextflow run main.nf --run_mode_analysis annotsv # Run only AnnotSV analysis
 nextflow run main.nf --run_mode_analysis cnv     # Run only CNV analysis
-nextflow run main.nf --run_mode_analysis terp    # Run only TERP analysis
+nextflow run main.nf --run_mode_analysis tertp    # Run only TERTP analysis
 nextflow run main.nf --run_mode_analysis rmd     # Generate only the pdf report
 ```
 
@@ -349,7 +355,7 @@ For questions, bug reports, or feature requests, please contact:
 
 **Maintainers:**
 - Christian Bope (chbope@ous-hf.no / christianbope@gmail.com)
-- Skabbi (skabbi@gmail.com)
+- Skabbi (skahal@ous-hf.no / skabbi@gmail.com)
 
 You can also:
 1. Open an issue on GitHub
