@@ -1,23 +1,9 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
-// Define parameters
-// params.input_dir = "/home/chbope/extension/testdata/single_bam_folder" // Base directory containing Sample_ID folders
-// params.merge_bam_dir = "/home/chbope/extension/testdata/single_bam_folder/merge_bam" // Directory to store merged BAM files
-// params.occ_bam_dir = "/home/chbope/extension/testdata/single_bam_folder/occ_bam"
-// params.threads = 12 // Number of threads for samtools operations
-// params.roi_bed = file("/home/chbope/extension/data/reference/OCC.protein_coding.bed")
+
 params.bam_sample_id_file = file("/home/chbope/extension/testdata/sample_ids_bam.txt")
 
-///
-//params.sample_flowcell_id = file("/data/pipeline/data/200_GBMs_samples10.txt")
 
-// Load sample information from a file
-//def sample_info = [:]
-//file("/data/pipeline/results/trash/sample_info.txt").splitEachLine('\t') { fields ->
-//    if (fields.size() == 2) {
-//        sample_info[fields[0]] = fields[1] // Map Sample_ID to Flow_cell_ID
-//    }
-//}
 
 def sample_info = [:]
 //file(params.bam_sample_id_file).splitEachLine('\t') { fields ->

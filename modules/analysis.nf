@@ -26,29 +26,6 @@ def loadSampleThresholds() {
 }
 
 //---------------------------------------------------------------------
-// (Optional) Parameter definitions and commented documentation
-//---------------------------------------------------------------------
-// params.mgmt_promoter_r_script = "mnt/scripts/MGMT_Prospective2.R"
-// Define the base path as a parameter
-// params.path = "/home/chbope/extension"
-// params.input_path = "${params.path}"
-// params.output_path = "${params.path}/results"
-// params.annotate_dir = "/home/chbope/extension/data/annotations"
-// params.config_dir = "/home/chbope/Documents/nanopore/packages/knotannotsv/knotAnnotSV"
-// params.ref_dir ="/home/chbope/extension/data/reference"
-// params.model_path="/home/chbope/extension/Data_for_Bope"
-// params.clair3_dir="/home/chbope/Documents/nanopore/Data_for_Bope/results/sample_id1/callvariantclair3/clair3_output"
-// params.humandb_dir="/home/chbope/extension/data/annovar/humandb"
-// params.clairSTo_dir="/home/chbope/Documents/nanopore/Data_for_Bope/results/sample_id1/callvariantclairsto/clairsto_output"
-// params.svanna_dir="/home/chbope/extension/data/svanna-cli-1.0.4/"
-// params.bin_dir="/home/chbope/Documents/nanopore/nextflow/bin/"
-// params.epi2me_dir="/home/chbope/Documents/nanopore/epi2me/wf-human-variation-master/"
-// params.out_dir_epi2me ="/home/chbope/extension/out_dir_epi2me"
-
-// (Additional parameter definitions and file paths are commented out for clarity)
-// ...
-
-//---------------------------------------------------------------------
 // Process Definitions
 //---------------------------------------------------------------------
 

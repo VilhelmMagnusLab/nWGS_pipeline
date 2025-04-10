@@ -1,3 +1,9 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:c412cb7185edd6a828568eb8bd4d2d50a32090c822e3478e95588d0e1428e2bb
-size 2469
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+1	c6/3c3371	1791081	analysis:ace_tmc (1)	COMPLETED	0	2025-04-10 13:27:18.820	3m 19s	2m 12s	100.3%	633.1 MB	2.5 GB	8.9 GB	3 MB
+2	b7/e427e0	1794438	mergebam:merge_bam_files (1)	COMPLETED	0	2025-04-10 13:30:37.883	3m 11s	1m 56s	323.5%	15.2 MB	964.4 MB	2.8 GB	1.3 GB
+4	50/0f3d21	1797659	epi2me:run_epi2me_modkit (1)	COMPLETED	0	2025-04-10 13:33:48.926	6m 51s	6m 37s	194.1%	3.7 GB	48.6 GB	33.8 GB	51.3 GB
+6	b9/5867ee	1856102	analysis:cramino_report (1)	COMPLETED	0	2025-04-10 13:40:39.994	22.7s	1.5s	55.7%	27.5 MB	41.3 MB	19.6 MB	2.9 KB
+3	e0/f31eaf	1856598	mergebam:extract_roi (1)	COMPLETED	0	2025-04-10 13:41:02.733	47.5s	24s	99.0%	11.4 MB	23.2 MB	1.3 GB	10.3 MB
+7	c6/f38173	1858055	analysis:igv_tools (1)	COMPLETED	0	2025-04-10 13:41:50.266	13.3s	6.2s	90.1%	225.4 MB	239.6 MB	13.8 MB	36.4 KB
+11	12/81396c	1858676	analysis:plot_genomic_regions (1)	FAILED	1	2025-04-10 13:42:03.584	27.1s	27s	-	-	-	-	-
+8	10/8f2e65	1858992	analysis:extract_epic (T10-01)	ABORTED	-	2025-04-10 13:42:30.649	-	-	-	-	-	-	-

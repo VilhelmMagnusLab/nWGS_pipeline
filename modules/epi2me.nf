@@ -1,36 +1,6 @@
 #!/usr/bin/env nextflow
 
 nextflow.enable.dsl=2
-//params.mgmt_promoter_r_script = "mnt/scripts/MGMT_Prospective2.R"
-// Define the base path as a parameter
-
-// params.path = "/home/chbope/extension"
-
-
-// params.epi2me_dir="/home/chbope/Documents/nanopore/epi2me/wf-human-variation-master/"
-// params.episv ="/home/chbope/extension/results/epi2me/episv"
-// params.epimodkit ="/home/chbope/extension/results/epi2me/epimodkit"
-// params.epicnv ="/home/chbope/extension/results/epi2me/epicnv"
-
-// input reference files for all samples
-
-// params.reference_genome = file("/home/chbope/extension/data/reference/GCF_000001405.39_GRCh38.p13_genomic_chr_only_plus_mt.fa")
-// params.reference_genome_bai = file("/home/chbope/extension/data/reference/CF_000001405.39_GRCh38.p13_genomic_chr_only_plus_mt.fa.fai")
-
-
-// params.tr_bed_file = file("/home/chbope/extension/data/reference/human_GRCh38_trf.bed")
-// //params.epi2me_config_file = file("/home/chbope/Documents/nanopore/epi2me/wf-human-variation-master/nextflow.config")
-// params.epi2me_config_file = file("/home/chbope/Documents/nanopore/nextflow/pipeline/configs/pipeline1.config")
-// //params.epi2me_base_config_file = file("/home/chbope/Documents/nanopore/epi2me/wf-human-variation-master/base.config")
-// //input individual samples files
-
-// //input file folder
-// merge_bam_folder = "/home/chbope/extension/Data_for_Bope/single_bam_folder"
-
-
-
-// Define the available run modes
-
 
 //##############################3
 //## Extract overlapping EPIC sites for methylation based classification 

@@ -79,3 +79,4 @@
 2025-03-20 11:39:54	10m 6s	lethal_majorana	ERR	72d6a2d7caff8794e22a3defc9689ded	29143127-0df9-41a3-8ac4-91d857693215	nextflow run main.nf --run_order_mode -resume
 2025-03-20 12:40:25	-	prickly_brown	-	103f47162db4edeac1d412698d4dc865	29143127-0df9-41a3-8ac4-91d857693215	nextflow run main.nf --run_order_mode -resume
 2025-03-20 13:53:42	-	dreamy_bassi	-	94b27fc596b6c0d8690b18a79282e680	29143127-0df9-41a3-8ac4-91d857693215	nextflow run main.nf --run_order_mode -resume
+2025-04-10 13:27:14	15m 17s	disturbed_ampere	ERR	67b72568354b4de7bbed5db628f58777	29143127-0df9-41a3-8ac4-91d857693215	nextflow run main.nf --run_order_mode -resume
