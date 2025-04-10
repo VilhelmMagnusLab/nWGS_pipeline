@@ -3,7 +3,7 @@ output:
   pdf_document:
     fig_height: 3
     latex_engine: pdflatex
-   # output: pdf_document
+    #output: pdf_document
 header-includes:
    - \usepackage{helvet}
    - \renewcommand*\familydefault{\sfdefault}
@@ -31,8 +31,8 @@ library(htmltools)
 
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) < 17) {
-  stop("Usage: Rscript report.R <sample_id> <cramino_stat> <votes_file> <dictionary_file> <logo_file> <copy_number_plot_file> <tumor_copy_number_file> <cnv_filter_file> <cnv_chr9> <cnv_chr7> <mgmt_results_file> <snv_results_file> <structure_variant_file> <terp_html> <annotsv_html> <svanna_html>  <output_pdf_file>")
+if (length(args) < 20) {
+  stop("Usage: Rscript report.R <sample_id> <cramino_stat> <votes_file> <dictionary_file> <logo_file> <copy_number_plot_file> <tumor_copy_number_file> <cnv_filter_file> <cnv_chr9> <cnv_chr7> <mgmt_results_file> <snv_results_file> <structure_variant_file> <terp_html> <annotsv_html> <svanna_html> <egfr_plot_file> <idh1_plot_file> <tertp_plot_file> <output_pdf_file>")
 }
 
 
@@ -52,7 +52,10 @@ structure_variant_file <- args[13]
 terp_html              <- args[14]
 annotsv_html           <- args[15]
 svanna_html            <- args[16]
-output_pdf_file        <- args[17]
+egfr_plot_file         <- args[17]
+idh1_plot_file         <- args[18]
+tertp_plot_file        <- args[19]
+output_pdf_file        <- args[20]
 
 # Read in the votes and dictionary files
 if (!file.exists(votes_file)) {
@@ -111,28 +114,40 @@ Vertical dashed lines indicate the recommended >0.2 cut-off for classification.
 ```{r, out.height = "150px", fig.align = 'center', echo=FALSE, warning=FALSE}
 library(ggplot2)
 
-ggplot(data = mc, aes(x = Methylation.Class.Name, y = score)) +
-  geom_bar(stat = "identity", fill = "#1f78b4") +
-  geom_hline(yintercept = 0.2, linetype = "dashed") +
-  coord_flip() +
-  scale_x_discrete(limits = mc[order(mc$score, decreasing = TRUE), ]$Methylation.Class.Name[5:1]) +
-  scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), limits = c(0, 1)) +
-  ylab("score") + xlab("") +
-  ggtitle("Methylation class (MC)") +
-  theme_classic() + theme(aspect.ratio = 1)
+# Filter out rows with NA or zero scores before plotting
+mc_filtered <- mc %>%
+    filter(!is.na(score), score > 0) %>%
+    arrange(desc(score)) %>%
+    slice_head(n = 5)  # Take top 5 scores
+
+ggplot(data = mc_filtered, aes(x = Methylation.Class.Name, y = score)) +
+    geom_bar(stat = "identity", fill = "#1f78b4") +
+    geom_hline(yintercept = 0.2, linetype = "dashed") +
+    coord_flip() +
+    scale_x_discrete(limits = rev(mc_filtered$Methylation.Class.Name)) +
+    scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), limits = c(0, 1)) +
+    ylab("score") + xlab("") +
+    ggtitle("Methylation class (MC)") +
+    theme_classic() + theme(aspect.ratio = 1)
 
 ```
 
 ```{r, out.height = "150px", fig.align = 'center', echo=FALSE, warning=FALSE}
-ggplot(mcf, aes(x = Methylation.Class.Family, y = score_MCF)) +
-  geom_bar(stat = "identity", fill = "#4daf4a") +
-  geom_hline(yintercept = 0.2, linetype = "dashed") +
-  coord_flip() +
-  scale_x_discrete(limits = mcf[order(mcf$score_MCF, decreasing = TRUE), ]$Methylation.Class.Family[5:1]) +
-  scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), limits = c(0, 1)) +
-  ylab("score") + xlab("") +
-  ggtitle("Methylation class family (MCF)") +
-  theme_classic() + theme(aspect.ratio = 1)
+# Filter and prepare MCF data
+mcf_filtered <- mcf %>%
+    filter(!is.na(score_MCF), score_MCF > 0) %>%
+    arrange(desc(score_MCF)) %>%
+    slice_head(n = 5)  # Take top 5 scores
+
+ggplot(mcf_filtered, aes(x = Methylation.Class.Family, y = score_MCF)) +
+    geom_bar(stat = "identity", fill = "#4daf4a") +
+    geom_hline(yintercept = 0.2, linetype = "dashed") +
+    coord_flip() +
+    scale_x_discrete(limits = rev(mcf_filtered$Methylation.Class.Family)) +
+    scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), limits = c(0, 1)) +
+    ylab("score") + xlab("") +
+    ggtitle("Methylation class family (MCF)") +
+    theme_classic() + theme(aspect.ratio = 1)
 
 ```
 
@@ -140,25 +155,16 @@ ggplot(mcf, aes(x = Methylation.Class.Family, y = score_MCF)) +
 
 Methylation-based classification using nanopore whole genome sequencing is a research tool currently under development. It has not been clinically validated in sufficiently large cohorts. Interpretation and implementation of the results in a clinical setting is in the sole responsibility of the treating physician.
 
-### Copy Number Profile
+### Copy Number Variation Profile
+
+### Full CNV Profile
+
+Genes annotated in the full CNV profile are amplified (Gain) or deleted (Loss) based on QDNAseq results.
 
 ```{r, out.height = "150px", echo=FALSE}
 # Display the copy number plot using the provided file path
 knitr::include_graphics(copy_number_plot_file)
 ```
-
-```{r, out.height = "150px", echo=FALSE}
-# Display the copy number plot using the provided file path
-knitr::include_graphics(cnv_chr9)
-```
-
-```{r, out.height = "150px", echo=FALSE}
-# Display the copy number plot using the provided file path
-knitr::include_graphics(cnv_chr7)
-```
-
-
-
 ```{r comment='', echo=FALSE}
 # Function to check if sufficient number of events are present (90% threshold)
 df <- read.csv(tumor_copy_number_file,
@@ -249,8 +255,9 @@ if (length(details) > 0) {
     cat(paste("*", details, collapse = "\n"))
 }
 ```
-### Copy Number Variation Filter Table
+The table is filtered for copy number variation events with a score of 2 (amplification) or -2 (homozygous deletion) and no sex chromosome.
 ```{r comment='', echo=FALSE}
+#cat("Table 1: Copy Number Variation Filter Table\n\n")
 # Read and process the CNV data
 df_mgmt <- read.csv(cnv_filter_file, stringsAsFactors = FALSE, sep = ',')
 
@@ -298,7 +305,16 @@ if(nrow(df_filtered) == 0){
     }
 }
 ```
-### CDK2NA/B Detection
+
+### Chromosome 9 CNV/CDK2NA/B Profile
+
+Chromosome 9 CNV for visual inspection of CDK2NA/B annotated.
+
+```{r, out.height = "150px", echo=FALSE}
+# Display the copy number plot using the provided file path
+knitr::include_graphics(cnv_chr9)
+```
+
 ```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
 
@@ -330,24 +346,76 @@ cdk2nb_homo <- any(df$Chrom == "9" &
 
 # Generate and display CDK2NA/B status messages
 if (cdk2na_hemi) {
-    cat("There is a hemizygous deletion in chromosome 9: CDK2NA is detected\n")
+    cat("There is a hemizygous deletion in chromosome 9: CDKN2A is deleted\n")
 }
 if (cdk2na_homo) {
-    cat("There is a homozygous deletion in chromosome 9: CDK2NA is detected\n")
+    cat("There is a homozygous deletion in chromosome 9: CDKN2A is deleted\n")
 }
 if (cdk2nb_hemi) {
-    cat("There is a hemizygous deletion in chromosome 9: CDK2NB is detected\n")
+    cat("There is a hemizygous deletion in chromosome 9: CDKN2B is deleted\n")
 }
 if (cdk2nb_homo) {
-    cat("There is a homozygous deletion in chromosome 9: CDK2NB is detected\n")
+    cat("There is a homozygous deletion in chromosome 9: CDKN2B is deleted\n")
 }
 if (!cdk2na_hemi && !cdk2na_homo && !cdk2nb_hemi && !cdk2nb_homo) {
-    cat("No CDK2NA/B deletions detected\n")
+    cat("No CDKN2A/B deletions detected\n")
 }
 ```
-### Methylation Table
 
+### Chromosome 7 CNV/EGFR Profile
+
+Chromosome 7 CNV for visual inspection of EGFR annotated.
+
+```{r, out.height = "150px", echo=FALSE}
+# Display the copy number plot using the provided file path
+knitr::include_graphics(cnv_chr7)
+```
+```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
+# Read the tumor copy number file
+df <- read.csv(tumor_copy_number_file, sep="\t", stringsAsFactors=FALSE)
+
+# Filter for chromosome 7 and get max copy number
+chr7_max_cn <- df[df$Chrom == "7", "Tumor.Copy"]
+if (length(chr7_max_cn) > 0) {
+    max_value <- max(chr7_max_cn, na.rm=TRUE)
+    
+    # Format the output with bold text
+     if (knitr::is_latex_output()) {
+        cat(sprintf("The EGFR copy number for the sample %s is %.2f\n", sample_id, max_value))
+    } else if (knitr::is_html_output()) {
+        cat(sprintf("The EGFR copy number for the sample %s is <strong>%.2f</strong>\n", sample_id, max_value))
+    } else {
+        cat(sprintf("The EGFR copy number for the sample %s is %.2f\n", sample_id, max_value))
+    }
+} else {
+    cat(sprintf("No copy number data found for chromosome 7 in the sample %s\n", sample_id))
+}
+```
+```{r, out.width="0.5\\linewidth", out.height="0.3\\textheight", fig.align='center', echo=FALSE}
+
+knitr::include_graphics(egfr_plot_file)
+
+```
+The vertical red line highlights exons 2-7. Deletion of exons 2-7 results in EGFRviii variant.
+
+### IDH1 p.R132 coverage
+
+Sequenced coverage of IDH1 p.R132 (red horizontal line) for visual inspection.
+
+```{r, out.width="0.5\\linewidth", out.height="0.3\\textheight", fig.align='center', echo=FALSE}
+knitr::include_graphics(idh1_plot_file)
+```
+### TERTp coverage
+Sequenced coverage of TERTp C228T (left vertical red line) and G250 (right vertical red line) for visual inspection.
+```{r, out.width="0.5\\linewidth", out.height="0.3\\textheight", fig.align='center', echo=FALSE}
+knitr::include_graphics(tertp_plot_file)
+```
+
+
+### MGMT Methylation Table
+The table below shows the methylation results for the MGMT gene. Where Mean Methylation Full: All 98 CpG in MGMT promoter; Mean Methylation Pyro: Four CpG included in MGMT pyro kit; Classification by Pyro: Classification of the pyrosequencing array; Classification by Full: Classification of the full methylation array.
 ```{r comment='', echo=FALSE}
+#cat("Table 2: Methylation Table\n\n")
 # Read MGMT results
 df_mgmt <- read.csv(mgmt_results_file, stringsAsFactors = FALSE)
 
@@ -362,31 +430,6 @@ colnames(df_mgmt) <- gsub("Classification_by_Pyro", "Classification by Pyro", co
 colnames(df_mgmt) <- gsub("Classification_by_Full", "Classification by Full", colnames(df_mgmt))
 
 # Add COSMIC hyperlinks
-if ("COSMIC100" %in% colnames(df_mgmt)) {
-    add_cosmic_link <- function(value) {
-        if (!is.na(value) && grepl("ID=", value)) {
-            cosmic_id <- sub(".*ID=", "", value)
-            # Always use https for COSMIC links to ensure portability
-            cosmic_url <- sprintf("https://cancer.sanger.ac.uk/cosmic/search?q=%s", cosmic_id)
-            if (knitr::is_latex_output()) {
-                sprintf("\\href{%s}{\\textcolor{blue}{%s}}", cosmic_url, cosmic_id)
-            } else if (knitr::is_html_output()) {
-                sprintf('<a href="%s" target="_blank">%s</a>', cosmic_url, cosmic_id)
-            } else {
-                cosmic_id
-            }
-        } else {
-            value
-        }
-    }
-    df_mgmt$COSMIC100 <- sapply(df_mgmt$COSMIC100, add_cosmic_link)
-}
-
-# Make sure the LaTeX preamble includes hyperref package
-if (knitr::is_latex_output()) {
-    options(knitr.table.format = "latex")
-    knitr::opts_chunk$set(dev = 'pdf')
-}
 
 # Display table with formatting
 if (knitr::is_html_output()) {
@@ -410,53 +453,79 @@ if (knitr::is_html_output()) {
 }
 ```
 ### SNV Calling and Annotation
-
+SNVs in the select genes. Only non-synonymous exonic variants that are not known to be benign according to ClinVar_20240611 are reported. Where GQ: Genotype Quality, Depth: Sequenced depth, AD: Allele Depth, GT: Allele Genotype, AF: Allele Frequency.
 ```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
 library(kableExtra)
+library(dplyr)
 
 # Read the SNV annotation results using the provided file path
 df_mgmt <- read.csv(snv_results_file, header = TRUE, stringsAsFactors = FALSE, sep = "\t", row.names = NULL)
 
-# Filter and clean AAChange.refGene column
+# 1. Remove ExonicFunc.refGene column
+df_mgmt <- df_mgmt %>% select(-ExonicFunc.refGene)
+
+# 2. Clean COSMIC100 column - remove "ID=" from values
+if ("COSMIC100" %in% colnames(df_mgmt)) {
+    df_mgmt$COSMIC100 <- gsub("ID=", "", df_mgmt$COSMIC100)
+}
+
+# 3. Merge Depth columns keeping higher value
+if (all(c("Depth", "ClairS_Depth") %in% colnames(df_mgmt))) {
+    df_mgmt <- df_mgmt %>%
+        mutate(
+            Depth = pmax(as.numeric(Depth), as.numeric(ClairS_Depth), na.rm = TRUE)
+        ) %>%
+        select(-ClairS_Depth)  # Remove ClairS_Depth after merging
+}
+
+# Process AAChange.refGene column
 if ("AAChange.refGene" %in% colnames(df_mgmt)) {
-    # Function to extract c.*:p.* pattern from each entry
-    extract_pattern <- function(text) {
-        # Split multiple entries
+    # Function to process AAChange.refGene entries
+    process_aachange <- function(text) {
+        if (is.na(text) || text == "") {
+            return("No")
+        }
+        
         entries <- unlist(strsplit(text, ","))
-        # Extract c.*:p.* patterns
         patterns <- sapply(entries, function(x) {
-            #match <- regexpr("c\\.[^:]*:p\\.[^,]*", x) #nucleotide and protein change
-            match <- regexpr("p\\.[^:]*", x) #protein change
+            match <- regexpr("p\\.[^:]*", x)
             if (match != -1) {
                 substr(x, match, match + attr(match, "match.length") - 1)
             } else {
                 NA
             }
         })
-        # Return only the matching patterns, joined by comma
+        
         patterns <- patterns[!is.na(patterns)]
-        if (length(patterns) > 0) {
-            paste(patterns, collapse = ",")
+        
+        if (length(patterns) == 0) {
+            return("No")
+        } else if (length(patterns) == 1) {
+            return(patterns[1])
         } else {
-            NA
+            pattern_counts <- table(patterns)
+            most_frequent <- names(pattern_counts)[which.max(pattern_counts)]
+            return(most_frequent)
         }
     }
     
-    # Apply the extraction to each row
-    df_mgmt$AAChange.refGene <- sapply(df_mgmt$AAChange.refGene, extract_pattern)
-    
-    # Remove rows where no pattern was found
-    df_mgmt <- df_mgmt[!is.na(df_mgmt$AAChange.refGene), ]
+    df_mgmt$AAChange.refGene <- sapply(df_mgmt$AAChange.refGene, process_aachange)
 }
 
-# Move first column to position 14 and remove row names
-col_names <- colnames(df_mgmt)
-first_col <- col_names[1]
-remaining_cols <- col_names[-1]
-new_order <- c(remaining_cols[1:12], first_col, remaining_cols[13:length(remaining_cols)])
-df_mgmt <- df_mgmt[, new_order]
-rownames(df_mgmt) <- NULL  # Remove row names
+# Reorder columns to put Gene.refGene first and Chr second
+df_mgmt <- df_mgmt %>%
+    select(
+        Gene.refGene,  # First column
+        Chr,           # Second column
+        everything()   # All other columns in their current order
+    )
+
+# Remove row names
+rownames(df_mgmt) <- NULL
+
+# Add title above table
+#cat("**Table 1: Variant Analysis Results**\n\n")
 
 # Display table with formatting
 if (knitr::is_html_output()) {
@@ -479,53 +548,74 @@ if (knitr::is_html_output()) {
 }
 ```
 
-```{r comment='', echo=FALSE}
-#cat(readLines("/home/chbope/Documents/trash/tmp/rmd/Dummy_merge_annotation_filter_snvs_allcall.csv"), sep ='\n')
-```
 
 ### Structure Variant Fusion Events
 ```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
 library(kableExtra)
 
-# Read the structure variant file using the provided file path
-df_mgmt <- read.csv(structure_variant_file, stringsAsFactors = FALSE, sep = "\t")
-
-# Remove the AAChange.refGene column if it exists
-
-if ("AAChange.refGene" %in% colnames(df_mgmt)) {
-    df_mgmt <- df_mgmt[, !colnames(df_mgmt) %in% "AAChange.refGene"]
+# Function to check if file is empty or has only header
+is_empty_file <- function(df) {
+    return(nrow(df) == 0)
 }
 
-if (nrow(df_mgmt) > 0) {
-    if (knitr::is_html_output()) {
-        tbl <- kable(df_mgmt, 
-                     format = "html", 
-                     table.attr = "style='border: 1px solid black; border-collapse: collapse; width: 80%; margin-left: auto; margin-right: auto;'", 
-                     align = "c")
-        for (i in 1:(ncol(df_mgmt) - 1)) {
-            tbl <- tbl %>% column_spec(i, border_right = "1px solid black")
+# Try to read the file and handle potential errors
+tryCatch({
+    # Read the structure variant file
+    df_mgmt <- read.csv(structure_variant_file, stringsAsFactors = FALSE, sep = "\t")
+    
+    # Remove the AAChange.refGene column if it exists
+    if ("AAChange.refGene" %in% colnames(df_mgmt)) {
+        df_mgmt <- df_mgmt[, !colnames(df_mgmt) %in% "AAChange.refGene"]
+    }
+    
+    # Check if the file is empty or has only headers
+    if (!is_empty_file(df_mgmt)) {
+        if (knitr::is_html_output()) {
+            tbl <- kable(df_mgmt, 
+                        format = "html", 
+                        table.attr = "style='border: 1px solid black; border-collapse: collapse; width: 80%; margin-left: auto; margin-right: auto;'", 
+                        align = "c")
+            for (i in 1:(ncol(df_mgmt) - 1)) {
+                tbl <- tbl %>% column_spec(i, border_right = "1px solid black")
+            }
+            tbl %>% 
+                kable_styling(bootstrap_options = c("striped", "hover"), 
+                            full_width = FALSE, 
+                            position = "center")
+        } else if (knitr::is_latex_output()) {
+            align_str <- paste0("|", paste(rep("c", ncol(df_mgmt)), collapse = "|"), "|")
+            kable(df_mgmt, 
+                  format = "latex", 
+                  booktabs = TRUE, 
+                  align = align_str) %>%
+                kable_styling(latex_options = c("striped", "hold_position", "scale_down"), 
+                            full_width = FALSE, 
+                            position = "center")
+        } else {
+            kable(df_mgmt)
         }
-        tbl %>% 
-            kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE, position = "center")
-    } else if (knitr::is_latex_output()) {
-        align_str <- paste0("|", paste(rep("c", ncol(df_mgmt)), collapse = "|"), "|")
-        kable(df_mgmt, format = "latex", booktabs = TRUE, align = align_str) %>%
-            kable_styling(latex_options = c("striped", "hold_position", "scale_down"), full_width = FALSE, position = "center")
     } else {
-        kable(df_mgmt)
+        # Handle empty file or header-only case
+        if (knitr::is_html_output()) {
+            cat("<p style='text-align: center; color: #666;'><em>No fusion event was detected in this sample.</em></p>")
+        } else if (knitr::is_latex_output()) {
+            cat("No fusion event was detected in this sample.")
+        } else {
+            cat("No fusion event was detected in this sample.")
+        }
     }
-} else {
+}, error = function(e) {
+    # Handle file reading errors
     if (knitr::is_html_output()) {
-        cat("<p>No fusion event was detected in this sample.</p>")
+        cat("<p style='text-align: center; color: #666;'><em>No fusion event was detected in this sample.</em></p>")
     } else if (knitr::is_latex_output()) {
         cat("No fusion event was detected in this sample.")
     } else {
         cat("No fusion event was detected in this sample.")
     }
-}
+})
 ```
-
 
 
 ### External Results Links
@@ -551,12 +641,22 @@ terp_link <- make_file_link(terp_html)
 # Generate LaTeX code with proper file links
 latex_code <- paste0(
     "The AnnotSV full result can be found at: \\href{", annotsv_link, "}{\\textcolor{blue}{AnnotSV Result}}  \\\\\n",
-    "The Svanna full result can be found at: \\href{", svanna_link, "}{\\textcolor{blue}{Svanna Result}} \\\\\n",
-    "The TERTp full result can be found at: \\href{", terp_link, "}{\\textcolor{blue}{TERTp Result}} "
+    "The Svanna full result can be found at: \\href{", svanna_link, "}{\\textcolor{blue}{Svanna Result}} \\\\\n"
 )
 
 knitr::raw_latex(latex_code)
 ```
 
+### Path to the result
+
+```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
+cat("The complete results of all nWGS pipeline processes are available at the following path:\n", "$PATH")
+```
+
+### Disclaimer 
+
+This nanopore whole genome sequencing (nWGS) pipleine is a research tool currently under
+development. It has not been clinically validated in sufficiently large cohorts. Interpretation and implementation of the results
+in a clinical setting is in the sole responsibility of the treating physician
 
 #### Report generated on `r Sys.time()`

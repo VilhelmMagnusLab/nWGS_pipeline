@@ -206,14 +206,29 @@ $(function() {
 
   // Nextflow report data
   window.data = {
-    "elapsed": "10m 5s",
-    "beginningMillis": 1742397438213,
-    "endingMillis": 1742467799792,
+    "elapsed": "8m 35s",
+    "beginningMillis": 1743695536970,
+    "endingMillis": 1744208869216,
     "processes": [
-        {"label": "mergebam:merge_bam_files (1)", "cached": true, "index": 0, "times": [{"starting_time": 1742397597083, "ending_time": 1742397597146}, {"starting_time": 1742397597146, "ending_time": 1742397967473, "label": "6m 34s \/ 23.7 MB \/ CACHED"}, {"starting_time": 1742397967473, "ending_time": 1742397991381}]},
-        {"label": "analysis:ace_tmc (1)", "cached": true, "index": 1, "times": [{"starting_time": 1742397438213, "ending_time": 1742397438257}, {"starting_time": 1742397438257, "ending_time": 1742397570362, "label": "2m 39s \/ 633.6 MB \/ CACHED"}, {"starting_time": 1742397570362, "ending_time": 1742397597046}]},
-        {"label": "mergebam:extract_roi (1)", "cached": true, "index": 2, "times": [{"starting_time": 1742397991467, "ending_time": 1742397991481}, {"starting_time": 1742397991481, "ending_time": 1742398070038, "label": "1m 43s \/ 13.4 MB \/ CACHED"}, {"starting_time": 1742398070038, "ending_time": 1742398094237}]},
-        {"label": "epi2me:run_epi2me_modkit (1)", "cached": false, "index": 3, "times": [{"starting_time": 1742467198597, "ending_time": 1742467198660}]}
+        {"label": "analysis:ace_tmc (1)", "cached": true, "index": 0, "times": [{"starting_time": 1743695536970, "ending_time": 1743695537063}, {"starting_time": 1743695537063, "ending_time": 1743695668350, "label": "2m 40s \/ 633 MB \/ CACHED"}, {"starting_time": 1743695668350, "ending_time": 1743695697171}]},
+        {"label": "mergebam:merge_bam_files (1)", "cached": true, "index": 1, "times": [{"starting_time": 1743695697205, "ending_time": 1743695697272}, {"starting_time": 1743695697272, "ending_time": 1743695849413, "label": "2m 57s \/ 15.4 MB \/ CACHED"}, {"starting_time": 1743695849413, "ending_time": 1743695874031}]},
+        {"label": "analysis:cramino_report (1)", "cached": true, "index": 2, "times": [{"starting_time": 1743749406486, "ending_time": 1743749406538}, {"starting_time": 1743749406538, "ending_time": 1743749408513, "label": "19.3s \/ 75.8 MB \/ CACHED"}, {"starting_time": 1743749408513, "ending_time": 1743749425793}]},
+        {"label": "mergebam:extract_roi (1)", "cached": true, "index": 3, "times": [{"starting_time": 1743695874092, "ending_time": 1743695874131}, {"starting_time": 1743695874131, "ending_time": 1743695898119, "label": "45.5s \/ 11.4 MB \/ CACHED"}, {"starting_time": 1743695898119, "ending_time": 1743695919609}]},
+        {"label": "analysis:igv_tools (1)", "cached": true, "index": 4, "times": [{"starting_time": 1743763032776, "ending_time": 1743763032847}, {"starting_time": 1743763032847, "ending_time": 1743763038589, "label": "12.6s \/ 232.5 MB \/ CACHED"}, {"starting_time": 1743763038589, "ending_time": 1743763045400}]},
+        {"label": "analysis:extract_epic (T10-01)", "cached": true, "index": 5, "times": [{"starting_time": 1744204297266, "ending_time": 1744204297365}, {"starting_time": 1744204297365, "ending_time": 1744204355384, "label": "1m 14s \/ 303.1 MB \/ CACHED"}, {"starting_time": 1744204355384, "ending_time": 1744204371424}]},
+        {"label": "analysis:clairs_to (1)", "cached": true, "index": 6, "times": [{"starting_time": 1743750020697, "ending_time": 1743750020765}, {"starting_time": 1743750020765, "ending_time": 1743751273038, "label": "21m 23s \/ 66.1 GB \/ CACHED"}, {"starting_time": 1743751273038, "ending_time": 1743751303797}]},
+        {"label": "analysis:annotesv (1)", "cached": true, "index": 7, "times": [{"starting_time": 1743763529204, "ending_time": 1743763529271}, {"starting_time": 1743763529271, "ending_time": 1743772419467, "label": "2h 28m 15s \/ 50.4 GB \/ CACHED"}, {"starting_time": 1743772419467, "ending_time": 1743772424110}]},
+        {"label": "analysis:svannasv (1)", "cached": true, "index": 8, "times": [{"starting_time": 1743772424119, "ending_time": 1743772424210}, {"starting_time": 1743772424210, "ending_time": 1743772465820, "label": "1m 17s \/ 1.7 GB \/ CACHED"}, {"starting_time": 1743772465820, "ending_time": 1743772500715}]},
+        {"label": "analysis:annotatecnv (1)", "cached": true, "index": 9, "times": [{"starting_time": 1743696444851, "ending_time": 1743696444939}, {"starting_time": 1743696444939, "ending_time": 1743696463779, "label": "39.3s \/ 198.4 MB \/ CACHED"}, {"starting_time": 1743696463779, "ending_time": 1743696484110}]},
+        {"label": "analysis:clair3 (1)", "cached": true, "index": 10, "times": [{"starting_time": 1743763008184, "ending_time": 1743763008270}, {"starting_time": 1743763008270, "ending_time": 1743763019888, "label": "24.6s \/ 450.1 MB \/ CACHED"}, {"starting_time": 1743763019888, "ending_time": 1743763032747}]},
+        {"label": "analysis:nanodx (1)", "cached": true, "index": 11, "times": [{"starting_time": 1744204916219, "ending_time": 1744204916305}, {"starting_time": 1744204916305, "ending_time": 1744204918445, "label": "16.5s \/ 176.9 MB \/ CACHED"}, {"starting_time": 1744204918445, "ending_time": 1744204932693}]},
+        {"label": "analysis:mgmt_promoter (1)", "cached": true, "index": 12, "times": [{"starting_time": 1744204900595, "ending_time": 1744204900685}, {"starting_time": 1744204900685, "ending_time": 1744204901710, "label": "15.6s \/ 21.4 MB \/ CACHED"}, {"starting_time": 1744204901710, "ending_time": 1744204916205}]},
+        {"label": "analysis:circosplot (1)", "cached": true, "index": 13, "times": [{"starting_time": 1744182786573, "ending_time": 1744182786651}, {"starting_time": 1744182786651, "ending_time": 1744182786664, "label": "1m 8s \/ 0 \/ CACHED"}, {"starting_time": 1744182786664, "ending_time": 1744182854611}]},
+        {"label": "analysis:knotannotsv (1)", "cached": true, "index": 14, "times": [{"starting_time": 1744182773195, "ending_time": 1744182773216}, {"starting_time": 1744182773216, "ending_time": 1744182774590, "label": "13.4s \/ 47 MB \/ CACHED"}, {"starting_time": 1744182774590, "ending_time": 1744182786551}]},
+        {"label": "analysis:merge_annotation (1)", "cached": true, "index": 15, "times": [{"starting_time": 1744187319557, "ending_time": 1744187319624}, {"starting_time": 1744187319624, "ending_time": 1744187320754, "label": "13.8s \/ 20.8 MB \/ CACHED"}, {"starting_time": 1744187320754, "ending_time": 1744187333370}]},
+        {"label": "epi2me:run_epi2me_modkit (1)", "cached": false, "index": 16, "times": [{"starting_time": 1744208358068, "ending_time": 1744208358120}, {"starting_time": 1744208358120, "ending_time": 1744208842713, "label": "8m 20s \/ 3.8 GB"}, {"starting_time": 1744208842713, "ending_time": 1744208857668}]},
+        {"label": "analysis:plot_genomic_regions (1)", "cached": false, "index": 17, "times": [{"starting_time": 1744208857709, "ending_time": 1744208857768}, {"starting_time": 1744208857768, "ending_time": 1744208868537, "label": "10.8s \/ -"}]},
+        {"label": "analysis:run_nn_classifier (1)", "cached": false, "index": 18, "times": []}
     ]
 }
 ;

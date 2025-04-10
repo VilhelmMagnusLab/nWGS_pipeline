@@ -1,69 +1,49 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import csv
-import re
-import argparse
+import sys
+import os
 
-# Set up argument parser
-parser = argparse.ArgumentParser(description="Extract matching rows and specific columns from File 1 based on gene patterns in File 2.")
-parser.add_argument('file1', type=str, help='Path to File 1 (annotated variants file)')
-parser.add_argument('file2', type=str, help='Path to File 2 (gene names file)')
-parser.add_argument('output_file', type=str, help='Path to output file for saving matching rows')
-
-# Parse arguments
-args = parser.parse_args()
-
-# File paths
-file1_path = args.file1
-file2_path = args.file2
-output_file_path = args.output_file
-
-# Load gene names from File 2
-with open(file2_path, 'r') as gene_file:
-    gene_reader = csv.reader(gene_file)
-    next(gene_reader, None)  # Skip the header if present
-    gene_names = {row[0].strip() for row in gene_reader if row}  # Set of gene names for fast lookup
-
-# Columns to extract from File 1 (zero-based indices for specific columns)
-columns_to_extract = [1, 2, 3, 4, 5, 6, 8, 10, 11, 13, 14, 15, 16, 114]
-
-# Read File 1 and find matching rows
-matching_rows = []
-with open(file1_path, 'r') as file1:
-    reader = csv.reader(file1, delimiter='\t', quoting=csv.QUOTE_NONE)
-    headers = next(reader)
-
-    # Find the index of the "AnnotSV_ranking_criteria" column
+# Increase CSV field size limit
+maxInt = sys.maxsize
+while True:
     try:
-        criteria_column_index = headers.index("AnnotSV_ranking_criteria")
-    except ValueError:
-        raise Exception("The header 'AnnotSV_ranking_criteria' was not found in the file.")
+        csv.field_size_limit(maxInt)
+        break
+    except OverflowError:
+        maxInt = int(maxInt/10)
 
-    # Add headers for extracted columns to output
-    extracted_headers = [headers[i] for i in columns_to_extract]
-    matching_rows.append(extracted_headers)
+def main():
+    if len(sys.argv) != 4:
+        print("Usage: annotsv_fusion_filter.py <input_file> <fusion_genes_list> <output_file>")
+        sys.exit(1)
 
-    # Check each row for matching patterns
-    for row in reader:
-        if len(row) > criteria_column_index:
-            criteria_column = row[criteria_column_index]
+    input_file = sys.argv[1]
+    fusion_genes_list = sys.argv[2]
+    output_file = sys.argv[3]
 
-            # Extract and retain only matching gene patterns in the criteria column
-            matched_genes = []
-            for gene_name in gene_names:
-                pattern = rf'\b{gene_name}/\w+\b'
-                matches = re.findall(pattern, criteria_column)
-                if matches:
-                    matched_genes.extend(matches)
+    # Read fusion genes list
+    with open(fusion_genes_list, 'r') as f:
+        fusion_genes = set(line.strip() for line in f)
 
-            # If there are matched genes, add them to the extracted data
-            if matched_genes:
-                extracted_data = [row[i] for i in columns_to_extract]
-                # Replace the last item in extracted_data with the matched genes, joined by commas
-                extracted_data[-1] = ','.join(matched_genes)
-                matching_rows.append(extracted_data)
+    # Process AnnotSV file
+    with open(input_file, 'r') as infile, open(output_file, 'w', newline='') as outfile:
+        reader = csv.reader(infile, delimiter='\t')
+        writer = csv.writer(outfile, delimiter='\t')
 
-# Save the matching rows and extracted columns to a new file
-with open(output_file_path, 'w', newline='') as output_file:
-    writer = csv.writer(output_file, delimiter='\t')
-    writer.writerows(matching_rows)
+        # Write header
+        header = next(reader)
+        writer.writerow(header)
+
+        # Process rows
+        for row in reader:
+            try:
+                gene_name = row[header.index('Gene_name')]
+                if any(gene in fusion_genes for gene in gene_name.split('/')):
+                    writer.writerow(row)
+            except (ValueError, IndexError) as e:
+                print(f"Warning: Error processing row: {e}", file=sys.stderr)
+                continue
+
+if __name__ == "__main__":
+    main()
 

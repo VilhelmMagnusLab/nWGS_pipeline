@@ -265,7 +265,7 @@ workflow epi2me {
 
         // Create default channels for empty processes
         default_modkit = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed -> 
-            tuple(sid, file("${params.epimodkit}/${sid}_wf_mods.bedmethyl.gz")) 
+            tuple(sid, file("${params.epimodkit}/${sid}.wf_mods.bedmethyl.gz")) 
         }
         
         default_cnv = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed -> 
@@ -278,7 +278,7 @@ workflow epi2me {
         }
         
         default_sv = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed -> 
-            tuple(sid, file("${params.episv}/${sid}_wf_sv.vcf.gz"))
+            tuple(sid, file("${params.episv}/${sid}.wf_sv.vcf.gz"))
         }
 
         // Mix actual results with defaults
@@ -292,22 +292,22 @@ workflow epi2me {
             .join(cnv_results, by: 0)
             .join(sv_results, by: 0)
             .map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv ->
-            tuple(
-                sample_id,
-                bam,
-                bai,
-                ref,
-                ref_bai,
-                tr_bed,
-                modkit,
-                segs_bed,
-                bins_bed,
-                segs_vcf,
-                sv
-            )
-        }
+                log.info "Processing completed for sample: ${sample_id}"
+                tuple(
+                    sample_id,
+                    modkit,
+                    segs_bed,
+                    bins_bed,
+                    segs_vcf,
+                    sv
+                )
+            }
 
     emit:
         results = results_ch
+            .map { results ->
+                log.info "Epi2me processing completed for sample: ${results[0]}"
+                results
+            }
 }
     

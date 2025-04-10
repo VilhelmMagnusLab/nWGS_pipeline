@@ -5,6 +5,36 @@ merge_variant_caller_output <- function(Merged_file, Pileup_file, Somatic_file, 
   library(dplyr)
   library(tidyr)
   
+  # Function to check if file is empty or has only header
+  is_empty_file <- function(file_path) {
+    if (!file.exists(file_path)) return(TRUE)
+    data <- tryCatch({
+      read.table(file_path, header=TRUE, sep="\t", stringsAsFactors=FALSE)
+    }, error = function(e) {
+      return(data.frame())
+    })
+    return(nrow(data) == 0)
+  }
+
+  # Check if all input files are empty
+  all_empty <- all(sapply(c(Merged_file, Pileup_file, Somatic_file), is_empty_file))
+  
+  if (all_empty) {
+    # Create empty output with header
+    header <- c("Gene.refGene", "Chr", "Start", "End", "Ref", "Alt", "Func.refGene", 
+               "ExonicFunc.refGene", "AAChange.refGene", "cosmic100", "CLNSIG", 
+               "CLNDN", "AF", "Depth", "ClairS_AF", "ClairS_Depth")
+    
+    empty_df <- data.frame(matrix(ncol = length(header), nrow = 0))
+    colnames(empty_df) <- header
+    
+    # Write empty dataframe with header
+    write.table(empty_df, file = output_file, sep = "\t", 
+               row.names = FALSE, quote = FALSE)
+    
+    return(invisible(NULL))
+  }
+
   # Load files
   Merged <- read.delim(Merged_file, header = TRUE, colClasses = c("character"))
   Merged <- Merged %>%

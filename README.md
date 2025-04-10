@@ -74,7 +74,7 @@ wget https://hub.docker.com/r/ontresearch/wf-cnv
 wget https://hub.docker.com/repositories/vilhelmmagnuslab/ace_1.24.0
 wget https://hub.docker.com/repositories/vilhelmmagnuslab/annotsv_3.3.4--py311hdfd78af_1
 wget https://hub.docker.com/repositories/vilhelmmagnuslab/clair3_amd64
-wget https://hub.docker.com/repositories/vilhelmmagnuslab/clairsto_amd64
+wget https://hub.docker.com/r/hkubal/clairs-to
 wget https://hub.docker.com/repositories/vilhelmmagnuslab/igv_report_amd64
 wget https://hub.docker.com/repositories/vilhelmmagnuslab/vcf2circos
 wget https://hub.docker.com/repositories/vilhelmmagnuslab/nanodx_env
@@ -95,7 +95,12 @@ refdata/
 ├── MGMT_CpG_Island.hg38.bed # MGMT CpG islands
 ├── OCC.SNV.screening.bed    # SNV screening regions
 ├── TERTp_variants.bed       # TERT promoter variants
+├── hg38_refGene.txt         # RefGene annotation
+├── hg38_refGeneMrna.fa      # RefGene mRNA sequences
+├── hg38_clinvar_20240611.txt # ClinVar annotations
+├── hg38_cosmic100coding2024.txt # Cosmic annotations
 └── human_GRCh38_trf.bed    # Tandem repeat regions
+
 reference_genome = "${params.ref_dir}/ref.fa" need to be provided or downloaded from the following link: https://www.ncbi.nlm.nih.gov/datasets/docs/v2/reference-docs/reference-genomes/human-reference-genomes/
 ```
 

@@ -1,3 +1,3 @@
-sample,fastq_1,fastq_2
-SAMPLE_PE,/path/to/fastq/sample_1.fastq.gz,/path/to/fastq/sample_2.fastq.gz
-SAMPLE_SE,/path/to/fastq/sample_se.fastq.gz, 
+version https://git-lfs.github.com/spec/v1
+oid sha256:3baf04b7f24fa35fee3a95e8d8bc1991ab04a8b59fc0e375dfe16dff28fb0539
+size 144

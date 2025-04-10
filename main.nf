@@ -8,72 +8,87 @@ include { analysis } from './modules/analysis.nf'
 
 workflow {
     if (params.run_order_mode) {
-        println """
+        log.info """
         Running pipelines sequentially in strict order:
         1. Mergebam Pipeline
         2. Epi2me Pipeline
         3. Analysis Pipeline
         """
-        
-        // Run mergebam first
-        println "=== Starting Mergebam Pipeline ==="
+
+        // Step 1: Run mergebam
+        log.info "=== Starting Mergebam Pipeline ==="
         def mergebam_results = mergebam()
 
-        // Run epi2me after mergebam completes
-        println "=== Starting Epi2me Pipeline ==="
+        // Step 2: Run epi2me
+        log.info "=== Starting Epi2me Pipeline ==="
         def epi2me_results = epi2me(mergebam_results.merged_bams)
 
-        // Wait for epi2me processes to complete
-        epi2me_results.results.subscribe { results ->
-            def (sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv) = results
-            println "Epi2me processes completed for ${sample_id}"
+        // Step 3: Prepare analysis input
+        def analysis_input = epi2me_results.results.map { result ->
+            def (sample_id, modkit, segs_bed, bins_bed, segs_vcf, sv) = result
+            
+            // Verify required files exist
+            def bam = file("${params.occ_bam_folder}/${sample_id}.occ.bam")
+            def bai = file("${params.occ_bam_folder}/${sample_id}.occ.bam.bai")
+            def ref = file(params.reference_genome)
+            def ref_bai = file(params.reference_genome_bai)
+            def tr_bed = file(params.tr_bed_file)
+            def bedmethyl = file("${params.bedmethyl_folder}/${sample_id}.wf_mods.bedmethyl.gz")
+
+            assert bam.exists() : "BAM file not found: ${bam}"
+            assert bai.exists() : "BAI file not found: ${bai}"
+            assert bedmethyl.exists() : "Bedmethyl file not found: ${bedmethyl}"
+
+            tuple(
+                sample_id, 
+                bam, 
+                bai, 
+                ref, 
+                ref_bai, 
+                tr_bed, 
+                modkit, 
+                segs_bed, 
+                bins_bed, 
+                segs_vcf, 
+                sv
+            )
         }
 
-        // Create channel for analysis
-        def analysis_input = epi2me_results.results
-            .map { results ->
-                def (sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv) = results
-                
-                // Get paths from config
-                def cnv_files = [
-                    segs_vcf: file("${params.epicnv}/qdna_seq/${sample_id}_segs.vcf"),
-                    segs_bed: file("${params.epicnv}/qdna_seq/${sample_id}_segs.bed"),
-                    bins_bed: file("${params.epicnv}/qdna_seq/${sample_id}_bins.bed"),
-                    calls_bed: file("${params.epicnv}/qdna_seq/${sample_id}_calls.bed")
-                ]
-                
-                def sv_file = file("${params.episv}/${sample_id}_wf_sv.vcf.gz")
-                def modkit_file = file("${params.epimodkit}/${sample_id}_wf_mods.bedmethyl.gz")
-                
-                // Wait for files to be ready
-                while (!sv_file.exists() || !modkit_file.exists() || !cnv_files.every { k, f -> f.exists() }) {
-                    sleep(300000) // Wait 5 minutes
-                    println "Waiting for output files to be ready for ${sample_id}..."
-                }
-
-                // Verify file sizes
-                def verifyFileSize = { file ->
-                    if (file.exists() && file.size() == 0) {
-                        error "File ${file} exists but is empty"
-                    }
-                }
-                
-                verifyFileSize(sv_file)
-                verifyFileSize(modkit_file)
-                cnv_files.each { k, f -> verifyFileSize(f) }
-                
-                println "All files verified for ${sample_id}, proceeding with analysis"
-                results
-            }
-
-        // Run analysis after verification
-        println "=== Starting Analysis Pipeline ==="
+        // Step 4: Run analysis
+        log.info "=== Starting Analysis Pipeline ==="
         analysis(analysis_input)
-        
     } else {
-        // Run workflows independently based on mode parameters
         if (params.run_mode_mergebam) mergebam()
-        if (params.run_mode_epi2me) epi2me()
-        if (params.run_mode_analysis) analysis()
+        if (params.run_mode_epi2me) epi2me(Channel.empty())
+        if (params.run_mode_analysis) analysis(Channel.empty())
     }
+}
+
+// Single workflow completion handler
+workflow.onComplete {
+    def msg = """
+        Pipeline execution summary
+        ---------------------------
+        Completed at : ${workflow.complete}
+        Duration    : ${workflow.duration}
+        Success     : ${workflow.success}
+        workDir     : ${workflow.workDir}
+        exit status : ${workflow.exitStatus}
+        """
+    if (workflow.success) {
+        log.info msg
+        if (params.run_mode_analysis == 'rmd') {
+            log.info "RMD report generated successfully"
+        }
+    } else {
+        log.error msg
+    }
+}
+
+workflow.onError {
+    log.error """
+        Pipeline execution failed
+        ---------------------------
+        Error message: ${workflow.errorMessage}
+        """
 }
