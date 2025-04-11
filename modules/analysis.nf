@@ -713,39 +713,35 @@ process igv_tools {
 
 
 process plot_genomic_regions {
-    publishDir "${params.output_path}/coverage", mode: 'copy'
-    label 'gviz'
-    
-    input:
-    tuple val(sample_id), 
-          path(gviz_data),
-          path(bam_file),
-          path(bam_index),
-          path(cytoband_file)
+        cpus 4
+        memory '2 GB'
+       // label 'plot_genomic_regions'
+        publishDir "${params.output_path}/tertp", mode: "copy", overwrite: true
 
-    output:
-    tuple val(sample_id), 
-          path("${sample_id}_egfr_coverage.pdf"),
-          path("${sample_id}_idh1_coverage.pdf"),
-          path("${sample_id}_tertp_coverage.pdf"),
-          emit: plot_genomic_regions_out
+        input:
+        tuple path(gviz_data), val(sample_id), path(occ_bam), path(occ_bam_bai), path(cytoband_file)
 
-    script:
-    """
-    #!/bin/bash
-    set -e
-
-    # Run the R script with paths
-    Rscript /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/bin/plot_genomic_regions.R \
-        "${gviz_data}" \
-        "${sample_id}" \
-        "${bam_file}" \
-        "${sample_id}_egfr_coverage.pdf" \
-        "${sample_id}_idh1_coverage.pdf" \
-        "${sample_id}_tertp_coverage.pdf" \
-        "${cytoband_file}"
-    """
-}
+        output:
+        tuple val(sample_id), path("${sample_id}_egfr_coverage.pdf"), path("${sample_id}_idh1_coverage.pdf"), path("${sample_id}_tertp_coverage.pdf"), emit:plot_genomic_regions_out
+        
+        script:
+        """
+        #!/bin/bash
+        ls -l
+        echo "Rscript path: \$(which Rscript)"
+        echo "GViz file: ${gviz_data}"
+        eval \"\$(micromamba shell hook --shell bash)\"
+        micromamba activate gviz_env
+        plot_genomic_regions.R \
+            ${gviz_data} \
+            ${sample_id} \
+            ${occ_bam} \
+            ${sample_id}_egfr_coverage.pdf \
+            ${sample_id}_idh1_coverage.pdf \
+            ${sample_id}_tertp_coverage.pdf \
+            ${cytoband_file}
+        """
+    }
 
 
 process markdown_report {

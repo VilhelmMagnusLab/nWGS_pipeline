@@ -1,0 +1,65 @@
+FROM mambaorg/micromamba:1.5.5
+
+# Set environment for micromamba
+ENV MAMBA_DOCKERFILE_ACTIVATE=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Use root for system dependencies
+USER root
+
+# Install system packages required for R libraries
+RUN apt-get update && apt-get install -y \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    libxt-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libtiff-dev \
+    libgdal-dev \
+    libgeos-dev \
+    libproj-dev \
+    libudunits2-dev \
+    libcairo2-dev \
+    libglpk-dev \
+    libfreetype6-dev \
+    wget \
+    git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create the R environment with micromamba
+RUN micromamba create -y -n gviz_env -c conda-forge -c bioconda \
+    r-base=4.2 \
+    r-remotes \
+    r-xml \
+    r-rcurl \
+    r-httr \
+    bioconductor-gviz \
+    bioconductor-bsgenome.hsapiens.ucsc.hg38 \
+    bioconductor-txdb.hsapiens.ucsc.hg38.knowngene \
+    bioconductor-org.hs.eg.db
+
+# Install Bioconductor packages within the R environment
+RUN micromamba run -n gviz_env R -e "\
+    if (!requireNamespace('BiocManager', quietly=TRUE)) \
+        install.packages('BiocManager', repos='https://cloud.r-project.org'); \
+    BiocManager::install(c('BiocGenerics', 'S4Vectors', 'IRanges', 'GenomeInfoDb', \
+                           'GenomicRanges', 'Biostrings', 'XVector', 'rtracklayer'), \
+                          update=FALSE, ask=FALSE)"
+
+RUN micromamba run -n gviz_env R -e "\
+    BiocManager::install(c('AnnotationDbi', 'biomaRt', 'GenomicFeatures', \
+                           'BSgenome', 'ensembldb', 'biovizBase'), \
+                          update=FALSE, ask=FALSE)"
+
+# Verify Gviz loads successfully
+RUN apt-get update && apt-get install -y procps
+RUN micromamba run -n gviz_env R -e "library(Gviz); cat('✅ Gviz loaded successfully\n')"
+
+# Drop back to micromamba's default non-root user
+USER $MAMBA_USER
+
+# Default command
+CMD ["micromamba", "run", "-n", "gviz_env", "R"]
+
