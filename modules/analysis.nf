@@ -748,83 +748,56 @@ process markdown_report {
     cpus 4
     memory '2 GB'
     publishDir "${params.output_path}/report", mode: "copy", overwrite: true
-    label 'markdown'
 
     input:
     tuple val(sample_id), 
-          val(craminoreport),
-          val(nanodx), 
-          val(dictionaire), 
-          val(logo), 
-          val(cnv_plot), 
-          val(tumor_number), 
-          val(annotatecnv),
-          val(cnv_chr9),
-          val(cnv_chr7), 
-          val(mgmt_results),
-          val(merge_results),
-          val(annotSV_fusion), 
-          val(terphtml),
-          val(svannahtml), 
-          val(annotsvhtml),
-          val(egfr_coverage),
-          val(idh1_coverage),
-          val(tertp_coverage)
+          path(craminoreport),
+          path(nanodx), 
+          path(dictionaire), 
+          path(logo), 
+          path(cnv_plot), 
+          path(tumor_number), 
+          path(annotatecnv),
+          path(cnv_chr9),
+          path(cnv_chr7), 
+          path(mgmt_results),
+          path(merge_results),
+          path(annotSV_fusion), 
+          path(terphtml),
+          path(svannahtml), 
+          path(annotsvhtml),
+          path(egfr_coverage),
+          path(idh1_coverage),
+          path(tertp_coverage)
 
     output:
-    tuple val(sample_id), path("${sample_id}_markdown_pipeline_report.pdf"), emit: markdown_report
+    path("*_markdown_pipeline_report.pdf")
 
     script:
     """
-    # Create header.tex file
-    cat << 'EOT' > header.tex
-    \\usepackage[utf8]{inputenc}
-    \\usepackage{fontspec}
-    \\setmainfont{Arial}
-    \\usepackage{xcolor}
-    \\usepackage{booktabs}
-    \\usepackage{longtable}
-    \\usepackage{array}
-    \\usepackage{multirow}
-    \\usepackage{float}
-    \\usepackage{makecell}
-    \\usepackage{graphicx}
-    \\usepackage{caption}
-    \\usepackage{placeins}
-    EOT
-
-    # Generate report with proper document structure
-    Rscript -e '
-    rmarkdown::render(
-        "${workflow.projectDir}/bin/nextflow_markdown_pipeline3.Rmd",
-        output_format = rmarkdown::pdf_document(
-            latex_engine = "xelatex",
-            includes = list(in_header = "header.tex"),
-            keep_tex = TRUE
-        ),
-        output_file = "${sample_id}_markdown_pipeline_report.pdf",
-        params = list(
-            sample_id = "${sample_id}",
-            cramino_stat = "${craminoreport}",
-            nanodx = "${nanodx}",
-            dictionary_file = "${dictionaire}",
-            logo_file = "${logo}",
-            copy_number_plot_file = "${cnv_plot}",
-            tumor_copy_number_file = "${tumor_number}",
-            cnv_filter_file = "${annotatecnv}",
-            cnv_chr9 = "${cnv_chr9}",
-            cnv_chr7 = "${cnv_chr7}",
-            mgmt_results_file = "${mgmt_results}",
-            snv_results_file = "${merge_results}",
-            structure_variant_file = "${annotSV_fusion}",
-            terp_html = "${terphtml}",
-            svanna_html = "${svannahtml}",
-            annotsv_html = "${annotsvhtml}",
-            egfr_plot_file = "${egfr_coverage}",
-            idh1_plot_file = "${idh1_coverage}",
-            tertp_plot_file = "${tertp_coverage}"
-        )
-    )'
+    echo "Processing report for sample: ${sample_id}"
+    
+    Rscript -e "rmarkdown::render('${projectDir}/bin/nextflow_markdown_pipeline3.Rmd', \
+        output_file='${sample_id}_markdown_pipeline_report.pdf')" \
+        "${sample_id}" \
+        "${craminoreport}" \
+        "${nanodx}" \
+        "${dictionaire}" \
+        "${logo}" \
+        "${cnv_plot}" \
+        "${tumor_number}" \
+        "${annotatecnv}" \
+        "${cnv_chr9}" \
+        "${cnv_chr7}" \
+        "${mgmt_results}" \
+        "${merge_results}" \
+        "${annotSV_fusion}" \
+        "${terphtml}" \
+        "${svannahtml}" \
+        "${annotsvhtml}" \
+        "${egfr_coverage}" \
+        "${idh1_coverage}" \
+        "${tertp_coverage}"
     """
 }
 
@@ -1346,162 +1319,55 @@ workflow analysis {
         // RMD report generation
         if (params.run_mode in ['rmd', 'all']) {
             println "Running RMD Report Generation..."
-            
-            // MGMT analysis channels and processes
-        //     mgmt_ch = Channel.fromPath("${params.bedmethyl_folder}/*.wf_mods.bedmethyl.gz")
-        //         .map { gz ->
-        //             def sample_id = gz.getBaseName().split("\\.")[0]
-        //             tuple(sample_id, gz, file(params.epicsites), file(params.mgmt_cpg_island_hg38))
-        //         }
-        //         .filter { it[0] in sample_thresholds }
-            
-        //     // Run MGMT related processes
-        //     extract_epic(mgmt_ch)
-        // MGMT_output = extract_epic.out.MGMTheaderout
-        //     //MGMT_sturgeon = extract_epic.out.sturgeonbedinput
-        //         .map { sample_id, sturgeoninput -> tuple(sample_id, sturgeoninput, params.sturgeon_model) }
-        // //sturgeon(MGMT_sturgeon)
-        // mgmt_promoter(MGMT_output)
-        //     mgmt_nanodx = extract_epic.out.epicselectnanodxinput
-        //         .map { sample_id, epicselectnanodxinput -> tuple(sample_id, epicselectnanodxinput, params.hg19_450model) }
-        // nanodx(mgmt_nanodx)
-        //     nanodx_out = nanodx.out.nanodx450out
-        //         .map { sample_id, nanodx450out -> tuple(sample_id, nanodx450out, params.nanodx_450model, params.snakefile_nanodx, params.nn_model) }
-        // run_nn_classifier(nanodx_out)
-        //    rmd_nanodx_out = run_nn_classifier.out.rmdnanodx
 
-        mgmt_ch = params.run_order_mode ? 
-                input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
-                    tuple(
-                        sample_id, 
-                        modkit,
-                        file(params.epicsites),
-                        file(params.mgmt_cpg_island_hg38)
-                    )
-                } :
-                Channel.fromList(sample_thresholds.keySet().collect())
-                    .map { sample_id -> 
-                        tuple(
-                            sample_id,
-                            file("${params.bedmethyl_folder}/*.wf_mods.bedmethyl.gz"),
-                            file(params.epicsites),
-                            file(params.mgmt_cpg_island_hg38)
-                        )
-                    }
-            
-            // Run MGMT related processes
-            extract_epic(mgmt_ch)
-            
-            // Create channels for downstream processes
-            MGMT_output = extract_epic.out.MGMTheaderout
-            
-            MGMT_sturgeon = extract_epic.out.sturgeonbedinput
-                .map { sample_id, sturgeoninput -> 
-                    tuple(sample_id, sturgeoninput, file(params.sturgeon_model)) 
-                }
-            
-            mgmt_nanodx = extract_epic.out.epicselectnanodxinput
-                .map { sample_id, epicselectnanodxinput -> 
-                    tuple(sample_id, epicselectnanodxinput, file(params.hg19_450model)) 
-                }
-
-            // Run the processes
-            //sturgeon(MGMT_sturgeon)
-            mgmt_promoter(MGMT_output)
-            nanodx(mgmt_nanodx)
-            
-            nanodx_out = nanodx.out.nanodx450out
-                .map { sample_id, nanodx450out -> 
-                    tuple(
-                        sample_id, 
-                        nanodx450out, 
-                        file(params.nanodx_450model),
-                        file(params.snakefile_nanodx),
-                        file(params.nn_model)
-                    ) 
-                }
-            
-            run_nn_classifier(nanodx_out)
-            rmd_nanodx_out = run_nn_classifier.out.rmdnanodx
-
-            // SV analysis
-        svannasv(boosts_svanna_channel)
-        rmd_svanna_html = svannasv.out.rmdsvannahtml
-            svannasv_out = svannasv.out.occsvannaannotationannotationvcf
-                .map { sample_id, svannavcfoutput -> tuple(sample_id, svannavcfoutput, params.vcf2circos_json) }
-        circosplot(svannasv_out)
-
-            // AnnotSV analysis
-        annotesv(boosts_annotsv_channel)
-            annotsv_output = annotesv.out.annotatedvariantsout
-                .map { sample_id, annotated_variants -> tuple(sample_id, annotated_variants, file(params.knotannotsv_conf)) }
-        knotannotsv(annotsv_output)
-        rmd_knotannotsv_html = knotannotsv.out.rmdannotsvhtml
-
-            // OCC analysis
-        clair3(boosts_clair3_channel)
-        clair3_out = clair3.out.clair3output
-        clairs_to(boosts_clairSTo_channel)
-        clairs_to_out = clairs_to.out.annotateandfilter_clairstoout
-            combine_file = clair3_out.combine(clairs_to_out)
-                .map { occ_pileup_annotateandfilter, merge_annotateandfilter, sample_id, annotateandfilter_clairsto ->
-                    tuple(sample_id, merge_annotateandfilter, occ_pileup_annotateandfilter, annotateandfilter_clairsto, file(params.occ_genes))
-    }
-        merge_annotation(combine_file)
-
-            // Other tools
-        igv_tools(boosts_igv_channel)
-        cramino_report(boosts_cramino)
-        plot_genomic_regions(boosts_plot_genomic_regions_channel)
-
-            // Combine all results for markdown report
-            // Use the stored annotatecnv results from earlier CNV analysis
-            if (!annotatecnv_results) {
-                error "CNV analysis results not found. Make sure CNV analysis runs before RMD generation."
-            }
- 
-            mergecnv_out = annotatecnv_results.rmdcnvtumornumber
-                .combine(merge_annotation.out.occmergeout, by:0)
+            // Combine all results for markdown report using emitted channels
+            markdown_inputs = cramino_report.out.craminostatout
                 .combine(run_nn_classifier.out.rmdnanodx, by: 0)
-                .combine(mgmt_promoter.out.mgmtresultsout, by:0)
-                .combine(annotesv.out.annotsvfusion, by:0)
-                .combine(svannasv.out.rmdsvannahtml, by:0)
-                .combine(knotannotsv.out.rmdannotsvhtml, by:0)
-                .combine(igv_tools.out.tertp_out_igv, by:0)
-                .combine(cramino_report.out.craminostatout, by:0)
-                .combine(plot_genomic_regions.out.plot_genomic_regions_out, by:0)
-            // Create final map for markdown report
-            mergecnv_out_map = mergecnv_out.map { sample_id, cnv_plot, tumor_copy_number, annotatedcnv_filter_header, cnv_chr9, cnv_chr7, merge_annotation_filter_snvs_allcall, nanodx_classifier, mgmt_results, annotSV_fusion_extraction, svannahtml, annotsvhtml, terphtml, craminoreport ->
-                [
-                    sample_id,
-                    craminoreport,
-                    nanodx_classifier,
-                    params.nanodx_dictinaire,
-                    params.mardown_logo,
-                    cnv_plot,
-                    tumor_copy_number,
-                    annotatedcnv_filter_header,
-                    cnv_chr9,
-                    cnv_chr7,
-                    mgmt_results,
-                    merge_annotation_filter_snvs_allcall,
-                    annotSV_fusion_extraction,
-                    terphtml,
-                    svannahtml,
-                    annotsvhtml,
-                    egfr_coverage,
-                    idh_coverage,
-                    tertp_coverage
-                ]
-            }.view()
+                .combine(Channel.value(file(params.nanodx_dictinaire)))
+                .combine(Channel.value(file(params.mardown_logo)))
+                .combine(annotatecnv.out.rmdcnvplot, by: 0)
+                .combine(annotatecnv.out.rmdcnvtumornumber, by: 0)
+                .combine(annotatecnv.out.rmdcnvfilterheader, by: 0)
+                .combine(annotatecnv.out.rmdcnvchr9, by: 0)
+                .combine(annotatecnv.out.rmdcnvchr7, by: 0)
+                .combine(mgmt_promoter.out.mgmtresultsout, by: 0)
+                .combine(merge_annotation.out.occmergeout, by: 0)
+                .combine(annotesv.out.annotsvfusion, by: 0)
+                .combine(igv_tools.out.tertp_out_igv, by: 0)
+                .combine(svannasv.out.rmdsvannahtml, by: 0)
+                .combine(knotannotsv.out.rmdannotsvhtml, by: 0)
+                .combine(plot_genomic_regions.out.plot_genomic_regions_out, by: 0)
+                .map { it -> 
+                    tuple(
+                        it[0],              // sample_id
+                        it[1],              // cramino_statistics
+                        it[2],              // nanodx_classifier
+                        it[3],              // nanodx_dictionaire
+                        it[4],              // markdown_logo
+                        it[5],              // cnv_plot
+                        it[6],              // tumor_copy_number
+                        it[7],              // annotatedcnv_filter_header
+                        it[8],              // cnv_chr9
+                        it[9],              // cnv_chr7
+                        it[10],             // mgmt_results
+                        it[11],             // merge_annotation_filter
+                        it[12],             // annotSV_fusion
+                        it[13],             // tertp_html
+                        it[14],             // svanna_html
+                        it[15],             // annotsv_html
+                        it[16],             // egfr_coverage
+                        it[17],             // idh1_coverage
+                        it[18]              // tertp_coverage
+                    )
+                }
 
-            // Generate markdown report
-            markdown_report(mergecnv_out_map)
+            // Generate markdown report for each sample
+            markdown_report(markdown_inputs)
         }
 
     emit:
         markdown_out = params.run_mode_analysis == 'rmd' ? 
-            markdown_report.out.markdown_report : 
+            markdown_report.out : 
             Channel.empty()
 }
 
