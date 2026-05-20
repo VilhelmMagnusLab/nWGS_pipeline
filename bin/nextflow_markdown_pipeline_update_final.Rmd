@@ -84,9 +84,12 @@ output_pdf_file        <- args[24]
 pipeline_version       <- args[25]
 
 # SNV filtering thresholds (new parameters)
-snv_depth_threshold    <- if (length(args) >= 26) as.numeric(args[26]) else 10
-snv_gq_threshold       <- if (length(args) >= 27) as.numeric(args[27]) else 10
-warning_img            <- if (length(args) >= 28) args[28] else NULL
+snv_depth_threshold      <- if (length(args) >= 26) as.numeric(args[26]) else 10
+snv_gq_threshold         <- if (length(args) >= 27) as.numeric(args[27]) else 10
+warning_img              <- if (length(args) >= 28) args[28] else NULL
+pancan_votes_file        <- if (length(args) >= 29) args[29] else NULL
+pancan_dictionary_file   <- if (length(args) >= 30) args[30] else NULL
+pancan_tsne_plot_file    <- if (length(args) >= 31) args[31] else NULL
 
 # Read in the votes and dictionary files
 if (!file.exists(votes_file)) {
@@ -121,10 +124,30 @@ dict <- read.csv(dictionary_file, header = TRUE, sep = "\t")
 mc <- votes %>% 
   left_join(dict, by = c("class" = "Methylation.Class.Name.Abbreviated"))
 
-# Summarise scores by methylation class family
+# Summarise scores by methylation class family (Capper)
 mcf <- mc %>%
   group_by(Methylation.Class.Family) %>%
   summarise(score_MCF = sum(score))
+
+# Read pan-cancer classifier votes (soft — graceful fallback if file absent)
+mc_pancan  <- NULL
+mcf_pancan <- NULL
+if (!is.null(pancan_votes_file) && file.exists(pancan_votes_file) &&
+    !is.null(pancan_dictionary_file) && file.exists(pancan_dictionary_file)) {
+  tryCatch({
+    votes_pancan <- read.csv(pancan_votes_file, header = TRUE, sep = "\t")
+    dict_pancan  <- read.csv(pancan_dictionary_file, header = TRUE, sep = "\t")
+    if (nrow(votes_pancan) > 0) {
+      mc_pancan <- votes_pancan %>%
+        left_join(dict_pancan, by = c("class" = "Methylation.Class.Name.Abbreviated"))
+      mcf_pancan <- mc_pancan %>%
+        group_by(Methylation.Class.Family) %>%
+        summarise(score_MCF = sum(score))
+    }
+  }, error = function(e) {
+    message("Could not load pan-cancer classifier results: ", e$message)
+  })
+}
 
 # Extract mean coverage from cramino statistics
 lines <- readLines(cramino_stat)
@@ -206,50 +229,56 @@ if (!is.na(cov_value) && cov_value < 30) {
 }
 ```
 
-### CrossNN Methylation-based Classification
+### Methylation-based Classification CrossNN, Pan cancer reference data
 
 ```{r echo=FALSE, results='asis'}
-# Create the classification summary table
-classification_data <- data.frame(
-  Classification = c("Methylation Class Family", "Methylation Class"),
-  Result = c(
-    ifelse(max(mcf$score_MCF) >= 0.2, 
-           as.character(mcf[which.max(mcf$score_MCF), ]$Methylation.Class.Family), 
-           "not classifiable"),
-    ifelse(mc$score[1] >= 0.2, 
-           as.character(mc$Methylation.Class.Name[1]), 
-           "not classifiable ")
-  ),
-  Score = c(
-    ifelse(max(mcf$score_MCF) >= 0.2, round(max(mcf$score_MCF), digits = 3), "-"),
-    ifelse(mc$score[1] >= 0.2, round(mc$score[1], digits = 3), "-")
+render_classification_table <- function(mcf_data, mc_data) {
+  tbl <- data.frame(
+    Classification = c("Methylation Class Family", "Methylation Class"),
+    Result = c(
+      ifelse(max(mcf_data$score_MCF) >= 0.2,
+             as.character(mcf_data[which.max(mcf_data$score_MCF), ]$Methylation.Class.Family),
+             "not classifiable"),
+      ifelse(mc_data$score[1] >= 0.2,
+             as.character(mc_data$Methylation.Class.Name[1]),
+             "not classifiable")
+    ),
+    Score = c(
+      ifelse(max(mcf_data$score_MCF) >= 0.2, round(max(mcf_data$score_MCF), digits = 3), "-"),
+      ifelse(mc_data$score[1] >= 0.2, round(mc_data$score[1], digits = 3), "-")
+    )
   )
-)
-
-if (knitr::is_latex_output()) {
-  kable(classification_data,
-        format = "latex",
-        booktabs = TRUE,
-        col.names = c("Classification", "Result", "Score"),
-        align = "lcc",
-        row.names = FALSE) %>%
-    kable_styling(latex_options = c("striped", "hold_position"),
-                  full_width = FALSE,
-                  position = "center") %>%
-    column_spec(2, bold = TRUE) %>%
-    column_spec(3, bold = TRUE)
-} else {
-  kable(classification_data,
-        format = "html",
-        col.names = c("Classification", "Result", "Score"),
-        align = "lcc",
-        row.names = FALSE) %>%
-    kable_styling(bootstrap_options = c("striped", "hover"),
-                  full_width = FALSE,
-                  position = "center") %>%
-    column_spec(2, bold = TRUE) %>%
-    column_spec(3, bold = TRUE)
+  if (knitr::is_latex_output()) {
+    kable(tbl, format = "latex", booktabs = TRUE,
+          col.names = c("Classification", "Result", "Score"),
+          align = "lcc", row.names = FALSE) %>%
+      kable_styling(latex_options = c("striped", "hold_position"),
+                    full_width = FALSE, position = "center") %>%
+      column_spec(2, bold = TRUE) %>%
+      column_spec(3, bold = TRUE)
+  } else {
+    kable(tbl, format = "html",
+          col.names = c("Classification", "Result", "Score"),
+          align = "lcc", row.names = FALSE) %>%
+      kable_styling(bootstrap_options = c("striped", "hover"),
+                    full_width = FALSE, position = "center") %>%
+      column_spec(2, bold = TRUE) %>%
+      column_spec(3, bold = TRUE)
+  }
 }
+
+if (!is.null(mc_pancan) && !is.null(mcf_pancan)) {
+  render_classification_table(mcf_pancan, mc_pancan)
+} else {
+  cat("Pan-cancer classification results not available.\n")
+}
+```
+
+### Methylation-based Classification CrossNN, Capper CNS tumor reference data
+
+
+```{r echo=FALSE, results='asis'}
+render_classification_table(mcf, mc)
 ```
 
 ### Full CNV Profile
@@ -452,7 +481,7 @@ tryCatch({
         if ("CLNSIG" %in% colnames(df_snv)) {
             df_snv <- df_snv %>%
                 mutate(CLNSIG = case_when(
-                    CLNSIG == "Conflicting_classifications_of_pathogenicity" ~ "conflicting",
+                    grepl("Conflicting_classifications_of_pathogenicity", CLNSIG) ~ sub("Conflicting_classifications_of_pathogenicity", "conflicting", CLNSIG),
                     TRUE ~ CLNSIG
                 ))
         }
@@ -812,7 +841,7 @@ if (nrow(samples_df) == 0) {
 
 
 ```
-### CrossNN Methylation-based Classification
+### Methylation-based Classification CrossNN, Capper CNS tumor reference data
 
 Methylation-based classification is based on **`r as.integer(votes$num_features[1])`** CpG sites (overlap of sites covered in this sample and the model).
 At the methylation class (MC) level, the sample has been classified as **`r ifelse(mc$score[1] >= 0.2, mc$Methylation.Class.Name[1], "not classifiable (score < 0.2)")`**. 
@@ -1319,7 +1348,7 @@ tryCatch({
         cat("No SNV Calling and Annotation detected.\n")
     } else {
         # Display explanatory text when SNVs are present
-        cat("SNVs in the select genes. Only non-synonymous exonic variants that are not known to be benign according to ClinVar_20240611 and known pathogenic upstream variants, i.e. *TERT*p, are reported. GQ: Genotype Quality, Depth: Sequenced depth, AD: Allele Depth, GT: Allele Genotype, AF: Allele Frequency. The *GRCh38* build reference genome was used for the SNV calling and annotation. variant callers, P:Clair3 Pileup, M:Clair3 Merged and S_TO:ClairS-TO Somatic tumour-only\n\n")
+        cat("SNVs in the select genes. Only non-synonymous exonic variants that are not known to be benign according to ClinVar_20240611 and known pathogenic upstream variants, i.e. *TERT*p, are reported. GQ: Genotype Quality, Depth: Sequenced depth, AD: Allele Depth, GT: Allele Genotype, AF: Allele Frequency. The *GRCh38* build reference genome was used for the SNV calling and annotation. CLNSIG: conflicting = Conflicting classifications of pathogenicity (ClinVar). Variant callers, P:Clair3 Pileup, M:Clair3 Merged and S_TO:ClairS-TO Somatic tumour-only\n\n")
 
         # Use the already processed data (all transformations already done in the processing chunk)
         df_snv <- df_snv_processed

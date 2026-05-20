@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### `Added`
+- Added both Capper et al. and pan-cancer (pancan) classifiers running by default in every pipeline run
+  - New `crossNN_pancan` process outputs `{sample_id}_nanodx_classifier_pancan.tsv/txt`
+  - New `tsne_plot_pancan` process outputs `{sample_id}_tsne_plot_pancan.pdf/html`
+  - Pancan files copied to `routine_results/{sample_id}/` alongside Capper files
+  - Executive summary shows two classification tables: Pancan first, then Capper et al.
+  - Dedicated container mappings added for `crossNN_pancan` and `tsne_plot_pancan` in `conf/annotation.config`
+  - Graceful fallback: if pancan tsne fails (e.g. corrupted training set), pipeline continues and report still generates
 - Added preprint citation to README (Bope CD et al. 2026, https://doi.org/10.64898/2026.03.25.714119)
 - Added `extract_roi` process to `modules/epi2me.nf` — runs for `snv` and `all` modes, directly feeding `run_clair3` and `run_clairs_to` without requiring a separate mergebam step
 - Added missing `occ_bam_dir` and `roi_bed` parameters to `conf/epi2me.config`
@@ -30,8 +37,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `modules/epi2me.nf` and `main.nf`: changed `tokenize("\t")` to `trim().split(/\s+/)`
 - Fixed SNV executive summary CLNSIG filter to catch combined ClinVar pathogenic classifications
   - Changed from exact match (`CLNSIG == "Pathogenic"`) to case-insensitive substring match
-  - Now catches values like `"Pathogenic/Likely_pathogenic/risk factor"`, `"Likely_pathogenic"`, etc.
+  - Now catches values like `"Pathogenic/Likely_pathogenic/risk_factor"`, `"Likely_pathogenic"`, `"Likely_pathogenic|Affects"`, etc.
   - Only affects the executive summary table; full SNV table is unchanged
+- Fixed CLNSIG simplification to handle compound conflicting classifications
+  - Previously only the bare `"Conflicting_classifications_of_pathogenicity"` was shortened to `"conflicting"`
+  - Compound values like `"Conflicting_classifications_of_pathogenicity|risk_factor"` were left long and incorrectly passed the pathogenic filter
+  - Now uses `sub()` to replace the long prefix in all compound forms → `"conflicting|risk_factor"` etc.
+  - These values no longer match the pathogenic filter and are correctly excluded from the executive summary
+- Added `"conflicting: Conflicting classifications of pathogenicity (ClinVar)"` to the SNV table legend so users understand the abbreviation
 
 ### `Fixed`
 - Fixed `smart_sample_monitor_v2.sh` loading 0 samples when `set -eo pipefail` is active

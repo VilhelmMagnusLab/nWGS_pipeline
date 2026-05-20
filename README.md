@@ -77,6 +77,25 @@ The monitor will detect the `final_summary` file in `diana_dummy/diana-001/`, tr
 
 > The sample ID files created by `setup_pipeline.sh` already contain `diana-001` / `PBE00000` — no manual configuration needed.
 
+## Updating the Pipeline
+
+To get the latest version of DIANA, run the built-in update script from inside your pipeline directory:
+
+```bash
+cd /path/to/Diana
+bash update.sh
+```
+
+**What it does:**
+- Fetches and applies the latest changes from GitHub
+- Backs up any modified config files (`conf/annotation.config`, `conf/epi2me.config`, `conf/example.config`) to `conf/backup_<timestamp>/` before updating
+- Works for both cloned repositories and ZIP downloads
+- After updating, re-apply your custom paths from the backup folder if needed
+
+**For ZIP installs** (downloaded instead of cloned): `update.sh` automatically initialises a git repository and connects it to the upstream remote, so future updates are fast.
+
+> **Note:** `update.sh` only updates pipeline code and configuration. Reference files and containers are not re-downloaded. If a new version requires updated reference files, the release notes will indicate this.
+
 ## Pipeline Modules
 
 The pipeline consists of three main modules that can be run independently or sequentially:

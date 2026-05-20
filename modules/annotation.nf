@@ -254,6 +254,110 @@ process tsne_plot {
     """
 }
 
+// Pan-cancer CrossNN classifier — always runs alongside Capper et al.
+process crossNN_pancan {
+    label 'nanodx'
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path(bed_file), path(model_file), path(snakefile), path(nn_model)
+
+    output:
+    tuple val(sample_id), path("${sample_id}_nanodx_classifier_pancan.txt")
+    tuple val(sample_id), path("${sample_id}_nanodx_classifier_pancan.tsv"), emit: rmdnanodx_pancan
+
+    script:
+    """
+    #!/bin/bash
+    export TMPDIR="\${PWD}/tmp/"
+    export XDG_CACHE_HOME="\${TMPDIR}.cache"
+    mkdir -p "\$TMPDIR/.cache"
+
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate base
+    conda activate nanodx_env2feb
+
+    rm -f Snakefile
+
+    cat << EOF > Snakefile
+rule all:
+    input:
+        "${sample_id}_nanodx_classifier_pancan.txt",
+        "${sample_id}_nanodx_classifier_pancan.tsv"
+
+rule NN_classifier:
+    input:
+        bed = "${bed_file}",
+        model = "${model_file}"
+    output:
+        txt = "${sample_id}_nanodx_classifier_pancan.txt",
+        votes = "${sample_id}_nanodx_classifier_pancan.tsv"
+    threads: 2
+    resources:
+        mem_mb = 2048
+    script: "${params.nanodx_workflow_dir}/scripts/classify_NN_bedMethyl.py"
+EOF
+
+    if ! snakemake --cores ${task.cpus} --verbose NN_classifier; then
+        echo "Snakemake failed, creating empty output files"
+        touch "${sample_id}_nanodx_classifier_pancan.txt"
+        touch "${sample_id}_nanodx_classifier_pancan.tsv"
+        echo "NN pancan classifier failed - pickle compatibility issue" > "${sample_id}_nanodx_classifier_pancan.txt"
+    fi
+    """
+}
+
+// Pan-cancer t-SNE/UMAP plot — always runs alongside Capper et al.
+process tsne_plot_pancan {
+    label 'tsne'
+    stageInMode 'copy'
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_tsne_plot_pancan.html"
+
+    input:
+    tuple val(sample_id), path(epic_bed)
+    path(color_map)
+    path(training_set)
+
+    output:
+    tuple val(sample_id), path("${sample_id}_tsne_plot_pancan.pdf"), emit: tsne_pancan_out
+    tuple val(sample_id), path("${sample_id}_tsne_plot_pancan.html"), emit: tsne_pancan_html
+
+    script:
+    """
+    #!/bin/bash
+
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate tsneenv
+
+    if ! command -v Rscript >/dev/null 2>&1; then
+        echo "WARNING: Rscript not found — creating placeholder outputs"
+        touch "${sample_id}_tsne_plot_pancan.pdf"
+        touch "${sample_id}_tsne_plot_pancan.html"
+        exit 0
+    fi
+
+    echo "Using Rscript from: \$(which Rscript)"
+
+    if ! Rscript ${params.diana_dir}/bin/crossnn_tsne_fixed.R \\
+        --color-map ${color_map} \\
+        --bed ${epic_bed} \\
+        --trainingset ${training_set} \\
+        --method umap \\
+        --umap-n-neighbours 10 \\
+        --umap-min-dist 0.5 \\
+        --umap-pca-dim 100 \\
+        --pdf ${sample_id}_tsne_plot_pancan.pdf \\
+        --html ${sample_id}_tsne_plot_pancan.html; then
+        echo "WARNING: Pan-cancer t-SNE failed (training set may be corrupt) — creating placeholder outputs"
+        touch "${sample_id}_tsne_plot_pancan.pdf"
+        touch "${sample_id}_tsne_plot_pancan.html"
+    else
+        echo "Pan-cancer t-SNE plot generated for ${sample_id}"
+    fi
+    """
+}
+
 // MGMT promoter methylation analysis and quantification
 process mgmt_promoter {
     label 'epic'
@@ -812,7 +916,10 @@ process markdown_report {
           path(snv_target_genes),
           path(protein_coding_bed),
           path(rmd_template),
-          path(warning_img)
+          path(warning_img),
+          path(nanodx_classifier_pancan),
+          path(dictionaire_pancan),
+          path(tsne_plot_pancan_file)
 
     output:
     file("${sample_id}_markdown_pipeline_report.pdf")
@@ -926,7 +1033,10 @@ process markdown_report {
       "${workflow.manifest.version}" \
       "${params.snv_depth_threshold}" \
       "${params.snv_gq_threshold}" \
-      "\${PWD}/${warning_img}"
+      "\${PWD}/${warning_img}" \
+      "\${PWD}/${nanodx_classifier_pancan}" \
+      "\${PWD}/${dictionaire_pancan}" \
+      "\${PWD}/${tsne_plot_pancan_file}"
 
     # Flatten PDF with Ghostscript for maximum printer compatibility (soft — skips if gs absent)
     if command -v gs >/dev/null 2>&1; then
@@ -971,12 +1081,16 @@ process copy_results_to_summary {
     tuple val(sample_id), path(sturgeon_pdf)
     tuple val(sample_id), path(tsne_html)
     tuple val(sample_id), path(svanna_html)
+    tuple val(sample_id), path(tsne_pancan_html)
+    tuple val(sample_id), path(tsne_pancan_pdf)
 
     output:
     path("${sample_id}_mnpflex_input.bed"), optional: true
     path("${sample_id}_bedmethyl_sturgeon_general.pdf"), optional: true
     path("${sample_id}_tsne_plot.html"), optional: true
     path("${sample_id}_occ_svanna_annotation.html"), optional: true
+    path("${sample_id}_tsne_plot_pancan.html"), optional: true
+    path("${sample_id}_tsne_plot_pancan.pdf"), optional: true
 
     script:
     """
@@ -1004,6 +1118,18 @@ process copy_results_to_summary {
         cp -L ${svanna_html} temp_svanna.html
         mv temp_svanna.html ${sample_id}_occ_svanna_annotation.html
         echo "Created ${sample_id}_occ_svanna_annotation.html"
+    fi
+
+    if [ -f "${tsne_pancan_html}" ]; then
+        cp -L ${tsne_pancan_html} temp_tsne_pancan.html
+        mv temp_tsne_pancan.html ${sample_id}_tsne_plot_pancan.html
+        echo "Created ${sample_id}_tsne_plot_pancan.html"
+    fi
+
+    if [ -f "${tsne_pancan_pdf}" ]; then
+        cp -L ${tsne_pancan_pdf} temp_tsne_pancan.pdf
+        mv temp_tsne_pancan.pdf ${sample_id}_tsne_plot_pancan.pdf
+        echo "Created ${sample_id}_tsne_plot_pancan.pdf"
     fi
 
     echo "Files ready for publishing:"
@@ -1066,6 +1192,9 @@ def snakefile_nanodx_ch = Channel.value(file(params.snakefile_nanodx))
 def nn_model_ch = Channel.value(file(params.nn_model))
 def nanodxcolormap_ch = Channel.value(file(params.nanodxcolormap))
 def nanodxh5_ch = Channel.value(file(params.nanodxh5))
+def nanodx_pancan_model_ch = Channel.value(file(params.nanodx_pancan_model))
+def nanodxcolormap_pancan_ch = Channel.value(file(params.nanodxcolormap_pancan))
+def nanodxh5_pancan_ch = Channel.value(file(params.nanodxh5_pancan))
 def hg19_450model_ch = Channel.value(file(params.hg19_450model))
 def vcf2circos_json_ch = Channel.value(file(params.vcf2circos_json))
 def genecode_bed_ch = Channel.value(file(params.genecode_bed))
@@ -1570,11 +1699,24 @@ workflow annotation {
 
             crossNN(nanodx_out)
 
-            // Generate t-SNE plot using EPIC bed files
+            // Pan-cancer classifier (always runs alongside Capper)
+            nanodx_pancan_out = nanodx.out.nanodx450out
+                .combine(nanodx_pancan_model_ch).combine(snakefile_nanodx_ch).combine(nn_model_ch)
+                .map { sample_id, nanodx450out, nanodx_model, snakefile, nn_model ->
+                    tuple(sample_id, nanodx450out, nanodx_model, snakefile, nn_model)
+                }
+            crossNN_pancan(nanodx_pancan_out)
+
+            // Generate t-SNE plots for both classifiers
             tsne_plot(
                 extract_epic.out.epicselectnanodxinput,
                 nanodxcolormap_ch,
                 nanodxh5_ch
+            )
+            tsne_plot_pancan(
+                extract_epic.out.epicselectnanodxinput,
+                nanodxcolormap_pancan_ch,
+                nanodxh5_pancan_ch
             )
         }
 
@@ -1606,7 +1748,9 @@ workflow annotation {
                     extract_epic.out.mnpflex_bed,
                     sturgeon.out.sturgeon_pdf,
                     tsne_plot.out.tsne_html,
-                    svannasv.out.rmdsvannahtml
+                    svannasv.out.rmdsvannahtml,
+                    tsne_plot_pancan.out.tsne_pancan_html,
+                    tsne_plot_pancan.out.tsne_pancan_out
                 )
             }
         }
@@ -2038,11 +2182,24 @@ workflow annotation {
             crossNN(nanodx_out)
             rmd_nanodx_out = crossNN.out.rmdnanodx
 
-            // Generate t-SNE plot using EPIC bed files
+            // Pan-cancer classifier (always runs alongside Capper)
+            nanodx_pancan_out = nanodx.out.nanodx450out
+                .combine(nanodx_pancan_model_ch).combine(snakefile_nanodx_ch).combine(nn_model_ch)
+                .map { sample_id, nanodx450out, nanodx_model, snakefile, nn_model ->
+                    tuple(sample_id, nanodx450out, nanodx_model, snakefile, nn_model)
+                }
+            crossNN_pancan(nanodx_pancan_out)
+
+            // Generate t-SNE plots for both classifiers
             tsne_plot(
                 extract_epic.out.epicselectnanodxinput,
                 nanodxcolormap_ch,
                 nanodxh5_ch
+            )
+            tsne_plot_pancan(
+                extract_epic.out.epicselectnanodxinput,
+                nanodxcolormap_pancan_ch,
+                nanodxh5_pancan_ch
             )
             } else {
                 println "Reusing MGMT outputs from earlier analysis"
@@ -2201,8 +2358,10 @@ workflow annotation {
             .combine(cramino_output_ch, by:0)
             .combine(plot_genomic_regions.out.plot_genomic_regions_out, by:0)
             .combine(tsne_plot.out.tsne_out, by:0)
+            .combine(crossNN_pancan.out.rmdnanodx_pancan, by:0)
+            .combine(tsne_plot_pancan.out.tsne_pancan_out, by:0)
             // Create final map for markdown report
-        mergecnv_out_map = mergecnv_out.map { args -> 
+        mergecnv_out_map = mergecnv_out.map { args ->
                 def sample_id = args[0]
                 def cnv_plot = args[1]
                 def tumor_copy_number = args[2]
@@ -2221,6 +2380,8 @@ workflow annotation {
                 def tertp_coverage = args[15]
                 def idh2_coverage = args[16]
                 def tsne_plot_file = args[17]
+                def nanodx_classifier_pancan = args[18]
+                def tsne_plot_pancan_file = args[19]
 
                 // Use correct sample ID file based on run mode
                 def sample_id_file = params.run_mode_order ? "placeholder" : params.analyse_sample_id_file
@@ -2250,7 +2411,10 @@ workflow annotation {
                     file("${params.ref_dir}/snv_target_genes.txt"),
                     file(params.roi_protein_coding_bed),
                     file("${params.diana_dir}/bin/nextflow_markdown_pipeline_update_final.Rmd"),
-                    file("${params.diana_dir}/docs/warning.png")
+                    file("${params.diana_dir}/docs/warning.png"),
+                    nanodx_classifier_pancan,
+                    file(params.nanodx_pancan_dictinaire),
+                    tsne_plot_pancan_file
                 ]
             }.view()
 
