@@ -105,13 +105,14 @@ The pipeline consists of three main modules that can be run independently or seq
 - Extracts protein-coding regions of interest using `roi.protein_coding.bed`
 
 ### 2. **Epi2me Pipeline** (`--run_mode_epi2me`)
-Three independent analysis types:
+Four independent analysis types:
 
 | Analysis | Tool | Purpose | Output |
 |----------|------|---------|---------|
 | **Modified Base Calling** | Modkit | DNA modifications (5mC, 5hmC) | `*_wf_mods.bedmethyl.gz` |
 | **Structural Variants** | Sniffles2 | Structural variant detection | `*.sniffles.vcf.gz` |
 | **Copy Number Variation** | QDNAseq | CNV detection | `*_segs.bed`, `*_bins.bed`, `*_segs.vcf` |
+| **SNV Calling** | Clair3 (germline) + ClairS-TO (somatic) | Small variant calling on protein-coding ROI | `*.clair3.vcf.gz`, `*.clairsto.vcf.gz` |
 
 #### PacBio HiFi Data: BAM Alignment Pre-processing
 
@@ -134,7 +135,7 @@ samtools index /path/to/output.hifi_reads.aligned.bam
   - **Capper CNS tumor reference data** - Optimized for brain tumors
   - **Pan-cancer reference data** - Broader tumor type coverage
 - **Structural variant annotation** with Svanna
-- **SNV annotation** with Clair3 (germline) and ClairS-TO (somatic), filtered by configurable Depth and GQ thresholds
+- **SNV annotation** of pre-called VCFs from the Epi2me module (ANNOVAR, ClinVar, COSMIC), filtered by configurable Depth and GQ thresholds for the report
 - **CNV analysis** with ACE tumor content determination
 - **Comprehensive reporting** (HTML, IGV snapshots, Circos plots, Markdown)
 
