@@ -381,6 +381,11 @@ If you prefer manual setup or need to customize the reference files:
   - `occ_fusions_genes.txt` - User-defined region of interest gene list for SV/fusion filtering and SNV annotation (one gene per line; can be replaced with any custom gene list)
   - `nanoDx/` - NanoDx neural network classifier (with models from Zenodo)
 
+> **Updated pan-cancer dictionary:** An improved `pancan_devel_v5i_dictionary.txt` with better Methylation Class Family descriptions is available in the `docs/` folder of this repository. To apply it, copy the file to the static directory:
+> ```bash
+> cp docs/pancan_devel_v5i_dictionary.txt data/reference/nanoDx/static/pancan_devel_v5i_dictionary.txt
+> ```
+
 **Annotation databases** (automatically placed in `data/humandb/`):
 - `humandb.tar.gz` - Contains ANNOVAR annotation databases:
   - `hg38_refGene.txt` - RefGene annotation
