@@ -391,7 +391,62 @@ If you prefer manual setup or need to customize the reference files:
   - `hg38_refGene.txt` - RefGene annotation
   - `hg38_refGeneMrna.fa` - RefGene mRNA sequences
   - `hg38_clinvar_20240611.txt` - ClinVar annotations
-  - `hg38_cosmic100coding2024.txt` - Cosmic annotations
+  - `hg38_cosmic100coding2024.txt` - **Placeholder only** — contains empty COSMIC IDs (see COSMIC section below)
+
+### ANNOVAR Scripts (required, not included)
+
+The ANNOVAR Perl scripts are **not bundled** with DIANA due to ANNOVAR's license restrictions. You must download them separately:
+
+1. Register and download ANNOVAR from: [https://annovar.openbioinformatics.org/en/latest/user-guide/download/](https://annovar.openbioinformatics.org/en/latest/user-guide/download/)
+2. Copy the following scripts into the `bin/` directory of your DIANA installation:
+   - `annotate_variation.pl`
+   - `coding_change.pl`
+   - `convert2annovar.pl`
+   - `table_annovar.pl`
+
+```bash
+cp /path/to/annovar/annotate_variation.pl /path/to/Diana/bin/
+cp /path/to/annovar/coding_change.pl      /path/to/Diana/bin/
+cp /path/to/annovar/convert2annovar.pl    /path/to/Diana/bin/
+cp /path/to/annovar/table_annovar.pl      /path/to/Diana/bin/
+```
+
+### COSMIC Database (required, not included)
+
+COSMIC data requires a free institutional registration and **cannot be redistributed**. The `humandb.tar.gz` archive includes a placeholder `hg38_cosmic100coding2024.txt` with empty COSMIC IDs so the pipeline runs without error, but no real COSMIC annotations will appear in reports until you install the full database.
+
+To prepare the COSMIC database (following [ANNOVAR COSMIC instructions](https://annovar.openbioinformatics.org/en/latest/user-guide/filter/#cosmic-annotations)):
+
+```bash
+# 1. Download COSMIC v100 files from https://cancer.sanger.ac.uk/cosmic/download
+#    You need: Cosmic_GenomeScreensMutant and Cosmic_NonCodingVariants (VCF + TSV, GRCh38)
+
+# 2. Extract and decompress
+tar xvf Cosmic_GenomeScreensMutant_Vcf_v100_GRCh38.tar
+tar xvf Cosmic_GenomeScreensMutant_Tsv_v100_GRCh38.tar
+gunzip Cosmic_GenomeScreensMutant_v100_GRCh38.vcf.gz
+gunzip Cosmic_GenomeScreensMutant_v100_GRCh38.tsv.gz
+tar xvf Cosmic_NonCodingVariants_Tsv_v100_GRCh38.tar
+tar xvf Cosmic_NonCodingVariants_Vcf_v100_GRCh38.tar
+gunzip Cosmic_NonCodingVariants_v100_GRCh38.vcf.gz
+gunzip Cosmic_NonCodingVariants_v100_GRCh38.tsv.gz
+
+# 3. Build the ANNOVAR-formatted COSMIC file
+echo -e '#Chr\tStart\tEnd\tRef\tAlt\tCOSMIC100' > hg38_cosmic100_raw.txt
+prepare_annovar_user.pl -dbtype cosmic \
+    Cosmic_GenomeScreensMutant_v100_GRCh38.tsv \
+    -vcf Cosmic_GenomeScreensMutant_v100_GRCh38.vcf >> hg38_cosmic100_raw.txt
+prepare_annovar_user.pl -dbtype cosmic \
+    Cosmic_NonCodingVariants_v100_GRCh38.tsv \
+    -vcf Cosmic_NonCodingVariants_v100_GRCh38.vcf >> hg38_cosmic100_raw.txt
+index_annovar.pl hg38_cosmic100_raw.txt -outfile hg38_cosmic100coding2024.txt
+
+# 4. Copy to DIANA humandb directory (replaces the placeholder)
+cp hg38_cosmic100coding2024.txt     /path/to/Diana/data/humandb/
+cp hg38_cosmic100coding2024.txt.idx /path/to/Diana/data/humandb/
+```
+
+> **Note:** `prepare_annovar_user.pl` and `index_annovar.pl` are part of the ANNOVAR package downloaded in the step above.
 
 **Additional reference files** (automatically extracted to `data/reference/`):
 - `general.zip` - Sturgeon classifier model (kept as zip, not extracted)

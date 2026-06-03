@@ -1,3 +1,11 @@
+    # ANNOVAR scripts (license restricts redistribution — download from https://annovar.openbioinformatics.org)
+    bin/annotate_variation.pl
+    bin/coding_change.pl
+    bin/convert2annovar.pl
+    bin/table_annovar.pl
+    bin/prepare_annovar_user.pl
+    bin/index_annovar.pl
+
     # Nextflow
     work/
     .nextflow/
