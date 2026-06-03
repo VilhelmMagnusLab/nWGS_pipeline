@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### `Added`
+- Added `--clair3_model sup|hac` parameter to select Clair3/ClairS-TO basecalling model at runtime
+  - `sup` (Super Accuracy, default) uses `r1041_e82_400bps_sup_v520`
+  - `hac` (High Accuracy) uses `r1041_e82_400bps_hac_v520`
+  - Both paths defined in `conf/epi2me.config`; selection resolved in `modules/epi2me.nf` at runtime
+  - Default set in `nextflow.config` as `clair3_model = "sup"`
+- Updated Clair3 container to PyTorch-based `hkubal/clair3:latest` (conda env `clair3_v2`)
+  - Supports newer PyTorch-format model files (`.pt`) required by v520+ models
+  - `run_clair3` conda activation now falls back gracefully: `clair3_v2` → `clair3` → continues
+- Added timestamped ROI BED file copy to `routine_results/{sample_id}/` for run traceability
+  - Filename format: `roi.protein_coding_dd_mm_YYYY_HHmm.bed`
+  - Allows tracking which ROI version was used for any given sample run
+  - `copy_results_to_summary` now runs for all annotation modes (`run_mode_order`, `run_mode_epiannotation`, `run_mode_annotation`)
+- Added Sturgeon classifier as optional — pipeline continues without `general.zip` if absent
+  - Warning logged when model not found; all other analyses unaffected
+  - README updated with Dropbox download link and note that file must remain as a zip archive
 - Added both Capper et al. and pan-cancer (pancan) classifiers running by default in every pipeline run
   - New `crossNN_pancan` process outputs `{sample_id}_nanodx_classifier_pancan.tsv/txt`
   - New `tsne_plot_pancan` process outputs `{sample_id}_tsne_plot_pancan.pdf/html`
@@ -29,6 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ghostscript step is soft — skips silently if `gs` is not installed on the host, no extra install required
 
 ### `Changed`
+- Removed ANNOVAR Perl scripts from repository (license restricts redistribution)
+  - `annotate_variation.pl`, `coding_change.pl`, `convert2annovar.pl`, `table_annovar.pl` removed from git and added to `.gitignore`
+  - README updated with download instructions from https://annovar.openbioinformatics.org
+- COSMIC database no longer distributed — bundled `hg38_cosmic100coding2024.txt` is now a placeholder with empty IDs
+  - README updated with full preparation commands and note that institutional registration is required
+- README: added Sturgeon, Clair3 model, ANNOVAR, COSMIC, and update script documentation sections
 - Moved `extract_roi` from `modules/mergebam.nf` into `modules/epi2me.nf`; ROI extraction now happens inside the epi2me workflow and the result is emitted as `occ_bam`
 - Updated `main.nf` to remove the `occ_bams` argument from `epi2me()` calls and join annotation input via `epi2me_results.occ_bam` instead
 - `extract_roi` now uses `task.cpus` instead of `params.threads` (fixes undefined-parameter warning)

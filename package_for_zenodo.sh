@@ -29,7 +29,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 # Configuration
-PIPELINE_DIR="/home/godzilla/Diana"
+PIPELINE_DIR="/home/godzilla/diana"
 REFERENCE_DIR="${PIPELINE_DIR}/data/reference"
 HUMANDB_DIR="${PIPELINE_DIR}/data/humandb"
 OUTPUT_DIR="${1:-${PIPELINE_DIR}/zenodo_upload}"

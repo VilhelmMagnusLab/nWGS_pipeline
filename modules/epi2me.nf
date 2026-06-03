@@ -161,7 +161,7 @@ process run_clair3 {
     """
     # Activate conda environment for Clair3
     source /opt/conda/etc/profile.d/conda.sh
-    conda activate clair3
+    conda activate clair3_v2 2>/dev/null || conda activate clair3 2>/dev/null || true
 
     /opt/bin/run_clair3.sh \
         --bam_fn=$occ_bam \
@@ -172,7 +172,7 @@ process run_clair3 {
         --var_pct_phasing=1 \
         --platform="ont" \
         --no_phasing_for_fa \
-        --model_path=${params.clair3_model_path} \
+        --model_path=${params.clair3_model == "hac" ? params.clair3_model_path_hac : params.clair3_model_path} \
         --output=output_clair3
 
     # remove tmp folder

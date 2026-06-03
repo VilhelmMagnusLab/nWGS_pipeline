@@ -394,10 +394,13 @@ create_new_version() {
 
 delete_old_files() {
     local deposit_id=$1
+    # Remaining args are the filenames we are about to upload (selective delete)
+    shift
+    local files_to_replace=("$@")
 
-    print_header "Removing Old Files from New Version"
+    print_header "Removing Old Files That Will Be Replaced"
 
-    # Get list of files in the deposit
+    # Get list of files currently in the deposit
     local files_response=$(curl -s \
         "${API_BASE}/deposit/depositions/${deposit_id}/files" \
         -H "Authorization: Bearer ${ZENODO_TOKEN}")
@@ -405,26 +408,37 @@ delete_old_files() {
     local file_count=$(echo "$files_response" | jq '. | length')
 
     if [ "$file_count" -eq 0 ]; then
-        print_info "No old files to remove"
+        print_info "No old files found in draft"
         echo ""
         return
     fi
 
-    print_info "Found $file_count old file(s) to remove"
+    # Only delete files whose names match what we are uploading
+    local deleted=0
+    local skipped=0
+    echo "$files_response" | jq -r '.[] | "\(.id) \(.filename)"' | while read file_id filename; do
+        local should_delete=false
+        for replace_name in "${files_to_replace[@]}"; do
+            if [ "$filename" = "$replace_name" ]; then
+                should_delete=true
+                break
+            fi
+        done
 
-    # Delete each file
-    echo "$files_response" | jq -r '.[] | .id' | while read file_id; do
-        local filename=$(echo "$files_response" | jq -r ".[] | select(.id==\"$file_id\") | .filename")
-        echo -e "${CYAN}  Deleting: $filename${NC}"
-
-        curl -s -X DELETE \
-            "${API_BASE}/deposit/depositions/${deposit_id}/files/${file_id}" \
-            -H "Authorization: Bearer ${ZENODO_TOKEN}" > /dev/null
-
-        echo -e "  ${GREEN}✓${NC} Deleted"
+        if [ "$should_delete" = true ]; then
+            echo -e "${CYAN}  Deleting (will be replaced): $filename${NC}"
+            curl -s -X DELETE \
+                "${API_BASE}/deposit/depositions/${deposit_id}/files/${file_id}" \
+                -H "Authorization: Bearer ${ZENODO_TOKEN}" > /dev/null
+            echo -e "  ${GREEN}✓${NC} Deleted"
+            ((deleted++)) || true
+        else
+            echo -e "  ${YELLOW}Keeping (unchanged):${NC} $filename"
+            ((skipped++)) || true
+        fi
     done
 
-    print_success "Old files removed"
+    print_success "Selective delete complete — only files being re-uploaded were removed"
     echo ""
 }
 
@@ -670,7 +684,15 @@ EOF
         result=$(create_new_version)
         # Parse deposit_id from result (before deleting files)
         NEW_DEPOSIT_ID="${result%%|*}"
-        delete_old_files "$NEW_DEPOSIT_ID"
+        # Build list of filenames actually present in FILES_DIR to pass to selective delete
+        mapfile -t _upload_names < <(
+            for f in diana_dummy.tar.gz Assembly.zip general.zip \
+                      r1041_e82_400bps_sup_v420.zip humandb.tar.gz \
+                      svanna-data.zip reference_core.tar.gz; do
+                [ -f "${FILES_DIR}/${f}" ] && echo "$f"
+            done
+        )
+        delete_old_files "$NEW_DEPOSIT_ID" "${_upload_names[@]}"
     else
         # Option 3: Create brand new deposit
         result=$(create_new_deposit)

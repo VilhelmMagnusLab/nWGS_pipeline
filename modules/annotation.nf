@@ -1074,7 +1074,8 @@ process markdown_report {
 
 // Copy result files to routine_results folder for easy access
 process copy_results_to_summary {
-    publishDir "${params.result_path}/${sample_id}", mode: "copy", overwrite: true
+    publishDir "${params.result_path}/${sample_id}", mode: "copy", overwrite: true, pattern: "${sample_id}_*"
+    publishDir "${params.result_path}/${sample_id}", mode: "copy", overwrite: true, pattern: "roi.protein_coding_*.bed"
 
     input:
     tuple val(sample_id), path(mnpflex_bed)
@@ -1083,6 +1084,7 @@ process copy_results_to_summary {
     tuple val(sample_id), path(svanna_html)
     tuple val(sample_id), path(tsne_pancan_html)
     tuple val(sample_id), path(tsne_pancan_pdf)
+    path(roi_bed)
 
     output:
     path("${sample_id}_mnpflex_input.bed"), optional: true
@@ -1091,6 +1093,7 @@ process copy_results_to_summary {
     path("${sample_id}_occ_svanna_annotation.html"), optional: true
     path("${sample_id}_tsne_plot_pancan.html"), optional: true
     path("${sample_id}_tsne_plot_pancan.pdf"), optional: true
+    path("roi.protein_coding_*.bed"), optional: true
 
     script:
     """
@@ -1132,8 +1135,15 @@ process copy_results_to_summary {
         echo "Created ${sample_id}_tsne_plot_pancan.pdf"
     fi
 
+    # Copy ROI BED file with timestamp for run traceability
+    TIMESTAMP=\$(date +%d_%m_%Y_%H%M)
+    if [ -f "${roi_bed}" ]; then
+        cp -L ${roi_bed} "roi.protein_coding_\${TIMESTAMP}.bed"
+        echo "Created roi.protein_coding_\${TIMESTAMP}.bed"
+    fi
+
     echo "Files ready for publishing:"
-    ls -lh ${sample_id}_* 2>/dev/null || echo "No output files created"
+    ls -lh ${sample_id}_* roi.protein_coding_*.bed 2>/dev/null || echo "No output files created"
     """
 }
 
@@ -1211,7 +1221,14 @@ def gviz_data_ch = Channel.value(file(params.gviz_data))
 def cytoband_file_ch = Channel.value(file(params.cytoband_file))
 def epicsites_ch = Channel.value(file(params.epicsites))
 def mgmt_cpg_island_hg38_ch = Channel.value(file(params.mgmt_cpg_island_hg38))
-def sturgeon_model_ch = Channel.value(file(params.sturgeon_model))
+def _sturgeon_file = file(params.sturgeon_model)
+def sturgeon_available = _sturgeon_file.exists()
+def sturgeon_model_ch = sturgeon_available \
+    ? Channel.value(_sturgeon_file) \
+    : Channel.empty()
+if (!sturgeon_available) {
+    log.warn "Sturgeon model not found (${params.sturgeon_model}) — Sturgeon classification will be skipped. Download general.zip from Zenodo and place it in ${params.ref_dir}/"
+}
 
 //---------------------------------------------------------------------
 // Workflow definition
@@ -1681,7 +1698,7 @@ workflow annotation {
                 }
 
             // Run the processes
-            sturgeon(MGMT_sturgeon)
+            if (sturgeon_available) { sturgeon(MGMT_sturgeon) }
             mgmt_promoter(MGMT_output)
             nanodx(mgmt_nanodx)
 
@@ -1743,14 +1760,18 @@ workflow annotation {
             fusion_events_channel = svannasv_fusion_events.out.filterfusioneventout
 
             // Copy result files to routine_results for easy access
-            if (params.run_mode_order || params.run_mode_epiannotation) {
+            if (params.run_mode_order || params.run_mode_epiannotation || params.run_mode_annotation) {
+                def sturgeon_pdf_ch = sturgeon_available
+                    ? sturgeon.out.sturgeon_pdf
+                    : extract_epic.out.mnpflex_bed.map { sid, f -> tuple(sid, file("NO_STURGEON_PDF")) }
                 copy_results_to_summary(
                     extract_epic.out.mnpflex_bed,
-                    sturgeon.out.sturgeon_pdf,
+                    sturgeon_pdf_ch,
                     tsne_plot.out.tsne_html,
                     svannasv.out.rmdsvannahtml,
                     tsne_plot_pancan.out.tsne_pancan_html,
-                    tsne_plot_pancan.out.tsne_pancan_out
+                    tsne_plot_pancan.out.tsne_pancan_out,
+                    file(params.roi_protein_coding_bed)
                 )
             }
         }
@@ -2163,7 +2184,7 @@ workflow annotation {
                 }
 
             // Run the processes
-            sturgeon(MGMT_sturgeon)
+            if (sturgeon_available) { sturgeon(MGMT_sturgeon) }
             mgmt_promoter(MGMT_output)
             nanodx(mgmt_nanodx)
 

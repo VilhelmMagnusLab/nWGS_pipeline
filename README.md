@@ -449,10 +449,60 @@ cp hg38_cosmic100coding2024.txt.idx /path/to/Diana/data/humandb/
 > **Note:** `prepare_annovar_user.pl` and `index_annovar.pl` are part of the ANNOVAR package downloaded in the step above.
 
 **Additional reference files** (automatically extracted to `data/reference/`):
-- `general.zip` - Sturgeon classifier model (kept as zip, not extracted)
+- `general.zip` - Sturgeon classifier model (kept as zip, not extracted) — **see Sturgeon note below**
 - `Assembly.zip` - Assembly folder for vcfcircos visualization (automatically extracted)
-- `r1041_e82_400bps_sup_v420.zip` - ONT basecalling model for ClairS-TO (automatically extracted)
+- `r1041_e82_400bps_sup_v420.zip` - ONT basecalling model for Clair3/ClairS-TO (automatically extracted) — **see Clair3 model note below**
 - `svanna-data.zip` - Svanna structural variant annotation database (optional, automatically extracted)
+
+### Sturgeon Classifier Model (`general.zip`)
+
+The Sturgeon methylation classifier model (`general.zip`) must be present in `data/reference/` for Sturgeon-based classification to run. **If the file is absent the pipeline continues without Sturgeon** — all other analyses (NanoDx, MGMT, SNV, CNV, report) are unaffected.
+
+The model is included in the Zenodo reference archive. If you need to download it separately:
+
+> **Download:** [https://www.dropbox.com/s/yzca4exl40x9ukw/general.zip?dl=0](https://www.dropbox.com/s/yzca4exl40x9ukw/general.zip?dl=0)
+
+```bash
+# Copy to the reference folder
+cp general.zip /path/to/Diana/data/reference/general.zip
+```
+
+> The file must remain as a **zip archive** — do not extract it. Sturgeon reads the model directly from the zip.
+
+### Clair3 Basecalling Model
+
+Two model types are provided for R10.4.1 chemistry (400 bps):
+
+| Model folder | Basecalling type | When to use |
+|---|---|---|
+| `r1041_e82_400bps_sup_v520` | **SUP** (Super Accuracy) | Default — highest SNV calling accuracy, slower basecalling |
+| `r1041_e82_400bps_hac_v520` | **HAC** (High Accuracy) | Faster basecalling, slightly lower accuracy |
+
+The default is **SUP**. To switch to HAC, pass `--clair3_model hac` on the command line:
+
+```bash
+# Use HAC model
+./run_pipeline_singularity.sh --run_mode_order --clair3_model hac
+
+# Use SUP model (default — no flag needed)
+./run_pipeline_singularity.sh --run_mode_order
+```
+
+You can also change the permanent default in `nextflow.config`:
+```groovy
+params {
+    clair3_model = "sup"   // change to "hac" to make HAC the default
+}
+```
+
+> **Note:** Both model folders (`r1041_e82_400bps_sup_v520/` and `r1041_e82_400bps_hac_v520/`) must be present in `data/reference/` for the respective model to work. The models use **PyTorch format** (`.pt` files) and require the PyTorch-based Clair3 container.
+
+**Using a different Clair3 model:** Additional pre-trained models for other chemistries, platforms, or Dorado versions are available at [https://github.com/HKU-BAL/Clair3](https://github.com/HKU-BAL/Clair3). Download the model files, place them in a folder under `data/reference/`, and pass the folder path directly via `--clair3_model_path`:
+
+```bash
+./run_pipeline_singularity.sh --run_mode_order \
+    --clair3_model_path /path/to/Diana/data/reference/your_custom_model/
+```
 
 **Note on roi.protein_coding.bed:** This ROI BED file uses OCC (Onco-Comprehensive-Coverage) genes but can be substituted with any custom ROI BED file. It's used for:
 - Extracting regions of interest during BAM merging (mergebam module)
