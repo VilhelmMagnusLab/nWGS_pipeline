@@ -454,7 +454,7 @@ cp hg38_cosmic100coding2024.txt.idx /path/to/Diana/data/humandb/
 
 The Sturgeon methylation classifier model (`general.zip`) must be present in `data/reference/` for Sturgeon-based classification to run. **If the file is absent the pipeline continues without Sturgeon** — all other analyses (NanoDx, MGMT, SNV, CNV, report) are unaffected.
 
-The model is included in the Zenodo reference archive. If you need to download it separately:
+If you need to download it separately:
 
 > **Download:** [https://www.dropbox.com/s/yzca4exl40x9ukw/general.zip?dl=0](https://www.dropbox.com/s/yzca4exl40x9ukw/general.zip?dl=0)
 
