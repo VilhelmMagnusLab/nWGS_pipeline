@@ -378,13 +378,8 @@ If you prefer manual setup or need to customize the reference files:
   - `TERTp_variants.bed` - TERT promoter variants
   - `human_GRCh38_trf.bed` - Tandem repeat regions
   - `CNV_genes_tuned.csv` - CNV gene annotations
-  - `occ_fusions_genes.txt` - User-defined region of interest gene list for SV/fusion filtering and SNV annotation (one gene per line; can be replaced with any custom gene list)
+  - `roi_fusions_genes.txt` - User-defined region of interest gene list for SV/fusion filtering and SNV annotation (one gene per line; can be replaced with any custom gene list)
   - `nanoDx/` - NanoDx neural network classifier (with models from Zenodo)
-
-> **Updated pan-cancer dictionary:** An improved `pancan_devel_v5i_dictionary.txt` with better Methylation Class Family descriptions is available in the `docs/` folder of this repository. To apply it, copy the file to the static directory:
-> ```bash
-> cp docs/pancan_devel_v5i_dictionary.txt data/reference/nanoDx/static/pancan_devel_v5i_dictionary.txt
-> ```
 
 **Annotation databases** (automatically placed in `data/humandb/`):
 - `humandb.tar.gz` - Contains ANNOVAR annotation databases:
@@ -418,27 +413,29 @@ COSMIC data requires a free institutional registration and **cannot be redistrib
 To prepare the COSMIC database (following [ANNOVAR COSMIC instructions](https://annovar.openbioinformatics.org/en/latest/user-guide/filter/#cosmic-annotations)):
 
 ```bash
-# 1. Download COSMIC v100 files from https://cancer.sanger.ac.uk/cosmic/download
+# 1. Register and log in at https://cancer.sanger.ac.uk/cosmic/login
+#    then download COSMIC v{version} files from https://cancer.sanger.ac.uk/cosmic/download
 #    You need: Cosmic_GenomeScreensMutant and Cosmic_NonCodingVariants (VCF + TSV, GRCh38)
+#    Replace {version} with the current COSMIC version (e.g. 100)
 
-# 2. Extract and decompress
-tar xvf Cosmic_GenomeScreensMutant_Vcf_v100_GRCh38.tar
-tar xvf Cosmic_GenomeScreensMutant_Tsv_v100_GRCh38.tar
-gunzip Cosmic_GenomeScreensMutant_v100_GRCh38.vcf.gz
-gunzip Cosmic_GenomeScreensMutant_v100_GRCh38.tsv.gz
-tar xvf Cosmic_NonCodingVariants_Tsv_v100_GRCh38.tar
-tar xvf Cosmic_NonCodingVariants_Vcf_v100_GRCh38.tar
-gunzip Cosmic_NonCodingVariants_v100_GRCh38.vcf.gz
-gunzip Cosmic_NonCodingVariants_v100_GRCh38.tsv.gz
+# 2. Extract and decompress (replace {version} with your downloaded version)
+tar xvf Cosmic_GenomeScreensMutant_Vcf_v{version}_GRCh38.tar
+tar xvf Cosmic_GenomeScreensMutant_Tsv_v{version}_GRCh38.tar
+gunzip Cosmic_GenomeScreensMutant_v{version}_GRCh38.vcf.gz
+gunzip Cosmic_GenomeScreensMutant_v{version}_GRCh38.tsv.gz
+tar xvf Cosmic_NonCodingVariants_Tsv_v{version}_GRCh38.tar
+tar xvf Cosmic_NonCodingVariants_Vcf_v{version}_GRCh38.tar
+gunzip Cosmic_NonCodingVariants_v{version}_GRCh38.vcf.gz
+gunzip Cosmic_NonCodingVariants_v{version}_GRCh38.tsv.gz
 
 # 3. Build the ANNOVAR-formatted COSMIC file
 echo -e '#Chr\tStart\tEnd\tRef\tAlt\tCOSMIC100' > hg38_cosmic100_raw.txt
 prepare_annovar_user.pl -dbtype cosmic \
-    Cosmic_GenomeScreensMutant_v100_GRCh38.tsv \
-    -vcf Cosmic_GenomeScreensMutant_v100_GRCh38.vcf >> hg38_cosmic100_raw.txt
+    Cosmic_GenomeScreensMutant_v{version}_GRCh38.tsv \
+    -vcf Cosmic_GenomeScreensMutant_v{version}_GRCh38.vcf >> hg38_cosmic100_raw.txt
 prepare_annovar_user.pl -dbtype cosmic \
-    Cosmic_NonCodingVariants_v100_GRCh38.tsv \
-    -vcf Cosmic_NonCodingVariants_v100_GRCh38.vcf >> hg38_cosmic100_raw.txt
+    Cosmic_NonCodingVariants_v{version}_GRCh38.tsv \
+    -vcf Cosmic_NonCodingVariants_v{version}_GRCh38.vcf >> hg38_cosmic100_raw.txt
 index_annovar.pl hg38_cosmic100_raw.txt -outfile hg38_cosmic100coding2024.txt
 
 # 4. Copy to DIANA humandb directory (replaces the placeholder)
@@ -451,7 +448,6 @@ cp hg38_cosmic100coding2024.txt.idx /path/to/Diana/data/humandb/
 **Additional reference files** (automatically extracted to `data/reference/`):
 - `general.zip` - Sturgeon classifier model (kept as zip, not extracted) — **see Sturgeon note below**
 - `Assembly.zip` - Assembly folder for vcfcircos visualization (automatically extracted)
-- `r1041_e82_400bps_sup_v420.zip` - ONT basecalling model for Clair3/ClairS-TO (automatically extracted) — **see Clair3 model note below**
 - `svanna-data.zip` - Svanna structural variant annotation database (optional, automatically extracted)
 
 ### Sturgeon Classifier Model (`general.zip`)
@@ -495,7 +491,7 @@ params {
 }
 ```
 
-> **Note:** Both model folders (`r1041_e82_400bps_sup_v520/` and `r1041_e82_400bps_hac_v520/`) must be present in `data/reference/` for the respective model to work. The models use **PyTorch format** (`.pt` files) and require the PyTorch-based Clair3 container.
+> **Note:** Both model folders (`r1041_e82_400bps_sup_v520/` and `r1041_e82_400bps_hac_v520/`) must be present in `data/reference/` for the respective model to work (automatically extracted). The models use **PyTorch format** (`.pt` files) and require the PyTorch-based Clair3 container.
 
 **Using a different Clair3 model:** Additional pre-trained models for other chemistries, platforms, or Dorado versions are available at [https://github.com/HKU-BAL/Clair3](https://github.com/HKU-BAL/Clair3). Download the model files, place them in a folder under `data/reference/`, and pass the folder path directly via `--clair3_model_path`:
 
@@ -509,7 +505,7 @@ params {
 - SNV screening regions for variant calling (ClairS-TO analysis)
 - Ensure proper BED format with exactly 10 tab-separated fields per line
 
-**Note on occ_fusions_genes.txt:** Plain-text gene list (one gene symbol per line) used for SV/fusion event filtering and SNV annotation. This file can be replaced with any custom gene list of interest — for example, a laboratory-specific panel of oncology-relevant genes. The default list contains 204 genes covering common fusion partners and oncogenes.
+**Note on roi_fusions_genes.txt:** Plain-text gene list (one gene symbol per line) used for SV/fusion event filtering and SNV annotation. This file can be replaced with any user custom gene list of interest — for example, a laboratory-specific panel of oncology-relevant genes. The default list contains 204 genes covering common fusion partners and oncogenes.
 
 **Manual download:** If needed, all reference files are available at [Zenodo (DOI: 10.5281/zenodo.19232427)](https://doi.org/10.5281/zenodo.19232427)
 
@@ -529,7 +525,7 @@ data/
 │   ├── TERTp_variants.bed
 │   ├── human_GRCh38_trf.bed
 │   ├── CNV_genes_tuned.csv
-│   ├── occ_fusions_genes.txt
+│   ├── roi_fusions_genes.txt
 │   └── etc
 │
 └── humandb/                     # Annotation databases

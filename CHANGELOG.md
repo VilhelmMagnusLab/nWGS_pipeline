@@ -44,6 +44,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ghostscript step is soft — skips silently if `gs` is not installed on the host, no extra install required
 
 ### `Changed`
+- README: COSMIC section updated — added login link (https://cancer.sanger.ac.uk/cosmic/login) and replaced hardcoded `v100` with generic `v{version}` so instructions stay valid for future releases
+- Removed `docs/pancan_devel_v5i_dictionary.txt` from repository — updated dictionary now distributed via Zenodo reference archive; README note pointing to `docs/` removed
+- Renamed `occ_fusions_genes.txt` → `roi_fusions_genes.txt` and all related identifiers
+  - Config param: `occ_fusion_genes_list` → `roi_fusion_genes_list` in `annotation.config` and `example.config`
+  - Process input variable: `occ_fusions_genes` → `roi_fusions_genes` in `modules/annotation.nf`
+  - Channel variable: `occ_fusion_genes_list_ch` → `roi_fusion_genes_list_ch` in `modules/annotation.nf`
+  - Physical file renamed on disk: `data/reference/occ_fusions_genes.txt` → `roi_fusions_genes.txt`
+  - README directory tree and notes updated accordingly
+- Removed pan-cancer dictionary from `docs/` — updated file now distributed via Zenodo reference archive
+  - `docs/pancan_devel_v5i_dictionary.txt` deleted from repository
+  - README note pointing to `docs/` removed
 - Removed ANNOVAR Perl scripts from repository (license restricts redistribution)
   - `annotate_variation.pl`, `coding_change.pl`, `convert2annovar.pl`, `table_annovar.pl` removed from git and added to `.gitignore`
   - README updated with download instructions from https://annovar.openbioinformatics.org
