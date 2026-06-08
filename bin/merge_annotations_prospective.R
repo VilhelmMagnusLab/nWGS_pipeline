@@ -352,9 +352,27 @@ merge_variant_caller_output <- function(Merged_file, Pileup_file, Somatic_file, 
     return()
   }
 
+  # Join on variant position only (Chr, Start, End, Ref, Alt).
+  # Joining on annotation columns (Gene, AAChange, etc.) causes split entries
+  # when VEP picks different transcripts for the same position across callers.
+  # For ANNOVAR the result is identical since annotations are always consistent.
+  join_keys <- c("Chr", "Start", "End", "Ref", "Alt")
+
+  coalesce_join <- function(df, suffix1 = ".x", suffix2 = ".y") {
+    dup_base <- sub(paste0("\\", suffix1, "$"), "",
+                    grep(paste0("\\", suffix1, "$"), names(df), value = TRUE))
+    for (col in dup_base) {
+      c1 <- paste0(col, suffix1); c2 <- paste0(col, suffix2)
+      df[[col]] <- coalesce(df[[c1]], df[[c2]])
+      df[[c1]] <- NULL; df[[c2]] <- NULL
+    }
+    df
+  }
+
   # Merge files - handle empty data frames
   if (has_pileup && has_merged) {
-    All_calls <- full_join(Pileup, Merged) %>%
+    All_calls <- full_join(Pileup, Merged, by = join_keys, suffix = c(".x", ".y")) %>%
+      coalesce_join() %>%
       unite(Variant_caller, callerP, callerM, sep = ", ", na.rm = TRUE)
   } else if (has_pileup) {
     All_calls <- Pileup %>%
@@ -370,7 +388,8 @@ merge_variant_caller_output <- function(Merged_file, Pileup_file, Somatic_file, 
   if (has_somatic && nrow(Somatic) > 0) {
     if (nrow(All_calls) > 0) {
       All_calls <- All_calls %>%
-        full_join(Somatic) %>%
+        full_join(Somatic, by = join_keys, suffix = c(".x", ".y")) %>%
+        coalesce_join() %>%
         unite(Variant_caller, Variant_caller, callerS, sep = ", ", na.rm = TRUE)
     } else {
       All_calls <- Somatic %>%

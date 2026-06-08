@@ -393,15 +393,15 @@ process svannasv {
 
   label 'svannasv'
    publishDir "${params.output_path}/routine_annotation/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
-   publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_occ_svanna_annotation.html"
+   publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_roi_svanna_annotation.html"
 
    input:
    tuple val(sample_id), path(wf_sv), path(wf_sv_tbi),path(roi_protein_coding_bed)
 
    output:
    
-   tuple val(sample_id), path("${sample_id}_occ_svanna_annotation.html"), emit:rmdsvannahtml
-   tuple val(sample_id), path("${sample_id}_occ_svanna_annotation.vcf.gz"), emit: occsvannaannotationannotationvcf
+   tuple val(sample_id), path("${sample_id}_roi_svanna_annotation.html"), emit:rmdsvannahtml
+   tuple val(sample_id), path("${sample_id}_roi_svanna_annotation.vcf.gz"), emit: roisvannaannotationannotationvcf
    tuple val(sample_id), path("${sample_id}_sniffles2_under30mb.vcf.gz")
 
    script:
@@ -422,9 +422,9 @@ process svannasv {
    --vcf  $wf_sv \
    --phenotype-term HP:0100836 \
    --output-format html,vcf \
-   --prefix ${sample_id}_occ_svanna_annotation
+   --prefix ${sample_id}_roi_svanna_annotation
 
-  # cp "${sample_id}_occ_svanna_annotation.html" "${params.output_path}/report/${sample_id}_svanna.html"
+  # cp "${sample_id}_roi_svanna_annotation.html" "${params.output_path}/report/${sample_id}_svanna.html"
 
    """
 }
@@ -435,7 +435,7 @@ process svannasv_fusion_events {
     publishDir "${params.output_path}/routine_annotation/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(occ_svannavcf), path(genecode_bed), path(roi_fusions_genes)
+    tuple val(sample_id), path(roi_svannavcf), path(genecode_bed), path(roi_fusions_genes)
 
     output:
     tuple val(sample_id), path("${sample_id}_filter_fusion_event.tsv"), emit: filterfusioneventout
@@ -447,11 +447,11 @@ process svannasv_fusion_events {
 
     """
     # Create enhanced GFF3 with both exons and introns
-    gunzip -c $occ_svannavcf > ${sample_id}_occ_svanna_annotation.vcf
+    gunzip -c $roi_svannavcf > ${sample_id}_roi_svanna_annotation.vcf
    
     create_gff3_with_introns.py --gff3 $genecode_bed --out ${sample_id}_genecode_with_introns.gff3
 
-    breaking_point_bed_translocation_exon.py --vcf ${sample_id}_occ_svanna_annotation.vcf --out ${sample_id}_breaking_bedpoints.bed
+    breaking_point_bed_translocation_exon.py --vcf ${sample_id}_roi_svanna_annotation.vcf --out ${sample_id}_breaking_bedpoints.bed
 
     awk 'BEGIN{OFS="\t"} {if (\$1 !~ /^chr/) \$1 = "chr"\$1; print}' ${sample_id}_breaking_bedpoints.bed > ${sample_id}_breaking_bedpoints_sort.bed
 
@@ -682,12 +682,12 @@ process clair3_annotate {
     tuple val(sample_id), path(clair3_output_dir), path(pileup_vcf), path(merge_vcf)
 
     output:
-    tuple val(sample_id), path("${sample_id}_occ_pileup_snvs_avinput")
-    tuple val(sample_id), path("${sample_id}_occ_pileup_annotateandfilter.csv"), emit:occpileupannotateandfilterout
-    tuple val(sample_id), path("${sample_id}_occ_merge_snv_avinpt")
-    tuple val(sample_id), path("${sample_id}_occ_merge.hg38_multianno.txt")
+    tuple val(sample_id), path("${sample_id}_roi_pileup_snvs_avinput")
+    tuple val(sample_id), path("${sample_id}_roi_pileup_annotateandfilter.csv"), emit:roipileupannotateandfilterout
+    tuple val(sample_id), path("${sample_id}_roi_merge_snv_avinpt")
+    tuple val(sample_id), path("${sample_id}_roi_merge.hg38_multianno.txt")
     tuple val(sample_id), path("${sample_id}_merge_annotateandfilter.csv"), emit:mergeannotateandfilterout
-    tuple val(sample_id), path("${sample_id}_occ_pileup_annotateandfilter.csv"), path("${sample_id}_merge_annotateandfilter.csv"), emit:clair3output
+    tuple val(sample_id), path("${sample_id}_roi_pileup_annotateandfilter.csv"), path("${sample_id}_merge_annotateandfilter.csv"), emit:clair3output
 
     script:
     """
@@ -697,19 +697,19 @@ process clair3_annotate {
         --filter pass \
         --fraction 0.1 \
         --includeinfo \
-        --outfile ${sample_id}_occ_pileup_snvs_avinput
+        --outfile ${sample_id}_roi_pileup_snvs_avinput
 
-    table_annovar.pl  ${sample_id}_occ_pileup_snvs_avinput \
-        -outfile occ_pileup \
+    table_annovar.pl  ${sample_id}_roi_pileup_snvs_avinput \
+        -outfile roi_pileup \
         -buildver hg38 -protocol refGene,clinvar_20240611,cosmic100coding2024\
         -operation g,f,f \
         ${params.humandb_dir} \
         -otherinfo
 
-    awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /Pathogenic/' occ_pileup.hg38_multianno.txt \
+    awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /Pathogenic/' roi_pileup.hg38_multianno.txt \
         | awk '/exonic/ || /TERT/ || /Func.refGene/ || /Pathogenic/'  \
         | awk '!/dist=166/' \
-        | cut -f1-16,26,28,29 > ${sample_id}_occ_pileup_annotateandfilter.csv
+        | cut -f1-16,26,28,29 > ${sample_id}_roi_pileup_annotateandfilter.csv
 
     convert2annovar.pl ${merge_vcf} \
         --format vcf4 \
@@ -717,23 +717,23 @@ process clair3_annotate {
         --filter pass \
         --fraction 0.1 \
         --includeinfo \
-        --outfile ${sample_id}_occ_merge_snv_avinpt
+        --outfile ${sample_id}_roi_merge_snv_avinpt
 
-    table_annovar.pl ${sample_id}_occ_merge_snv_avinpt \
-        -outfile occ_merge \
+    table_annovar.pl ${sample_id}_roi_merge_snv_avinpt \
+        -outfile roi_merge \
         -buildver hg38 -protocol refGene,clinvar_20240611,cosmic100coding2024\
         -operation g,f,f \
         ${params.humandb_dir} \
         -otherinfo
 
     awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/ || /Pathogenic/' \
-        occ_merge.hg38_multianno.txt \
+        roi_merge.hg38_multianno.txt \
         | awk '/exonic/ || /TERT/ || /Func.refGene/ || /Pathogenic/'  \
         | awk '!/dist=166/' \
         | cut -f1-16,26,28,29 \
         > ${sample_id}_merge_annotateandfilter.csv
 
-    cp occ_merge.hg38_multianno.txt ${sample_id}_occ_merge.hg38_multianno.txt
+    cp roi_merge.hg38_multianno.txt ${sample_id}_roi_merge.hg38_multianno.txt
     """
 }
 
@@ -785,6 +785,157 @@ process clairs_to_annotate {
     """
 }
 
+// VEP-based SNV annotation (alternative to ANNOVAR — set snv_annotator = 'vep')
+// Requires: params.vep_cache_dir, params.clinvar_vcf, params.cosmic_vcf
+// ─────────────────────────────────────────────────────────────────────────────
+
+process clair3_annotate_vep {
+    label 'vep'
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/snv_annotation", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path(clair3_output_dir), path(pileup_vcf), path(merge_vcf)
+
+    output:
+    tuple val(sample_id), path("${sample_id}_roi_pileup_vep.vcf.gz")
+    tuple val(sample_id), path("${sample_id}_roi_pileup_annotateandfilter.csv"), emit: roipileupannotateandfilterout
+    tuple val(sample_id), path("${sample_id}_roi_merge_vep.vcf.gz")
+    tuple val(sample_id), path("${sample_id}_roi_merge.vep.vcf.gz")
+    tuple val(sample_id), path("${sample_id}_merge_annotateandfilter.csv"), emit: mergeannotateandfilterout
+    tuple val(sample_id), path("${sample_id}_roi_pileup_annotateandfilter.csv"), path("${sample_id}_merge_annotateandfilter.csv"), emit: clair3output
+
+    script:
+    def vep_args = """\
+        --format vcf --vcf \\
+        --compress_output bgzip \\
+        --assembly GRCh38 \\
+        --species homo_sapiens \\
+        --cache --dir_cache ${params.vep_cache_dir} --cache_version ${params.vep_cache_version} \\
+        --fasta ${params.reference_genome} \\
+        --offline --no_stats --fork ${task.cpus} \\
+        --force_overwrite \\
+        --symbol --biotype --canonical --mane --pick \\
+        --pick_order mane_select,mane_plus_clinical,canonical,appris,tsl,biotype,ccds,rank,length \\
+        --hgvs --protein \\
+        --sift b --polyphen b \\
+        --refseq \\
+        --custom file=${params.clinvar_vcf},short_name=ClinVar,format=vcf,type=exact,coords=0,fields=CLNSIG%CLNDN%CLNREVSTAT%CLNHGVS%CLNDISDB \\
+        --custom file=${params.cosmic_vcf},short_name=COSMIC,format=vcf,type=exact,coords=0,fields=GENE%CNT%ID"""
+    """
+    export PATH=${params.vep_bin_dir}:\$PATH
+
+    # ── Pileup VCF ──────────────────────────────────────────────────────────
+    vep --input_file ${pileup_vcf} --output_file ${sample_id}_roi_pileup_vep.vcf.gz ${vep_args}
+
+    filter_vep --format vcf \\
+        --input_file ${sample_id}_roi_pileup_vep.vcf.gz \\
+        --output_file ${sample_id}_pileup_filt.vcf \\
+        --filter "Consequence in missense_variant,inframe_insertion,inframe_deletion,upstream_gene_variant or ClinVar_CLNSIG match Pathogenic"
+
+    vep_to_annovar_format.py ${sample_id}_pileup_filt.vcf ${sample_id}_pileup_annovar.tsv clair3
+
+    awk -F'\\t' 'BEGIN{OFS="\\t"} NR==1 || (\$15 !~ /[Bb]enign/ || \$15 ~ /[Pp]athogenic/)' \\
+        ${sample_id}_pileup_annovar.tsv \\
+    | awk -F'\\t' 'NR==1 || \$6=="exonic" || (\$7=="TERT" && (\$6!="upstream" || (\$8~/^dist=/ && int(substr(\$8,6))<=260)))' \\
+    | awk -F'\\t' 'NR==1 || \$8 !~ /dist=166/' \\
+    > ${sample_id}_roi_pileup_annotateandfilter.csv
+
+    # ── Merge VCF ───────────────────────────────────────────────────────────
+    vep --input_file ${merge_vcf} --output_file ${sample_id}_roi_merge_vep.vcf.gz ${vep_args}
+    cp ${sample_id}_roi_merge_vep.vcf.gz ${sample_id}_roi_merge.vep.vcf.gz
+
+    filter_vep --format vcf \\
+        --input_file ${sample_id}_roi_merge_vep.vcf.gz \\
+        --output_file ${sample_id}_merge_filt.vcf \\
+        --filter "Consequence in missense_variant,inframe_insertion,inframe_deletion,upstream_gene_variant,frameshift_variant,stop_gained or ClinVar_CLNSIG match Pathogenic"
+
+    vep_to_annovar_format.py ${sample_id}_merge_filt.vcf ${sample_id}_merge_annovar.tsv clair3
+
+    awk -F'\\t' 'BEGIN{OFS="\\t"} NR==1 || (\$15 !~ /[Bb]enign/ || \$15 ~ /[Pp]athogenic/)' \\
+        ${sample_id}_merge_annovar.tsv \\
+    | awk -F'\\t' 'NR==1 || \$6=="exonic" || (\$7=="TERT" && (\$6!="upstream" || (\$8~/^dist=/ && int(substr(\$8,6))<=260)))' \\
+    | awk -F'\\t' 'NR==1 || \$8 !~ /dist=166/' \\
+    > ${sample_id}_merge_annotateandfilter.csv
+    """
+}
+
+process merge_clairsto_vcfs {
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/snv_annotation", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path('clairsto_output'), path(snv_vcf), path(indel_vcf)
+
+    output:
+    tuple val(sample_id), path("${sample_id}_merge_snv_indel_claisto.vcf.gz"), emit: merged_vcf
+
+    script:
+    """
+    bcftools concat -a -d all \\
+        clairsto_output/snv.vcf.gz clairsto_output/indel.vcf.gz \\
+        -Oz -o ${sample_id}_merge_snv_indel_claisto.vcf.gz
+    """
+}
+
+process clairs_to_annotate_vep {
+    label 'vep'
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/snv_annotation", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path(merged_vcf)
+
+    output:
+    tuple val(sample_id), path("${sample_id}_clairsto_vep.vcf.gz")
+    tuple val(sample_id), path("${sample_id}_ClairS_TO_snv.vep.vcf.gz")
+    tuple val(sample_id), path("${sample_id}_annotateandfilter_clairsto.csv"), emit: annotateandfilter_clairstoout
+
+    script:
+    """
+    export PATH=${params.vep_bin_dir}:\$PATH
+
+    # Keep only PASS variants — consistent with ANNOVAR's --filter pass behaviour
+    # Uses awk + bgzip (both in VEP container via htslib) instead of bcftools
+    tabix -p vcf ${merged_vcf}
+    zcat ${merged_vcf} | \
+      awk 'substr(\$1,1,1)=="#" || \$7=="PASS"' | \
+      bgzip > ${sample_id}_clairsto_pass.vcf.gz
+    tabix -p vcf ${sample_id}_clairsto_pass.vcf.gz
+
+    vep \\
+        --input_file ${sample_id}_clairsto_pass.vcf.gz \\
+        --output_file ${sample_id}_clairsto_vep.vcf.gz \\
+        --format vcf --vcf \\
+        --compress_output bgzip \\
+        --assembly GRCh38 \\
+        --species homo_sapiens \\
+        --cache --dir_cache ${params.vep_cache_dir} --cache_version ${params.vep_cache_version} \\
+        --fasta ${params.reference_genome} \\
+        --offline --no_stats --fork ${task.cpus} \\
+        --force_overwrite \\
+        --symbol --biotype --canonical --mane --pick \\
+        --pick_order mane_select,mane_plus_clinical,canonical,appris,tsl,biotype,ccds,rank,length \\
+        --hgvs --protein \\
+        --sift b --polyphen b \\
+        --refseq \\
+        --custom file=${params.clinvar_vcf},short_name=ClinVar,format=vcf,type=exact,coords=0,fields=CLNSIG%CLNDN%CLNREVSTAT%CLNHGVS%CLNDISDB \\
+        --custom file=${params.cosmic_vcf},short_name=COSMIC,format=vcf,type=exact,coords=0,fields=GENE%CNT%ID
+
+    cp ${sample_id}_clairsto_vep.vcf.gz ${sample_id}_ClairS_TO_snv.vep.vcf.gz
+
+    filter_vep --format vcf \\
+        --input_file ${sample_id}_clairsto_vep.vcf.gz \\
+        --output_file ${sample_id}_clairsto_filt.vcf \\
+        --filter "Consequence in missense_variant,inframe_insertion,inframe_deletion,upstream_gene_variant,frameshift_variant,stop_gained or ClinVar_CLNSIG match Pathogenic"
+
+    vep_to_annovar_format.py ${sample_id}_clairsto_filt.vcf ${sample_id}_clairsto_annovar.tsv clairsto
+
+    awk -F'\\t' 'BEGIN{OFS="\\t"} NR==1 || (\$15 !~ /[Bb]enign/ || \$15 ~ /[Pp]athogenic/)' \\
+        ${sample_id}_clairsto_annovar.tsv \\
+    | awk -F'\\t' 'NR==1 || \$6=="exonic" || (\$7=="TERT" && (\$6!="upstream" || (\$8~/^dist=/ && int(substr(\$8,6))<=260)))' \\
+    | awk -F'\\t' 'NR==1 || \$8 !~ /dist=166/' \\
+    > ${sample_id}_annotateandfilter_clairsto.csv
+    """
+}
+
 // Merge and filter annotations from Clair3 and ClairS-TO results
 process merge_annotation {
     debug true
@@ -792,11 +943,11 @@ process merge_annotation {
     publishDir "${params.output_path}/routine_annotation/${sample_id}/merge_annot_clair3andclairsto/", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(merge_file), path(pileup_file), path(clairsto_file), path(occ_genes)
+    tuple val(sample_id), path(merge_file), path(pileup_file), path(clairsto_file), path(roi_genes)
     
     output:
     //tuple val(sample_id), path("${sample_id}_merge_annotation_filter_snvs_allcall_filter.csv")
-    tuple val(sample_id), path("${sample_id}_merge_annotation_filter_snvs_allcall.csv"), emit: occmergeout
+    tuple val(sample_id), path("${sample_id}_merge_annotation_filter_snvs_allcall.csv"), emit: roimergeout
     
 
     script:
@@ -809,14 +960,14 @@ process merge_annotation {
     echo "Merge file: ${merge_file}"
     echo "Pileup file: ${pileup_file}"
     echo "ClairSTo file: ${clairsto_file}"
-    echo "OCC genes file: ${occ_genes}"
+    echo "OCC genes file: ${roi_genes}"
 
     merge_annotations_prospective.R \\
         "${merge_file}" \\
         "${pileup_file}" \\
         "${clairsto_file}" \\
         "${sample_id}_merge_annotation_filter_snvs_allcall.csv" \\
-        "${occ_genes}" \\
+        "${roi_genes}" \\
         ${sample_id}_merge_annotation_filter_snvs_allcall_filter.csv
 
     """
@@ -829,7 +980,7 @@ process igv_tools {
     publishDir "${params.output_path}/routine_annotation/${sample_id}/coverage", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(tertp_variants), path(ncbirefseq), path(reference_genome), path(reference_genome_bai)
+    tuple val(sample_id), path(roi_bam), path(roi_bam_bai), path(tertp_variants), path(ncbirefseq), path(reference_genome), path(reference_genome_bai)
 
     output:
     tuple val(sample_id), file("${sample_id}_tertp_id1.html"), emit: tertp_out_igv
@@ -841,7 +992,7 @@ process igv_tools {
     conda activate base
     
     export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-    create_report $tertp_variants --fasta $reference_genome --flanking 1000 --tracks $tertp_variants $occ_bam $ncbirefseq --output ${sample_id}_tertp_id1.html
+    create_report $tertp_variants --fasta $reference_genome --flanking 1000 --tracks $tertp_variants $roi_bam $ncbirefseq --output ${sample_id}_tertp_id1.html
     ##cp "${sample_id}_tertp_id1.html" "${params.output_path}/report/${sample_id}_tertp_id1.html"
     """
 }
@@ -1090,7 +1241,7 @@ process copy_results_to_summary {
     path("${sample_id}_mnpflex_input.bed"), optional: true
     path("${sample_id}_bedmethyl_sturgeon_general.pdf"), optional: true
     path("${sample_id}_tsne_plot.html"), optional: true
-    path("${sample_id}_occ_svanna_annotation.html"), optional: true
+    path("${sample_id}_roi_svanna_annotation.html"), optional: true
     path("${sample_id}_tsne_plot_pancan.html"), optional: true
     path("${sample_id}_tsne_plot_pancan.pdf"), optional: true
     path("roi.protein_coding_*.bed"), optional: true
@@ -1119,8 +1270,8 @@ process copy_results_to_summary {
 
     if [ -f "${svanna_html}" ]; then
         cp -L ${svanna_html} temp_svanna.html
-        mv temp_svanna.html ${sample_id}_occ_svanna_annotation.html
-        echo "Created ${sample_id}_occ_svanna_annotation.html"
+        mv temp_svanna.html ${sample_id}_roi_svanna_annotation.html
+        echo "Created ${sample_id}_roi_svanna_annotation.html"
     fi
 
     if [ -f "${tsne_pancan_html}" ]; then
@@ -1297,12 +1448,12 @@ workflow annotation {
                 def segs_vcf = args[9]
                 def rds_file = args[10]
                 def sv = args[11]
-                def occ_bed = args[12]
+                def roi_bed = args[12]
 
                 tuple(
                     sample_id,
                     segs_vcf,
-                    occ_bed,
+                    roi_bed,
                     bins_bed,
                     segs_bed,
                     sample_thresholds[sample_id]
@@ -1310,11 +1461,11 @@ workflow annotation {
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
                 .combine(roi_protein_coding_bed_ch)
-                .map { sample_id, occ_bed ->
+                .map { sample_id, roi_bed ->
                     tuple(
                         sample_id,
                         file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_segs.vcf"),
-                        occ_bed,
+                        roi_bed,
                         file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_bins.bed"),
                         file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_segs.bed"),
                         sample_thresholds[sample_id]
@@ -1335,7 +1486,7 @@ workflow annotation {
                 def segs_vcf = args[9]
                 def rds_file = args[10]
                 def sv = args[11]
-                def occ_bed = args[12]
+                def roi_bed = args[12]
 
                 //log.info "Creating Svanna input for sample: ${sample_id} (order mode)"
                 //log.info "SV file path: ${sv}"
@@ -1348,12 +1499,12 @@ workflow annotation {
                     sample_id,
                     sv_file,               // SV VCF file from epi2me
                     sv_index,              // Index file
-                    occ_bed
+                    roi_bed
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
                 .combine(roi_protein_coding_bed_ch)
-                .map { sample_id, occ_bed ->
+                .map { sample_id, roi_bed ->
                     //log.info "Creating Svanna input for sample: ${sample_id} (standalone mode)"
                     def sv_file = file("${params.sv_folder}/${sample_id}/${sample_id}.sniffles.vcf.gz")
 
@@ -1365,7 +1516,7 @@ workflow annotation {
                         sample_id,
                         sv_file,
                         file("${sv_file}.tbi"),
-                        occ_bed
+                        roi_bed
                     )
                 }
 
@@ -1447,7 +1598,7 @@ workflow annotation {
                 def clinvarindex = args[15]
                 def cosmic100 = args[16]
                 def cosmic100index = args[17]
-                def occ_bed = args[18]
+                def roi_bed = args[18]
 
                 tuple(
                     sample_id,
@@ -1461,14 +1612,14 @@ workflow annotation {
                     clinvarindex,
                     cosmic100,
                     cosmic100index,
-                    occ_bed
+                    roi_bed
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
                 .combine(refgene_ch).combine(hg38_refgenemrna_ch).combine(clinvar_ch)
                 .combine(clinvarindex_ch).combine(hg38_cosmic100_ch).combine(hg38_cosmic100index_ch)
                 .combine(roi_protein_coding_bed_ch)
-                .map { sample_id, refgene, refgenemrna, clinvar, clinvarindex, cosmic100, cosmic100index, occ_bed ->
+                .map { sample_id, refgene, refgenemrna, clinvar, clinvarindex, cosmic100, cosmic100index, roi_bed ->
                     tuple(
                         sample_id,
                         file("${params.roi_bam_folder}/${sample_id}.roi.bam"),
@@ -1481,7 +1632,7 @@ workflow annotation {
                         clinvarindex,
                         cosmic100,
                         cosmic100index,
-                        occ_bed
+                        roi_bed
 
                     )
                 }
@@ -1556,8 +1707,8 @@ workflow annotation {
         boosts_cramino = (params.run_mode_order || params.run_mode_epiannotation) ?
             input_data.map { args ->
                 def sample_id = args[0]
-                def occ_bam = args[1]    
-                def occ_bai = args[2]
+                def roi_bam = args[1]    
+                def roi_bai = args[2]
                 def ref = args[3]
                 def ref_bai = args[4]
 
@@ -1742,17 +1893,17 @@ workflow annotation {
             println "Running Svanna Analysis..."
             
             svannasv(boosts_svanna_channel)
-            svannasv_out = svannasv.out.occsvannaannotationannotationvcf
+            svannasv_out = svannasv.out.roisvannaannotationannotationvcf
                 .combine(vcf2circos_json_ch)
                 .map{ sample_id, svannavcfoutput, vcf2circos ->
                 [sample_id, svannavcfoutput, vcf2circos]
             }
             circosplot(svannasv_out)
             circosplot_out=circosplot.out.circosout
-            svannaoutfusion_events= svannasv.out.occsvannaannotationannotationvcf
+            svannaoutfusion_events= svannasv.out.roisvannaannotationannotationvcf
                 .combine(genecode_bed_ch).combine(roi_fusion_genes_list_ch)
-                .map{ sample_id, occsvannaannotationannotationvcf, genecode, fusion_genes ->
-                [sample_id, occsvannaannotationannotationvcf, genecode, fusion_genes]
+                .map{ sample_id, roisvannaannotationannotationvcf, genecode, fusion_genes ->
+                [sample_id, roisvannaannotationannotationvcf, genecode, fusion_genes]
             }
             svannasv_fusion_events(svannaoutfusion_events)
             
@@ -1829,12 +1980,26 @@ workflow annotation {
                     }
                 .view { "ClairSTo annotation input: $it" }
 
-            // Step 2: Run annotation processes
-            clair3_annotate(clair3_annot_input)
-            clairs_to_annotate(clairsto_annot_input)
+            // Step 2: Run annotation processes (ANNOVAR or VEP based on snv_annotator param)
+            def clair3_out_ch
+            def clairsto_out_ch
+            if (params.snv_annotator == 'vep') {
+                println "Using VEP for SNV annotation"
+                clair3_annotate_vep(clair3_annot_input)
+                merge_clairsto_vcfs(clairsto_annot_input)
+                clairs_to_annotate_vep(merge_clairsto_vcfs.out.merged_vcf)
+                clair3_out_ch   = clair3_annotate_vep.out.clair3output
+                clairsto_out_ch = clairs_to_annotate_vep.out.annotateandfilter_clairstoout
+            } else {
+                println "Using ANNOVAR for SNV annotation"
+                clair3_annotate(clair3_annot_input)
+                clairs_to_annotate(clairsto_annot_input)
+                clair3_out_ch   = clair3_annotate.out.clair3output
+                clairsto_out_ch = clairs_to_annotate.out.annotateandfilter_clairstoout
+            }
 
             // Step 3: Create properly structured channels for combination
-            def clair3_results = clair3_annotate.out.clair3output
+            def clair3_results = clair3_out_ch
                 .map { args ->
                     def sample_id = args[0]
                     def pileup_file = args[1]
@@ -1843,21 +2008,21 @@ workflow annotation {
                 }
                 .view { "Clair3 annotated mapped: $it" }
 
-            def clairsto_results = clairs_to_annotate.out.annotateandfilter_clairstoout
+            def clairsto_results = clairsto_out_ch
                 .view { "ClairSTo annotated output: $it" }
 
             // Step 4: Combine results and create input for merge_annotation
             combine_file = clair3_results
                 .combine(clairsto_results, by: 0)
                 .combine(roi_fusion_genes_list_ch)
-                .map { sample_id, pileup_file, merge_file, clairsto_file, occ_genes ->
+                .map { sample_id, pileup_file, merge_file, clairsto_file, roi_genes ->
                     println "Creating merge input for sample: $sample_id"
                     tuple(
                         sample_id,
                         merge_file,
                         pileup_file,
                         clairsto_file,
-                        occ_genes
+                        roi_genes
                     )
                 }
                 .view { "Merge annotation input: $it" }
@@ -2232,18 +2397,18 @@ workflow annotation {
                 println "Svanna analysis not run earlier, running now for RMD report..."
         svannasv(boosts_svanna_channel)
         rmd_svanna_html = svannasv.out.rmdsvannahtml
-            svannasv_out = svannasv.out.occsvannaannotationannotationvcf
+            svannasv_out = svannasv.out.roisvannaannotationannotationvcf
                 .combine(vcf2circos_json_ch)
-                .map { sample_id, occsvannaannotationannotationvcf, vcf2circos ->
-                    [sample_id, occsvannaannotationannotationvcf, vcf2circos]
+                .map { sample_id, roisvannaannotationannotationvcf, vcf2circos ->
+                    [sample_id, roisvannaannotationannotationvcf, vcf2circos]
                 }
         circosplot(svannasv_out)
 
         // Also run fusion events analysis for RMD mode
-        svannaoutfusion_events = svannasv.out.occsvannaannotationannotationvcf
+        svannaoutfusion_events = svannasv.out.roisvannaannotationannotationvcf
                 .combine(genecode_bed_ch).combine(roi_fusion_genes_list_ch)
-                .map { sample_id, occsvannaannotationannotationvcf, genecode, fusion_genes ->
-                [sample_id, occsvannaannotationannotationvcf, genecode, fusion_genes]
+                .map { sample_id, roisvannaannotationannotationvcf, genecode, fusion_genes ->
+                [sample_id, roisvannaannotationannotationvcf, genecode, fusion_genes]
             }
         svannasv_fusion_events(svannaoutfusion_events)
         
@@ -2290,16 +2455,25 @@ workflow annotation {
                         tuple(sample_id, clairsto_output_dir, snv_vcf, indel_vcf)
                     }
 
-                // Step 2: Run annotation
-                clair3_annotate(clair3_annot_input)
-                clairs_to_annotate(clairsto_annot_input)
-
-                clair3_out = clair3_annotate.out.clair3output
-                clairs_to_out = clairs_to_annotate.out.annotateandfilter_clairstoout
+                // Step 2: Run annotation (ANNOVAR or VEP based on snv_annotator param)
+                if (params.snv_annotator == 'vep') {
+                    println "Using VEP for SNV annotation"
+                    clair3_annotate_vep(clair3_annot_input)
+                    merge_clairsto_vcfs(clairsto_annot_input)
+                    clairs_to_annotate_vep(merge_clairsto_vcfs.out.merged_vcf)
+                    clair3_out = clair3_annotate_vep.out.clair3output
+                    clairs_to_out = clairs_to_annotate_vep.out.annotateandfilter_clairstoout
+                } else {
+                    println "Using ANNOVAR for SNV annotation"
+                    clair3_annotate(clair3_annot_input)
+                    clairs_to_annotate(clairsto_annot_input)
+                    clair3_out = clair3_annotate.out.clair3output
+                    clairs_to_out = clairs_to_annotate.out.annotateandfilter_clairstoout
+                }
             combine_file = clair3_out.combine(clairs_to_out, by: 0)
                 .combine(roi_fusion_genes_list_ch)
-                .map { sample_id, pileup_file, merge_file, clairsto_file, occ_genes ->
-                    tuple(sample_id, merge_file, pileup_file, clairsto_file, occ_genes)
+                .map { sample_id, pileup_file, merge_file, clairsto_file, roi_genes ->
+                    tuple(sample_id, merge_file, pileup_file, clairsto_file, roi_genes)
     }
         merge_annotation(combine_file)
             } else {
@@ -2337,7 +2511,7 @@ workflow annotation {
             }
             
             // Check if all required channels are available
-            if (!merge_annotation.out.occmergeout) {
+            if (!merge_annotation.out.roimergeout) {
                 error "Merge annotation results not found. Make sure OCC analysis runs before RMD generation."
             }
             
@@ -2370,7 +2544,7 @@ workflow annotation {
             }
 
             mergecnv_out = annotatecnv_results.rmdcnvtumornumber
-            .combine(merge_annotation.out.occmergeout, by:0)
+            .combine(merge_annotation.out.roimergeout, by:0)
             .combine(crossNN.out.rmdnanodx, by: 0)
             .combine(mgmt_promoter.out.mgmtresultsout, by:0)
             .combine(svannasv.out.rmdsvannahtml, by:0)

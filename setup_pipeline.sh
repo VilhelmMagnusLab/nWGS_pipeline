@@ -5,7 +5,7 @@
 # This script automatically downloads all reference files from Zenodo and
 # sets up the pipeline for immediate use.
 #
-# Zenodo Record: https://doi.org/10.5281/zenodo.19232427
+# Zenodo Record: https://doi.org/10.5281/zenodo.20596458
 #
 # Usage:
 #   ./setup_pipeline.sh docker|singularity [OPTIONS]
@@ -40,7 +40,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
-ZENODO_RECORD="19232427"  # Diana pipeline reference files v3 (DOI: 10.5281/zenodo.19232427)
+ZENODO_RECORD="20596458"  # Diana pipeline reference files v3 (DOI: 10.5281/zenodo.20596458)
 BASE_URL="https://zenodo.org/record/${ZENODO_RECORD}/files"
 PIPELINE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_DIR="${PIPELINE_DIR}/data"
@@ -460,6 +460,59 @@ setup_nanodx_classifier() {
     echo ""
 }
 
+setup_vep_cache() {
+    local VEP_CACHE_VERSION="115"
+    local VEP_CACHE_FILE="homo_sapiens_refseq_vep_${VEP_CACHE_VERSION}_GRCh38.tar.gz"
+    local VEP_CACHE_URL="https://ftp.ensembl.org/pub/release-${VEP_CACHE_VERSION}/variation/indexed_vep_cache/${VEP_CACHE_FILE}"
+    local VEP_CACHE_DIR="${HUMANDB_DIR}/homo_sapiens_refseq"
+
+    print_info "Setting up Ensembl VEP cache (v${VEP_CACHE_VERSION} GRCh38)..."
+
+    # Skip if already present
+    if [ -d "${VEP_CACHE_DIR}" ]; then
+        print_success "VEP cache (homo_sapiens_refseq) already present"
+        echo ""
+        return
+    fi
+
+    print_info "Downloading VEP cache from Ensembl (~15 GB, this will take a while)..."
+    print_info "URL: ${VEP_CACHE_URL}"
+
+    local download_ok=false
+    local tmp_file="${HUMANDB_DIR}/${VEP_CACHE_FILE}"
+
+    if check_command wget; then
+        wget -q --show-progress "${VEP_CACHE_URL}" -O "${tmp_file}" 2>&1 | \
+            grep --line-buffered "%" | \
+            sed -u -e "s,\.,,g" | \
+            awk '{printf("\r  Progress: %s", $2+0); fflush()}'
+        echo ""
+        [ ${PIPESTATUS[0]} -eq 0 ] && download_ok=true
+    elif check_command curl; then
+        curl -L "${VEP_CACHE_URL}" -o "${tmp_file}" --progress-bar
+        [ $? -eq 0 ] && download_ok=true
+    else
+        print_warning "Neither wget nor curl found — cannot download VEP cache automatically."
+    fi
+
+    if [ "$download_ok" = true ] && [ -f "${tmp_file}" ]; then
+        print_info "Extracting VEP cache to ${HUMANDB_DIR}..."
+        tar -xzf "${tmp_file}" -C "${HUMANDB_DIR}" && \
+            rm "${tmp_file}" && \
+            print_success "VEP cache installed at ${VEP_CACHE_DIR}"
+    else
+        # Clean up partial download if it exists
+        [ -f "${tmp_file}" ] && rm -f "${tmp_file}"
+        print_warning "VEP cache download failed — skipping (VEP annotation will not work)."
+        print_warning "To install manually, run:"
+        print_warning "  wget ${VEP_CACHE_URL} -O ${HUMANDB_DIR}/${VEP_CACHE_FILE}"
+        print_warning "  tar -xzf ${HUMANDB_DIR}/${VEP_CACHE_FILE} -C ${HUMANDB_DIR}"
+        print_info "The pipeline will continue and use ANNOVAR as the default annotator."
+    fi
+
+    echo ""
+}
+
 setup_svanna_database() {
     print_info "Setting up Svanna database..."
 
@@ -550,6 +603,9 @@ download_reference_files() {
         print_info "(Remove data/.humandb_downloaded to re-download)"
         echo ""
     fi
+
+    # Download VEP cache from Ensembl (optional — non-fatal if download fails)
+    setup_vep_cache
 
     # Download general.zip (Sturgeon classifier) - keep as zip, DO NOT extract
     if [ ! -f "${REFERENCE_DIR}/general.zip" ]; then
@@ -1201,7 +1257,7 @@ main() {
 ║                    DIANA-Automated Setup                      ║
 ║    Diagnostic Integrated Analytics for Neoplastic Alterations ║
 ║                                                               ║
-║           Zenodo: 10.5281/zenodo.19232427                     ║
+║           Zenodo: 10.5281/zenodo.20596458                     ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 EOF

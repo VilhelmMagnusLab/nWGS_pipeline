@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Executive summary shows two classification tables: Pancan first, then Capper et al.
   - Dedicated container mappings added for `crossNN_pancan` and `tsne_plot_pancan` in `conf/annotation.config`
   - Graceful fallback: if pancan tsne fails (e.g. corrupted training set), pipeline continues and report still generates
+- Added `setup_vep_cache()` to `setup_pipeline.sh` — automatically downloads Ensembl VEP cache (v115, GRCh38) from Ensembl FTP into `data/humandb/homo_sapiens_refseq/` during installation
+  - Download is **non-fatal**: if Ensembl FTP is unreachable the installation continues normally with ANNOVAR as the default annotator
+  - Prints manual download instructions when the download fails so users can install the cache later
+  - Skips silently if `homo_sapiens_refseq/` already exists
 - Added preprint citation to README (Bope CD et al. 2026, https://doi.org/10.64898/2026.03.25.714119)
 - Added `extract_roi` process to `modules/epi2me.nf` — runs for `snv` and `all` modes, directly feeding `run_clair3` and `run_clairs_to` without requiring a separate mergebam step
 - Added missing `occ_bam_dir` and `roi_bed` parameters to `conf/epi2me.config`
@@ -44,6 +48,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ghostscript step is soft — skips silently if `gs` is not installed on the host, no extra install required
 
 ### `Changed`
+- Bundled ANNOVAR Perl scripts into `bin/` with permission from the ANNOVAR authors
+  - Scripts included: `annotate_variation.pl`, `coding_change.pl`, `convert2annovar.pl`, `table_annovar.pl`, `index_annovar.pl`, `prepare_annovar_user.pl`
+  - Created `THIRD_PARTY_LICENSES.md` with ANNOVAR licence notice and required citation (Wang et al. 2010, *NAR*)
+  - README ANNOVAR section updated: manual copy instructions removed, licence notice and link to `THIRD_PARTY_LICENSES.md` added
+- Changed default SNV annotator from `"vep"` to `"annovar"` in `nextflow.config`
+  - VEP remains available via `--snv_annotator vep` or by editing `nextflow.config`
+  - README annotator table and code examples updated to reflect new default
+- Updated Zenodo record from `19232427` to `20596458` (DOI: `10.5281/zenodo.20596458`)
+  - Updated `setup_pipeline.sh` (header comment, `ZENODO_RECORD` variable, summary banner)
+  - Updated all DOI links in `README.md`
+  - Rebuilt Zenodo archives: `humandb.tar.gz`, `reference_core.tar.gz`, `diana_dummy.tar.gz`
+  - `humandb.tar.gz` no longer bundles the VEP cache (`homo_sapiens_refseq/`) — now downloaded directly from Ensembl during setup (see below)
 - README: COSMIC section updated — added login link (https://cancer.sanger.ac.uk/cosmic/login) and replaced hardcoded `v100` with generic `v{version}` so instructions stay valid for future releases
 - Removed `docs/pancan_devel_v5i_dictionary.txt` from repository — updated dictionary now distributed via Zenodo reference archive; README note pointing to `docs/` removed
 - Renamed `occ_fusions_genes.txt` → `roi_fusions_genes.txt` and all related identifiers

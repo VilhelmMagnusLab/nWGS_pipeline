@@ -53,7 +53,7 @@ cd Diana
 **What the setup script does:**
 - Checks for compatible Java (11–21) and installs it if missing
 - Installs Nextflow and adds it to PATH via `.diana_env`
-- Downloads all reference files from Zenodo (DOI: [10.5281/zenodo.19232427](https://doi.org/10.5281/zenodo.19232427))
+- Downloads all reference files from Zenodo (DOI: [10.5281/zenodo.20596458](https://doi.org/10.5281/zenodo.20596458))
 - Extracts and organizes files into the correct directory structure
 - Downloads and sets up Docker containers or Singularity images
 
@@ -360,7 +360,7 @@ Simply run:
 ```
 
 The script will:
-1. Download reference data from [Zenodo (DOI: 10.5281/zenodo.19232427)](https://doi.org/10.5281/zenodo.19232427)
+1. Download reference data from [Zenodo (DOI: 10.5281/zenodo.20596458)](https://doi.org/10.5281/zenodo.20596458)
 2. Extract and organize all files into the correct directory structure
 3. Set up NanoDx classifier models
 4. Configure all required paths
@@ -381,30 +381,45 @@ If you prefer manual setup or need to customize the reference files:
   - `roi_fusions_genes.txt` - User-defined region of interest gene list for SV/fusion filtering and SNV annotation (one gene per line; can be replaced with any custom gene list)
   - `nanoDx/` - NanoDx neural network classifier (with models from Zenodo)
 
+### SNV Annotation Tool Selection
+
+DIANA supports two SNV annotation backends. The choice is set in `nextflow.config`:
+
+```groovy
+params {
+    snv_annotator = "annovar"  // default — ANNOVAR
+    // snv_annotator = "vep"  // alternative — Ensembl VEP
+}
+```
+
+Or override on the command line:
+```bash
+./run_pipeline_singularity.sh --run_mode_order --snv_annotator vep
+```
+
+| Annotator | Default | Requirements |
+|-----------|---------|--------------|
+| **ANNOVAR** | ✓ Yes | ANNOVAR Perl scripts (bundled, subject to ANNOVAR licence) + ANNOVAR databases |
+| **VEP** | No | VEP cache + ClinVar VCF + COSMIC VCF (see below) |
+
 **Annotation databases** (automatically placed in `data/humandb/`):
-- `humandb.tar.gz` - Contains ANNOVAR annotation databases:
+- `humandb.tar.gz` - Contains ANNOVAR-format annotation databases (used by both annotators):
   - `hg38_refGene.txt` - RefGene annotation
   - `hg38_refGeneMrna.fa` - RefGene mRNA sequences
-  - `hg38_clinvar_20240611.txt` - ClinVar annotations
+  - `hg38_clinvar_20240611.txt` - ClinVar annotations (ANNOVAR format)
   - `hg38_cosmic100coding2024.txt` - **Placeholder only** — contains empty COSMIC IDs (see COSMIC section below)
 
-### ANNOVAR Scripts (required, not included)
+### ANNOVAR Scripts (bundled, used by default)
 
-The ANNOVAR Perl scripts are **not bundled** with DIANA due to ANNOVAR's license restrictions. You must download them separately:
+The following ANNOVAR Perl scripts are **bundled** with DIANA in the `bin/` directory:
+- `annotate_variation.pl`
+- `coding_change.pl`
+- `convert2annovar.pl`
+- `table_annovar.pl`
+- `index_annovar.pl`
+- `prepare_annovar_user.pl`
 
-1. Register and download ANNOVAR from: [https://annovar.openbioinformatics.org/en/latest/user-guide/download/](https://annovar.openbioinformatics.org/en/latest/user-guide/download/)
-2. Copy the following scripts into the `bin/` directory of your DIANA installation:
-   - `annotate_variation.pl`
-   - `coding_change.pl`
-   - `convert2annovar.pl`
-   - `table_annovar.pl`
-
-```bash
-cp /path/to/annovar/annotate_variation.pl /path/to/Diana/bin/
-cp /path/to/annovar/coding_change.pl      /path/to/Diana/bin/
-cp /path/to/annovar/convert2annovar.pl    /path/to/Diana/bin/
-cp /path/to/annovar/table_annovar.pl      /path/to/Diana/bin/
-```
+> **License notice:** Usage of ANNOVAR is subject to its own licence terms. See [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for details and the required citation.
 
 ### COSMIC Database (required, not included)
 
@@ -444,6 +459,65 @@ cp hg38_cosmic100coding2024.txt.idx /path/to/Diana/data/humandb/
 ```
 
 > **Note:** `prepare_annovar_user.pl` and `index_annovar.pl` are part of the ANNOVAR package downloaded in the step above.
+
+### Ensembl VEP Setup (required only when snv_annotator = "vep")
+
+VEP requires three components in `data/humandb/`. The **VEP cache** and **ClinVar VCF** are included in the Zenodo reference archive and extracted automatically by `setup_pipeline.sh`. Only the **COSMIC VCF** must be prepared manually.
+
+#### 1. VEP cache (`homo_sapiens_refseq/`)
+
+Distributed via Zenodo and automatically placed at `data/humandb/homo_sapiens_refseq/` during setup.
+
+To download manually (e.g. to use a newer cache version):
+```bash
+cd /path/to/Diana/data/humandb
+curl -O https://ftp.ensembl.org/pub/release-115/variation/indexed_vep_cache/homo_sapiens_refseq_vep_115_GRCh38.tar.gz
+tar xzf homo_sapiens_refseq_vep_115_GRCh38.tar.gz
+# Creates: homo_sapiens_refseq/115_GRCh38/
+```
+
+Update `conf/annotation.config` if using a different version:
+```groovy
+vep_cache_version = "115"
+```
+
+#### 2. ClinVar VCF (`clinvar.vcf.gz`)
+
+Distributed via Zenodo and automatically placed in `data/humandb/` during setup.
+
+To generate your own from the ANNOVAR ClinVar file (e.g. after a ClinVar update):
+```bash
+cd /path/to/Diana/data/humandb
+python3 /path/to/Diana/bin/annovar_to_vep_vcf.py \
+    clinvar hg38_clinvar_20240611.txt clinvar.vcf.gz
+# Creates: clinvar.vcf.gz and clinvar.vcf.gz.tbi
+```
+
+#### 3. COSMIC VCF (`CosmicCodingMuts.vcf.gz`) — must be prepared manually
+
+After preparing the ANNOVAR COSMIC file (see COSMIC Database section above), convert it to bgzipped VCF for VEP using the provided script:
+
+```bash
+cd /path/to/Diana/data/humandb
+python3 /path/to/Diana/bin/annovar_to_vep_vcf.py \
+    cosmic hg38_cosmic100coding2024.txt CosmicCodingMuts.vcf.gz
+# Creates: CosmicCodingMuts.vcf.gz and CosmicCodingMuts.vcf.gz.tbi
+```
+
+The final `data/humandb/` structure required for VEP mode:
+
+```
+data/humandb/
+├── homo_sapiens_refseq/           # VEP cache (Zenodo or manual)
+│   └── 115_GRCh38/
+├── clinvar.vcf.gz                 # ClinVar VCF for VEP (Zenodo or generated)
+├── clinvar.vcf.gz.tbi
+├── CosmicCodingMuts.vcf.gz        # COSMIC VCF for VEP (must be generated)
+├── CosmicCodingMuts.vcf.gz.tbi
+├── hg38_refGene.txt               # ANNOVAR databases (also used by ANNOVAR mode)
+├── hg38_clinvar_20240611.txt
+└── hg38_cosmic100coding2024.txt
+```
 
 **Additional reference files** (automatically extracted to `data/reference/`):
 - `general.zip` - Sturgeon classifier model (kept as zip, not extracted) — **see Sturgeon note below**
@@ -507,7 +581,7 @@ params {
 
 **Note on roi_fusions_genes.txt:** Plain-text gene list (one gene symbol per line) used for SV/fusion event filtering and SNV annotation. This file can be replaced with any user custom gene list of interest — for example, a laboratory-specific panel of oncology-relevant genes. The default list contains 204 genes covering common fusion partners and oncogenes.
 
-**Manual download:** If needed, all reference files are available at [Zenodo (DOI: 10.5281/zenodo.19232427)](https://doi.org/10.5281/zenodo.19232427)
+**Manual download:** If needed, all reference files are available at [Zenodo (DOI: 10.5281/zenodo.20596458)](https://doi.org/10.5281/zenodo.20596458)
 
 ### Directory Structure Setup
 After downloading the reference files, your directory structure should look like this:
