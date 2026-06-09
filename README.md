@@ -53,7 +53,7 @@ cd Diana
 **What the setup script does:**
 - Checks for compatible Java (11–21) and installs it if missing
 - Installs Nextflow and adds it to PATH via `.diana_env`
-- Downloads all reference files from Zenodo (DOI: [10.5281/zenodo.20596458](https://doi.org/10.5281/zenodo.20596458))
+- Downloads all reference files from Zenodo (DOI: [10.5281/zenodo.20609244](https://doi.org/10.5281/zenodo.20609244))
 - Extracts and organizes files into the correct directory structure
 - Downloads and sets up Docker containers or Singularity images
 
@@ -362,7 +362,7 @@ Simply run:
 ```
 
 The script will:
-1. Download reference data from [Zenodo (DOI: 10.5281/zenodo.20596458)](https://doi.org/10.5281/zenodo.20596458)
+1. Download reference data from [Zenodo (DOI: 10.5281/zenodo.20609244)](https://doi.org/10.5281/zenodo.20609244)
 2. Extract and organize all files into the correct directory structure
 3. Set up NanoDx classifier models
 4. Configure all required paths
@@ -583,7 +583,7 @@ params {
 
 **Note on roi_fusions_genes.txt:** Plain-text gene list (one gene symbol per line) used for SV/fusion event filtering and SNV annotation. This file can be replaced with any user custom gene list of interest — for example, a laboratory-specific panel of oncology-relevant genes. The default list contains 204 genes covering common fusion partners and oncogenes.
 
-**Manual download:** If needed, all reference files are available at [Zenodo (DOI: 10.5281/zenodo.20596458)](https://doi.org/10.5281/zenodo.20596458)
+**Manual download:** If needed, all reference files are available at [Zenodo (DOI: 10.5281/zenodo.20609244)](https://doi.org/10.5281/zenodo.20609244)
 
 ### Directory Structure Setup
 After downloading the reference files, your directory structure should look like this:

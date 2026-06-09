@@ -5,7 +5,7 @@
 # This script automatically downloads all reference files from Zenodo and
 # sets up the pipeline for immediate use.
 #
-# Zenodo Record: https://doi.org/10.5281/zenodo.20596458
+# Zenodo Record: https://doi.org/10.5281/zenodo.20609244
 #
 # Usage:
 #   ./setup_pipeline.sh docker|singularity [OPTIONS]
@@ -40,7 +40,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
-ZENODO_RECORD="20596458"  # Diana pipeline reference files v3 (DOI: 10.5281/zenodo.20596458)
+ZENODO_RECORD="20609244"  # Diana pipeline reference files v3 (DOI: 10.5281/zenodo.20609244)
 BASE_URL="https://zenodo.org/record/${ZENODO_RECORD}/files"
 
 # MD5 checksums for Zenodo archives — update these whenever archives are rebuilt
@@ -1299,7 +1299,7 @@ main() {
 ║                    DIANA-Automated Setup                      ║
 ║    Diagnostic Integrated Analytics for Neoplastic Alterations ║
 ║                                                               ║
-║           Zenodo: 10.5281/zenodo.20596458                     ║
+║           Zenodo: 10.5281/zenodo.20609244                     ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 EOF
