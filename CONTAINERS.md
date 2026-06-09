@@ -9,6 +9,19 @@ This is a quick reference guide for all Singularity/Docker containers used in th
 
 ---
 
+## Supported Architectures
+
+DIANA container images are built for **linux/amd64** (also known as **x86_64**) — the standard 64-bit architecture of Intel- and AMD-based servers and workstations. The *amd64* label does not imply that an AMD processor is required; any x86_64 CPU is supported.
+
+The current release is tested exclusively on x86_64 Linux systems. ARM64 platforms (including Apple Silicon Macs running Docker Desktop or Linux ARM servers) are not currently validated and may exhibit reduced performance or unexpected behaviour due to instruction-set emulation.
+
+**Running on non-x86_64 systems:**
+- **Docker:** add `--platform linux/amd64` to force emulation (e.g. `docker run --platform linux/amd64 ...`)
+- **Singularity/Apptainer:** amd64 images will run under QEMU emulation on ARM hosts if the host kernel supports it, but this is unsupported and not recommended for production use
+- For native ARM64 support, rebuild the containers from the provided Dockerfiles targeting `linux/arm64`
+
+---
+
 ## Container Index
 
 | Container Name | Purpose | Key Tools | Config File |

@@ -175,6 +175,8 @@ The pipeline can be executed in different modes:
 
 All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](https://hub.docker.com/repositories/vilhelmmagnuslab).
 
+> **Architecture:** All container images are built for **linux/amd64 (x86_64)**. ARM64 systems (e.g. Apple Silicon) are not currently validated — see [CONTAINERS.md](CONTAINERS.md) for details on emulation options.
+
 ## Usage Examples
 
 ### Complete Pipeline (Recommended)
