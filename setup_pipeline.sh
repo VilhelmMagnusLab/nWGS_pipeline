@@ -42,6 +42,17 @@ NC='\033[0m' # No Color
 # Configuration
 ZENODO_RECORD="20596458"  # Diana pipeline reference files v3 (DOI: 10.5281/zenodo.20596458)
 BASE_URL="https://zenodo.org/record/${ZENODO_RECORD}/files"
+
+# MD5 checksums for Zenodo archives — update these whenever archives are rebuilt
+declare -A ARCHIVE_MD5=(
+    ["diana_dummy.tar.gz"]="3067976db7e7bd190a415099c5c1cc53"
+    ["humandb.tar.gz"]="a63ae92e6245129116b0d28f92d7a512"
+    ["reference_core.tar.gz"]="aa93c2148f0d1b3110b3fe22debb4749"
+    ["general.zip"]="d3553e44f1bbab8c820e04168c5b8e59"
+    ["Assembly.zip"]="de6bc8bed97e433cbe8be55ed0e1536a"
+    ["svanna-data.zip"]="6a5cabf40172cc420553ae8ca6ea3805"
+    ["r1041_e82_400bps_sup_v420.zip"]="ab2112991f0cd224eb6c0f43d22acf3d"
+)
 PIPELINE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_DIR="${PIPELINE_DIR}/data"
 REFERENCE_DIR="${DATA_DIR}/reference"
@@ -114,6 +125,42 @@ download_file() {
     else
         print_error "Failed to download ${filename}"
         print_info "URL: ${url}"
+        exit 1
+    fi
+}
+
+verify_checksum() {
+    local file="$1"
+    local filename
+    filename="$(basename "${file}")"
+    local expected="${ARCHIVE_MD5[$filename]}"
+
+    # No checksum registered for this file — skip silently
+    if [ -z "${expected}" ]; then
+        return 0
+    fi
+
+    print_info "Verifying checksum for ${filename}..."
+
+    local actual
+    if check_command md5sum; then
+        actual=$(md5sum "${file}" | awk '{print $1}')
+    elif check_command md5; then
+        actual=$(md5 -q "${file}")
+    else
+        print_warning "md5sum not found — skipping checksum verification"
+        return 0
+    fi
+
+    if [ "${actual}" = "${expected}" ]; then
+        print_success "Checksum OK: ${filename}"
+    else
+        print_error "Checksum mismatch for ${filename}!"
+        print_error "  Expected: ${expected}"
+        print_error "  Got:      ${actual}"
+        print_error "The file is corrupted (likely an interrupted download)."
+        rm -f "${file}"
+        print_info "The bad file has been removed. Re-run setup_pipeline.sh to retry."
         exit 1
     fi
 }
@@ -523,27 +570,17 @@ setup_svanna_database() {
         return
     fi
 
-    # Download svanna-data.zip if not present
-    if [ ! -f "${REFERENCE_DIR}/svanna-data.zip" ]; then
-        print_info "Downloading svanna-data.zip from Zenodo..."
-        download_file "svanna-data.zip" "${REFERENCE_DIR}/svanna-data.zip"
-    else
-        print_success "svanna-data.zip already downloaded"
-    fi
-
-    # Extract the zip file
+    # Extract svanna-data.zip (bundled in reference_core.tar.gz)
     if [ -f "${REFERENCE_DIR}/svanna-data.zip" ]; then
         print_info "Extracting Svanna database..."
         extract_archive "${REFERENCE_DIR}/svanna-data.zip" "${REFERENCE_DIR}"
-
-        # Optionally remove zip after extraction to save space
-        # Uncomment the next line if you want to delete the zip after extraction
-        # rm "${REFERENCE_DIR}/svanna-data.zip"
-
         print_success "Svanna database setup complete!"
     else
-        print_error "Failed to download svanna-data.zip"
-        exit 1
+        print_warning "svanna-data.zip not found in reference directory — downloading as fallback..."
+        download_file "svanna-data.zip" "${REFERENCE_DIR}/svanna-data.zip"
+        verify_checksum "${REFERENCE_DIR}/svanna-data.zip"
+        extract_archive "${REFERENCE_DIR}/svanna-data.zip" "${REFERENCE_DIR}"
+        print_success "Svanna database setup complete!"
     fi
 
     echo ""
@@ -567,6 +604,7 @@ download_reference_files() {
     if [ ! -d "${DATA_DIR}/diana_dummy" ]; then
         print_info "Downloading demo test data (diana_dummy.tar.gz)..."
         download_file "diana_dummy.tar.gz" "${PIPELINE_DIR}/diana_dummy.tar.gz"
+        verify_checksum "${PIPELINE_DIR}/diana_dummy.tar.gz"
         extract_archive "${PIPELINE_DIR}/diana_dummy.tar.gz" "${DATA_DIR}"
         rm "${PIPELINE_DIR}/diana_dummy.tar.gz"
         print_success "Demo data extracted to data/diana_dummy/"
@@ -580,6 +618,7 @@ download_reference_files() {
     if [ ! -f "${DATA_DIR}/.reference_core_downloaded" ]; then
         print_info "Downloading core reference files (includes nanoDx classifier)..."
         download_file "reference_core.tar.gz" "${PIPELINE_DIR}/reference_core.tar.gz"
+        verify_checksum "${PIPELINE_DIR}/reference_core.tar.gz"
         extract_archive "${PIPELINE_DIR}/reference_core.tar.gz" "${REFERENCE_DIR}"
         rm "${PIPELINE_DIR}/reference_core.tar.gz"
         touch "${DATA_DIR}/.reference_core_downloaded"
@@ -594,6 +633,7 @@ download_reference_files() {
     if [ ! -f "${DATA_DIR}/.humandb_downloaded" ]; then
         print_info "Downloading ANNOVAR databases..."
         download_file "humandb.tar.gz" "${PIPELINE_DIR}/humandb.tar.gz"
+        verify_checksum "${PIPELINE_DIR}/humandb.tar.gz"
         extract_archive "${PIPELINE_DIR}/humandb.tar.gz" "${HUMANDB_DIR}"
         rm "${PIPELINE_DIR}/humandb.tar.gz"
         touch "${DATA_DIR}/.humandb_downloaded"
@@ -618,20 +658,22 @@ download_reference_files() {
         echo ""
     fi
 
-    # Download and extract Assembly.zip (vcfcircos assembly data)
-    if [ ! -f "${REFERENCE_DIR}/Assembly.zip" ] && [ ! -d "${REFERENCE_DIR}/Assembly" ]; then
-        print_info "Downloading Assembly data (Assembly.zip)..."
-        download_file "Assembly.zip" "${REFERENCE_DIR}/Assembly.zip"
-        print_info "Extracting Assembly data..."
-        extract_archive "${REFERENCE_DIR}/Assembly.zip" "${REFERENCE_DIR}"
-        print_success "Assembly data extracted"
+    # Extract Assembly.zip (bundled in reference_core.tar.gz)
+    if [ ! -d "${REFERENCE_DIR}/Assembly" ]; then
+        if [ -f "${REFERENCE_DIR}/Assembly.zip" ]; then
+            print_info "Extracting Assembly data..."
+            extract_archive "${REFERENCE_DIR}/Assembly.zip" "${REFERENCE_DIR}"
+            print_success "Assembly data extracted"
+        else
+            print_warning "Assembly.zip not found in reference directory — downloading as fallback..."
+            download_file "Assembly.zip" "${REFERENCE_DIR}/Assembly.zip"
+            verify_checksum "${REFERENCE_DIR}/Assembly.zip"
+            extract_archive "${REFERENCE_DIR}/Assembly.zip" "${REFERENCE_DIR}"
+            print_success "Assembly data extracted"
+        fi
         echo ""
     else
-        if [ -d "${REFERENCE_DIR}/Assembly" ]; then
-            print_success "Assembly data already present"
-        else
-            print_success "Assembly.zip already downloaded"
-        fi
+        print_success "Assembly data already present"
         echo ""
     fi
 
