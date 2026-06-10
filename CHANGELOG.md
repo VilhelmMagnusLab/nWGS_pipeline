@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Download is **non-fatal**: if Ensembl FTP is unreachable the installation continues normally with ANNOVAR as the default annotator
   - Prints manual download instructions when the download fails so users can install the cache later
   - Skips silently if `homo_sapiens_refseq/` already exists
+- Added `ensemblorg/ensembl-vep:latest` to `setup_pipeline.sh` container pulls (Docker and Singularity), needed only when `snv_annotator = "vep"`
+  - Singularity image is named `ensembl-vep_latest.sif`; updated `conf/annotation.config` (`clair3_annotate_vep`/`clairs_to_annotate_vep`) and `CONTAINERS.md` to match
 - Added preprint citation to README (Bope CD et al. 2026, https://doi.org/10.64898/2026.03.25.714119)
 - Added `extract_roi` process to `modules/epi2me.nf` — runs for `snv` and `all` modes, directly feeding `run_clair3` and `run_clairs_to` without requiring a separate mergebam step
 - Added missing `occ_bam_dir` and `roi_bed` parameters to `conf/epi2me.config`

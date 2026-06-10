@@ -42,6 +42,7 @@ The current release is tested exclusively on x86_64 Linux systems. ARM64 platfor
 | **gviz_amd64** | Gene coverage plots | Gviz | annotation.config |
 | **markdown_images_28feb2025** | RMarkdown reports | pandoc, knitr | annotation.config |
 | **nwgs_default_images** | General utilities | Various | annotation.config, mergebam.config |
+| **ensembl-vep** | SNV annotation (optional, `snv_annotator = "vep"`) | Ensembl VEP | annotation.config |
 
 ---
 
@@ -73,6 +74,7 @@ The current release is tested exclusively on x86_64 Linux systems. ARM64 platfor
 | svannasv_fusion_events | nwgs_default_images |
 | clair3_annotate | clair3_amd64 |
 | clairs_to_annotate | clairsto_amd64 |
+| clair3_annotate_vep / clairs_to_annotate_vep | ensembl-vep (optional, `snv_annotator = "vep"`) |
 | merge_annotation | nwgs_default_images |
 | igv_tools | igv_report_amd64 |
 | plot_genomic_regions | gviz_amd64 |

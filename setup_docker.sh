@@ -108,6 +108,9 @@ pull_if_not_exists "vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni"
 pull_if_not_exists "vilhelmmagnuslab/gviz_amd64"
 pull_if_not_exists "vilhelmmagnuslab/sturgeon_amd64_21jan"
 
+# Optional VEP image (only needed when snv_annotator = "vep")
+pull_if_not_exists "ensemblorg/ensembl-vep"
+
 # Epi2me images
 echo "Pulling Epi2me analysis images..."
 pull_if_not_exists "vilhelmmagnuslab/snifflesv252_update"

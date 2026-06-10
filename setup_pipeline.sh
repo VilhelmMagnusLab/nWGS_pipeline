@@ -754,6 +754,27 @@ setup_docker_containers() {
         fi
     }
 
+    # Function to pull an optional Docker image — never aborts setup on failure
+    pull_docker_optional() {
+        local image_name=$1
+        local image_with_tag="${image_name}:latest"
+
+        if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "^${image_with_tag}$"; then
+            echo -e "  ${GREEN}✓${NC} $image_with_tag already exists, skipping..."
+            return
+        fi
+
+        echo -e "  ${CYAN}Pulling${NC} $image_with_tag (optional)..."
+        docker pull "$image_with_tag" 2>&1 | grep -v "Pulling from"
+        if [ ${PIPESTATUS[0]} -eq 0 ]; then
+            echo -e "  ${GREEN}✓${NC} Pulled $image_with_tag"
+        else
+            print_warning "Could not pull optional image: $image_with_tag"
+            print_info "This is only needed for VEP annotation (snv_annotator = \"vep\"); ANNOVAR (default) is unaffected."
+            print_info "To install it later, run: docker pull $image_with_tag"
+        fi
+    }
+
     # Core analysis images
     echo "Core analysis images:"
     pull_docker_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
@@ -769,6 +790,11 @@ setup_docker_containers() {
     pull_docker_if_not_exists "vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni"
     pull_docker_if_not_exists "vilhelmmagnuslab/gviz_amd64"
     pull_docker_if_not_exists "vilhelmmagnuslab/sturgeon_amd64_21jan"
+    echo ""
+
+    # Optional VEP image (only needed when snv_annotator = "vep")
+    echo "Optional VEP image:"
+    pull_docker_optional "ensemblorg/ensembl-vep"
     echo ""
 
     # Epi2me images
@@ -826,6 +852,31 @@ setup_singularity_containers() {
         fi
     }
 
+    # Function to pull an optional image — never aborts setup on failure
+    pull_singularity_optional() {
+        local image_name=$1
+        local image_basename=$(basename "$image_name")
+        local image_file="${PIPELINE_DIR}/containers/${image_basename}_latest.sif"
+
+        if [ -f "$image_file" ]; then
+            echo -e "  ${GREEN}✓${NC} $image_name already exists, skipping..."
+            return
+        fi
+
+        echo -e "  ${CYAN}Pulling${NC} $image_name (optional)..."
+        $SINGULARITY_CMD pull --dir "${PIPELINE_DIR}/containers/" "docker://$image_name:latest" 2>&1 | \
+            grep -v "INFO:" || true
+
+        if [ -f "$image_file" ]; then
+            echo -e "  ${GREEN}✓${NC} Pulled $image_name"
+        else
+            print_warning "Could not pull optional image: $image_name"
+            print_info "This is only needed for VEP annotation (snv_annotator = \"vep\"); ANNOVAR (default) is unaffected."
+            print_info "To install it later, run:"
+            print_info "  $SINGULARITY_CMD pull --dir ${PIPELINE_DIR}/containers/ docker://$image_name:latest"
+        fi
+    }
+
     # Core analysis images
     echo "Core analysis images:"
     pull_singularity_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
@@ -841,6 +892,11 @@ setup_singularity_containers() {
     pull_singularity_if_not_exists "vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni"
     pull_singularity_if_not_exists "vilhelmmagnuslab/gviz_amd64ps"
     pull_singularity_if_not_exists "vilhelmmagnuslab/sturgeon_amd64_21jan"
+    echo ""
+
+    # Optional VEP image (only needed when snv_annotator = "vep")
+    echo "Optional VEP image:"
+    pull_singularity_optional "ensemblorg/ensembl-vep"
     echo ""
 
     # Epi2me images
