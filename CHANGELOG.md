@@ -55,11 +55,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed default SNV annotator from `"vep"` to `"annovar"` in `nextflow.config`
   - VEP remains available via `--snv_annotator vep` or by editing `nextflow.config`
   - README annotator table and code examples updated to reflect new default
-- Updated Zenodo record from `19232427` to `20596458` (DOI: `10.5281/zenodo.20596458`)
+- Updated Zenodo record from `19232427` to `20596458`, then to `20609244` (DOI: `10.5281/zenodo.20609244`)
   - Updated `setup_pipeline.sh` (header comment, `ZENODO_RECORD` variable, summary banner)
   - Updated all DOI links in `README.md`
   - Rebuilt Zenodo archives: `humandb.tar.gz`, `reference_core.tar.gz`, `diana_dummy.tar.gz`
   - `humandb.tar.gz` no longer bundles the VEP cache (`homo_sapiens_refseq/`) — now downloaded directly from Ensembl during setup (see below)
+  - `reference_core.tar.gz` rebuilt to additionally bundle `Assembly.zip`, `svanna-data.zip`, and the `r1041_e82_400bps_sup_v520`/`hac_v520` Clair3 models, all automatically extracted by `setup_pipeline.sh`
+- Added MD5 checksum verification (`verify_checksum()`, `ARCHIVE_MD5` map) to `setup_pipeline.sh` for all Zenodo archive downloads
+  - Detects corrupted/interrupted downloads immediately instead of failing later during extraction
+  - On mismatch, deletes the bad file and exits with instructions to re-run the script to retry
+- Removed `general.zip` (Sturgeon classifier) and `r1041_e82_400bps_sup_v420.zip` (old Dorado model) from `setup_pipeline.sh` downloads
+  - `general.zip` is no longer hosted on Zenodo — users download it manually per the README's Sturgeon section (Dropbox link)
+  - `r1041_e82_400bps_sup_v420.zip` replaced by the v520 sup/hac models bundled in `reference_core.tar.gz`; `setup_pipeline.sh` now verifies their presence instead of downloading
 - README: COSMIC section updated — added login link (https://cancer.sanger.ac.uk/cosmic/login) and replaced hardcoded `v100` with generic `v{version}` so instructions stay valid for future releases
 - Removed `docs/pancan_devel_v5i_dictionary.txt` from repository — updated dictionary now distributed via Zenodo reference archive; README note pointing to `docs/` removed
 - Renamed `occ_fusions_genes.txt` → `roi_fusions_genes.txt` and all related identifiers
@@ -95,6 +102,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `"conflicting: Conflicting classifications of pathogenicity (ClinVar)"` to the SNV table legend so users understand the abbreviation
 
 ### `Fixed`
+- Fixed `setup_pipeline.sh` extracting `reference_core.tar.gz` and `humandb.tar.gz` into the wrong directory, creating doubly-nested `data/reference/reference/...` and `data/humandb/humandb/...`
+  - Root cause: both archives now contain a top-level `reference/`/`humandb/` directory, but were extracted into `${REFERENCE_DIR}`/`${HUMANDB_DIR}` (already pointing to `data/reference`/`data/humandb`)
+  - Fix: both archives are now extracted into `${DATA_DIR}` so their top-level directory lands at the correct path
+  - This also fixes a follow-on failure where `Assembly.zip` was reported "missing" and a broken fallback download produced a 0-byte file that failed checksum verification
+- Fixed `download_file()` in `setup_pipeline.sh` always reporting success even when the download failed (e.g. HTTP 404)
+  - Root cause: exit status was checked on the last command of a `wget | grep | sed | awk` pipeline, not on `wget` itself
+  - Fix: capture `wget`'s exit code via `PIPESTATUS[0]`, use `curl -f` for curl, and verify the downloaded file is non-empty before declaring success
 - Fixed `smart_sample_monitor_v2.sh` loading 0 samples when `set -eo pipefail` is active
   - Root cause: `((line_count++))` returns exit code 1 when count is 0, killing the subshell silently
   - Fix: changed to pre-increment `((++line_count))` and `((++valid_count))`

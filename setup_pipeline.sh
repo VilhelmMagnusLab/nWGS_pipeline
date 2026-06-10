@@ -48,10 +48,8 @@ declare -A ARCHIVE_MD5=(
     ["diana_dummy.tar.gz"]="3067976db7e7bd190a415099c5c1cc53"
     ["humandb.tar.gz"]="a63ae92e6245129116b0d28f92d7a512"
     ["reference_core.tar.gz"]="620129cbe4143a3451d83eaf11f1944f"
-    ["general.zip"]="d3553e44f1bbab8c820e04168c5b8e59"
     ["Assembly.zip"]="de6bc8bed97e433cbe8be55ed0e1536a"
     ["svanna-data.zip"]="6a5cabf40172cc420553ae8ca6ea3805"
-    ["r1041_e82_400bps_sup_v420.zip"]="ab2112991f0cd224eb6c0f43d22acf3d"
 )
 PIPELINE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_DIR="${PIPELINE_DIR}/data"
@@ -107,24 +105,28 @@ download_file() {
 
     echo -e "${CYAN}📥 Downloading ${filename}...${NC}"
 
+    local dl_status=0
     if check_command wget; then
         wget -q --show-progress "${url}" -O "${destination}" 2>&1 | \
             grep --line-buffered "%" | \
             sed -u -e "s,\.,,g" | \
             awk '{printf("\r  Progress: %s", $2+0); fflush()}'
+        dl_status=${PIPESTATUS[0]}
         echo ""
     elif check_command curl; then
-        curl -L "${url}" -o "${destination}" --progress-bar
+        curl -fL "${url}" -o "${destination}" --progress-bar
+        dl_status=$?
     else
         print_error "Neither wget nor curl found. Please install one of them."
         exit 1
     fi
 
-    if [ $? -eq 0 ]; then
+    if [ ${dl_status} -eq 0 ] && [ -s "${destination}" ]; then
         print_success "Downloaded ${filename}"
     else
         print_error "Failed to download ${filename}"
         print_info "URL: ${url}"
+        rm -f "${destination}"
         exit 1
     fi
 }
@@ -619,7 +621,7 @@ download_reference_files() {
         print_info "Downloading core reference files (includes nanoDx classifier)..."
         download_file "reference_core.tar.gz" "${PIPELINE_DIR}/reference_core.tar.gz"
         verify_checksum "${PIPELINE_DIR}/reference_core.tar.gz"
-        extract_archive "${PIPELINE_DIR}/reference_core.tar.gz" "${REFERENCE_DIR}"
+        extract_archive "${PIPELINE_DIR}/reference_core.tar.gz" "${DATA_DIR}"
         rm "${PIPELINE_DIR}/reference_core.tar.gz"
         touch "${DATA_DIR}/.reference_core_downloaded"
         echo ""
@@ -634,7 +636,7 @@ download_reference_files() {
         print_info "Downloading ANNOVAR databases..."
         download_file "humandb.tar.gz" "${PIPELINE_DIR}/humandb.tar.gz"
         verify_checksum "${PIPELINE_DIR}/humandb.tar.gz"
-        extract_archive "${PIPELINE_DIR}/humandb.tar.gz" "${HUMANDB_DIR}"
+        extract_archive "${PIPELINE_DIR}/humandb.tar.gz" "${DATA_DIR}"
         rm "${PIPELINE_DIR}/humandb.tar.gz"
         touch "${DATA_DIR}/.humandb_downloaded"
         echo ""
@@ -646,17 +648,6 @@ download_reference_files() {
 
     # Download VEP cache from Ensembl (optional — non-fatal if download fails)
     setup_vep_cache
-
-    # Download general.zip (Sturgeon classifier) - keep as zip, DO NOT extract
-    if [ ! -f "${REFERENCE_DIR}/general.zip" ]; then
-        print_info "Downloading Sturgeon classifier (general.zip)..."
-        download_file "general.zip" "${REFERENCE_DIR}/general.zip"
-        print_success "Sturgeon classifier downloaded (kept as .zip)"
-        echo ""
-    else
-        print_success "Sturgeon classifier (general.zip) already present"
-        echo ""
-    fi
 
     # Extract Assembly.zip (bundled in reference_core.tar.gz)
     if [ ! -d "${REFERENCE_DIR}/Assembly" ]; then
@@ -677,16 +668,15 @@ download_reference_files() {
         echo ""
     fi
 
-    # Download and extract Dorado model
-    if [ ! -f "${REFERENCE_DIR}/r1041_e82_400bps_sup_v420.zip" ] && [ ! -d "${REFERENCE_DIR}/r1041_e82_400bps_sup_v420" ]; then
-        print_info "Downloading Dorado model (r1041_e82_400bps_sup_v420.zip)..."
-        download_file "r1041_e82_400bps_sup_v420.zip" "${REFERENCE_DIR}/r1041_e82_400bps_sup_v420.zip"
-        print_info "Extracting Dorado model..."
-        extract_archive "${REFERENCE_DIR}/r1041_e82_400bps_sup_v420.zip" "${REFERENCE_DIR}"
-        print_success "Dorado model extracted"
+    # Verify Clair3/ClairS-TO basecalling models (bundled in reference_core.tar.gz)
+    if [ -d "${REFERENCE_DIR}/r1041_e82_400bps_sup_v520" ] && [ -d "${REFERENCE_DIR}/r1041_e82_400bps_hac_v520" ]; then
+        print_success "Clair3 basecalling models (sup_v520, hac_v520) present"
         echo ""
     else
-        print_success "Dorado model already present"
+        print_warning "Clair3 basecalling models (r1041_e82_400bps_sup_v520 / hac_v520) not found in ${REFERENCE_DIR}"
+        print_warning "These are bundled inside reference_core.tar.gz"
+        print_info "Fix: rm data/.reference_core_downloaded && re-run setup_pipeline.sh"
+        print_info "to re-download and extract the updated reference_core.tar.gz."
         echo ""
     fi
 
