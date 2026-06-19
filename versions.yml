@@ -194,8 +194,8 @@ containers:
     tools:
       igv.js: latest
 
-  gviz_amd64:
-    docker_image: vilhelmmagnuslab/gviz_amd64:latest
+  gviz_amd64ps:
+    docker_image: vilhelmmagnuslab/gviz_amd64ps:latest
     singularity_image: gviz_amd64ps_latest.sif
     purpose: Gene coverage visualization
     tools:

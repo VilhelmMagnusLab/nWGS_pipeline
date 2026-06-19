@@ -101,11 +101,11 @@ pull_if_not_exists "vilhelmmagnuslab/clair3_amd64"
 pull_if_not_exists "vilhelmmagnuslab/clairsto_amd64"
 pull_if_not_exists "vilhelmmagnuslab/igv_report_amd64"
 pull_if_not_exists "vilhelmmagnuslab/vcf2circos"
-pull_if_not_exists "vilhelmmagnuslab/nanodx_env"
+pull_if_not_exists "vilhelmmagnuslab/nanodx_images_3feb25"
 pull_if_not_exists "vilhelmmagnuslab/crossnnumap"
 pull_if_not_exists "vilhelmmagnuslab/markdown_images_28feb2025"
 pull_if_not_exists "vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni"
-pull_if_not_exists "vilhelmmagnuslab/gviz_amd64"
+pull_if_not_exists "vilhelmmagnuslab/gviz_amd64ps"
 pull_if_not_exists "vilhelmmagnuslab/sturgeon_amd64_21jan"
 
 # Optional VEP image (only needed when snv_annotator = "vep")

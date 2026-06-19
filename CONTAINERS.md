@@ -39,7 +39,7 @@ The current release is tested exclusively on x86_64 Linux systems. ARM64 platfor
 | **crossnnumap** | t-SNE/UMAP plots | R t-SNE, UMAP | annotation.config |
 | **vcf2circos** | Circos plots | vcf2circos | annotation.config |
 | **igv_report_amd64** | IGV.js reports | IGV.js | annotation.config |
-| **gviz_amd64** | Gene coverage plots | Gviz | annotation.config |
+| **gviz_amd64ps** | Gene coverage plots | Gviz | annotation.config |
 | **markdown_images_28feb2025** | RMarkdown reports | pandoc, knitr | annotation.config |
 | **nwgs_default_images** | General utilities | Various | annotation.config, mergebam.config |
 | **ensembl-vep** | SNV annotation (optional, `snv_annotator = "vep"`) | Ensembl VEP | annotation.config |
@@ -77,7 +77,7 @@ The current release is tested exclusively on x86_64 Linux systems. ARM64 platfor
 | clair3_annotate_vep / clairs_to_annotate_vep | ensembl-vep (optional, `snv_annotator = "vep"`) |
 | merge_annotation | nwgs_default_images |
 | igv_tools | igv_report_amd64 |
-| plot_genomic_regions | gviz_amd64 |
+| plot_genomic_regions | gviz_amd64ps |
 | ace_tmc | ace_1.24.0 |
 | annotatecnv | annotcnv_images_27feb1025 |
 | markdown_report | markdown_images_28feb2025 |

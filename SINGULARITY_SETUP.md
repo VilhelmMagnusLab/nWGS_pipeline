@@ -57,7 +57,7 @@ singularity pull --dir containers/ docker://vilhelmmagnuslab/vcf2circos:latest
 singularity pull --dir containers/ docker://vilhelmmagnuslab/nanodx_images_3feb25:latest
 singularity pull --dir containers/ docker://vilhelmmagnuslab/markdown_images_28feb2025:latest
 singularity pull --dir containers/ docker://vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
-singularity pull --dir containers/ docker://vilhelmmagnuslab/gviz_amd64:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/gviz_amd64ps:latest
 
 # Epi2me images
 singularity pull --dir containers/ docker://vilhelmmagnuslab/snifflesv252_update:latest
@@ -109,7 +109,7 @@ apptainer {
 | NanoDx | `nanodx_images_3feb25_latest.sif` | NanoDx classification |
 | Markdown | `markdown_images_28feb2025_latest.sif` | Report generation |
 | Cramino | `mgmt_nanopipe_amd64_18feb2025_cramoni_latest.sif` | Quality assessment |
-| Gviz | `gviz_amd64_latest.sif` | Genomic visualization |
+| Gviz | `gviz_amd64ps_latest.sif` | Genomic visualization |
 | Sniffles2 | `snifflesv252_update_latest_latest.sif` | SV calling (Epi2me) |
 | QDNAseq | `qdnaseq_amd64_latest_latest.sif` | CNV analysis (Epi2me) |
 | Modkit | `modkit_latest_latest.sif` | Modified base calling (Epi2me) |

@@ -280,7 +280,7 @@ This document lists all software tools, packages, and their versions used in the
 | Container | igv_report_amd64_latest.sif |
 | Purpose | Generate IGV.js HTML reports |
 
-#### Genomic Region Plots (`gviz_amd64`)
+#### Genomic Region Plots (`gviz_amd64ps`)
 **Purpose:** Gene coverage visualization
 
 | Component | Version |

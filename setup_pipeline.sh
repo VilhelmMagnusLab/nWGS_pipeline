@@ -5,7 +5,7 @@
 # This script automatically downloads all reference files from Zenodo and
 # sets up the pipeline for immediate use.
 #
-# Zenodo Record: https://doi.org/10.5281/zenodo.20609244
+# Zenodo Record: https://doi.org/10.5281/zenodo.20761496
 #
 # Usage:
 #   ./setup_pipeline.sh docker|singularity [OPTIONS]
@@ -40,14 +40,14 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
-ZENODO_RECORD="20609244"  # Diana pipeline reference files v3 (DOI: 10.5281/zenodo.20609244)
+ZENODO_RECORD="20761496"  # Diana pipeline reference files v3 (DOI: 10.5281/zenodo.20761496)
 BASE_URL="https://zenodo.org/record/${ZENODO_RECORD}/files"
 
 # MD5 checksums for Zenodo archives — update these whenever archives are rebuilt
 declare -A ARCHIVE_MD5=(
     ["diana_dummy.tar.gz"]="3067976db7e7bd190a415099c5c1cc53"
     ["humandb.tar.gz"]="a63ae92e6245129116b0d28f92d7a512"
-    ["reference_core.tar.gz"]="620129cbe4143a3451d83eaf11f1944f"
+    ["reference_core.tar.gz"]="6675a32bcd83ef0d88de18e88ec676c7"
     ["Assembly.zip"]="de6bc8bed97e433cbe8be55ed0e1536a"
     ["svanna-data.zip"]="6a5cabf40172cc420553ae8ca6ea3805"
 )
@@ -784,11 +784,11 @@ setup_docker_containers() {
     pull_docker_if_not_exists "vilhelmmagnuslab/clairsto_amd64"
     pull_docker_if_not_exists "vilhelmmagnuslab/igv_report_amd64"
     pull_docker_if_not_exists "vilhelmmagnuslab/vcf2circos"
-    pull_docker_if_not_exists "vilhelmmagnuslab/nanodx_env"
+    pull_docker_if_not_exists "vilhelmmagnuslab/nanodx_images_3feb25"
     pull_docker_if_not_exists "vilhelmmagnuslab/crossnnumap"
     pull_docker_if_not_exists "vilhelmmagnuslab/markdown_images_28feb2025"
     pull_docker_if_not_exists "vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni"
-    pull_docker_if_not_exists "vilhelmmagnuslab/gviz_amd64"
+    pull_docker_if_not_exists "vilhelmmagnuslab/gviz_amd64ps"
     pull_docker_if_not_exists "vilhelmmagnuslab/sturgeon_amd64_21jan"
     echo ""
 
@@ -1345,7 +1345,7 @@ main() {
 ║                    DIANA-Automated Setup                      ║
 ║    Diagnostic Integrated Analytics for Neoplastic Alterations ║
 ║                                                               ║
-║           Zenodo: 10.5281/zenodo.20609244                     ║
+║           Zenodo: 10.5281/zenodo.20761496                     ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 EOF

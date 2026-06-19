@@ -30,8 +30,9 @@ NC='\033[0m'
 
 # Configuration
 PIPELINE_DIR="/home/godzilla/diana"
-REFERENCE_DIR="${PIPELINE_DIR}/data/reference"
-HUMANDB_DIR="${PIPELINE_DIR}/data/humandb"
+DATA_DIR="${PIPELINE_DIR}/data"
+REFERENCE_DIR="${DATA_DIR}/reference"
+HUMANDB_DIR="${DATA_DIR}/humandb"
 OUTPUT_DIR="${1:-${PIPELINE_DIR}/zenodo_upload}"
 
 ################################################################################
@@ -109,18 +110,25 @@ package_reference_core() {
     print_info "Creating reference_core.tar.gz from ${REFERENCE_DIR}..."
     print_warning "This may take 5-10 minutes for ~25 GB of files..."
 
-    # Package reference files (exclude items packaged separately)
+    # Package reference files.
+    # Tar from DATA_DIR with 'reference' as the entry (not '.' from inside
+    # REFERENCE_DIR) so the archive has a top-level reference/ directory —
+    # setup_pipeline.sh extracts this archive into DATA_DIR, expecting that
+    # top-level directory to land at data/reference/.
     # nanoDx is INCLUDED in reference_core.tar.gz since it's already in data/reference/nanoDx/
+    # Assembly.zip and svanna-data.zip ARE bundled (kept as zips so users can
+    # extract on demand); their already-extracted directory counterparts are
+    # excluded to avoid shipping the same content twice. general.zip
+    # (Sturgeon) is distributed separately, not via Zenodo. The deprecated
+    # v420 Dorado model is excluded in favor of the bundled v520 sup/hac models.
     tar -czf "$output_file" \
-        -C "${REFERENCE_DIR}" \
-        --exclude='general.zip' \
-        --exclude='Assembly' \
-        --exclude='Assembly.zip' \
-        --exclude='svanna-data' \
-        --exclude='svanna-data.zip' \
-        --exclude='r1041_e82_400bps_sup_v420' \
-        --exclude='r1041_e82_400bps_sup_v420.zip' \
-        .
+        -C "${DATA_DIR}" \
+        --exclude='reference/general.zip' \
+        --exclude='reference/Assembly' \
+        --exclude='reference/svanna-data' \
+        --exclude='reference/r1041_e82_400bps_sup_v420' \
+        --exclude='reference/r1041_e82_400bps_sup_v420.zip' \
+        reference
 
     local size=$(stat -f%z "$output_file" 2>/dev/null || stat -c%s "$output_file")
     local size_human=$(human_readable_size $size)
@@ -141,9 +149,15 @@ package_humandb() {
     print_info "Creating humandb.tar.gz from ${HUMANDB_DIR}..."
     print_warning "This may take 3-5 minutes for ~10 GB of files..."
 
+    # Tar from DATA_DIR with 'humandb' as the entry so the archive has a
+    # top-level humandb/ directory (see package_reference_core comment above).
+    # homo_sapiens_refseq/ (the VEP cache, ~24 GB) is excluded — it's
+    # downloaded directly from Ensembl by setup_pipeline.sh instead of
+    # being bundled here.
     tar -czf "$output_file" \
-        -C "${HUMANDB_DIR}" \
-        .
+        -C "${DATA_DIR}" \
+        --exclude='humandb/homo_sapiens_refseq' \
+        humandb
 
     local size=$(stat -f%z "$output_file" 2>/dev/null || stat -c%s "$output_file")
     local size_human=$(human_readable_size $size)

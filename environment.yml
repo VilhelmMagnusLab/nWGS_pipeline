@@ -49,7 +49,7 @@ dependencies:
 # Visualization:
 #   - VCF2Circos (in vcf2circos container)
 #   - IGV Reports (in igv_report_amd64 container)
-#   - Gviz plots (in gviz_amd64 container)
+#   - Gviz plots (in gviz_amd64ps container)
 #   - R Markdown reports (in markdown_images container)
 #
 # For complete version information, see:

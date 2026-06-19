@@ -90,6 +90,7 @@ warning_img              <- if (length(args) >= 28) args[28] else NULL
 pancan_votes_file        <- if (length(args) >= 29) args[29] else NULL
 pancan_dictionary_file   <- if (length(args) >= 30) args[30] else NULL
 pancan_tsne_plot_file    <- if (length(args) >= 31) args[31] else NULL
+gbm_protein_fusion_file  <- if (length(args) >= 32) args[32] else structure_variant_file
 
 # Read in the votes and dictionary files
 if (!file.exists(votes_file)) {
@@ -645,8 +646,8 @@ is_empty_file <- function(df) {
 
 # Try to read the file and handle potential errors
 tryCatch({
-    # Read the structure variant file - optimized for tab-separated format
-    df_sv <- read.table(structure_variant_file, 
+    # Read the structure variant file (sv_fusions_both_gbm.tsv) - optimized for tab-separated format
+    df_sv <- read.table(structure_variant_file,
                          header = TRUE, 
                          sep = "\t",
                          stringsAsFactors = FALSE,
@@ -656,21 +657,36 @@ tryCatch({
                          na.strings = c("", "NA", "N/A", "na", "n/a"),
                          check.names = FALSE)
     
-    # Define essential columns for structural variants (excluding ID)
-    essential_columns <- c("chr", "star", "end", "svtype", "breaking", "Genes")
+    # Embed the gene name into the chromosome column, e.g. "chrX[BCOR]"
+    if (all(c("chrom_A", "gene_A") %in% colnames(df_sv))) {
+        df_sv$chrom_A <- ifelse(!is.na(df_sv$gene_A) & df_sv$gene_A != "",
+                                 paste0(df_sv$chrom_A, "[", df_sv$gene_A, "]"),
+                                 df_sv$chrom_A)
+    }
+    if (all(c("chrom_B", "gene_B") %in% colnames(df_sv))) {
+        df_sv$chrom_B <- ifelse(!is.na(df_sv$gene_B) & df_sv$gene_B != "",
+                                 paste0(df_sv$chrom_B, "[", df_sv$gene_B, "]"),
+                                 df_sv$chrom_B)
+    }
 
-    # Keep only essential columns that exist in the data
+    # Keep only the display columns from sv_fusions_gbm_protein.tsv
+    essential_columns <- c("fusion_name", "svtype", "chrom_A", "chrom_B", "pos_A", "pos_B", "support", "af", "element_A", "element_B")
+    col_labels <- c(fusion_name = "Fusion Name", svtype = "SV Type",
+                     chrom_A = " Partner A", chrom_B = "Partner B",
+                     pos_A = "Pos A", pos_B = "Pos B",
+                     support = "Support", af = "VAF",
+                     element_A = "Breakpoint A", element_B = "Breakpoint B")
     available_essential <- essential_columns[essential_columns %in% colnames(df_sv)]
     df_sv <- df_sv[, available_essential, drop = FALSE]
+    colnames(df_sv) <- col_labels[available_essential]
 
     # Check if the file is empty or has only headers
     if (!is_empty_file(df_sv)) {
-        # Add explanatory text for structure variants
-        #explanatory_text <- paste("Fusion events detected in the sample. The table shows essential breakpoint information including chromosome, position, structural variant type, and associated genes.")
-        #cat(strwrap(explanatory_text, width = 110), sep = "\n\n")
-
-        # Find Genes column index for italic formatting
-        genes_col_idx <- which(colnames(df_sv) == "Genes")
+        explanatory_text <- paste("Fusion events detected in the sample, restricted to candidates where BOTH",
+                                   "partner genes fall within the regions-of-interest (ROI) gene list. The table",
+                                   "shows the fusion gene pair, structural variant type, chromosome, and",
+                                   "breakpoint position for each partner.")
+        cat(strwrap(explanatory_text, width = 110), sep = "\n\n")
 
         if (knitr::is_html_output()) {
             tbl <- kable(df_sv,
@@ -682,16 +698,12 @@ tryCatch({
             for (i in 1:(ncol(df_sv) - 1)) {
                 tbl <- tbl %>% column_spec(i, border_right = "1px solid black")
             }
-            # Apply italic to Genes column
-            if (length(genes_col_idx) > 0) {
-                tbl <- tbl %>% column_spec(genes_col_idx, italic = TRUE)
-            }
             tbl %>%
                 kable_styling(bootstrap_options = c("striped", "hover"),
                             full_width = FALSE,
                             position = "center")
         } else if (knitr::is_latex_output()) {
-            tbl <- kable(df_sv,
+            kable(df_sv,
                   format = "latex",
                   booktabs = TRUE,
                   align = "c",
@@ -699,35 +711,32 @@ tryCatch({
                 kable_styling(latex_options = c("repeat_header", "striped", "hold_position", "scale_down"),
                             full_width = FALSE,
                             position = "center")
-            # Apply italic to Genes column
-            if (length(genes_col_idx) > 0) {
-                tbl <- tbl %>% column_spec(genes_col_idx, italic = TRUE)
-            }
-            tbl
         } else {
             kable(df_sv, row.names = FALSE)
         }
     } else {
         # Handle empty file or header-only case
+        no_fusion_msg <- "No fusion event detected between two genes both within the ROI gene list. See the Extended Report for fusions involving any ROI gene paired with a protein-coding partner."
         if (knitr::is_html_output()) {
-            cat("<p style='text-align: center; color: #666;'><em>No fusion event break point detected in this sample.</em></p>")
+            cat("<p style='text-align: center; color: #666;'><em>", no_fusion_msg, "</em></p>")
         } else if (knitr::is_latex_output()) {
-            cat("No fusion event break point detected in this sample.")
+            cat(strwrap(no_fusion_msg, width = 110), sep = "\n")
         } else {
-            cat("No fusion event break point detected in this sample.")
+            cat(strwrap(no_fusion_msg, width = 110), sep = "\n")
         }
     }
 }, error = function(e) {
     # Handle file reading errors with more detailed information
     error_msg <- paste("Error reading structure variant file:", e$message)
     cat(error_msg, "\n")
-    
+
+    no_fusion_msg <- "No fusion event detected between two genes both within the ROI gene list. See the Extended Report for fusions involving any ROI gene paired with a protein-coding partner."
     if (knitr::is_html_output()) {
-        cat("<p style='text-align: center; color: #666;'><em>No fusion event break point detected in this sample.</em></p>")
+        cat("<p style='text-align: center; color: #666;'><em>", no_fusion_msg, "</em></p>")
     } else if (knitr::is_latex_output()) {
-        cat("No fusion event break point detected in this sample.")
+        cat(strwrap(no_fusion_msg, width = 110), sep = "\n")
     } else {
-        cat("No fusion event break point detected in this sample.")
+        cat(strwrap(no_fusion_msg, width = 110), sep = "\n")
     }
 })
 ```
@@ -1415,8 +1424,8 @@ is_empty_file <- function(df) {
 
 # Try to read the file and handle potential errors
 tryCatch({
-    # Read the structure variant file - optimized for tab-separated format
-    df_mgmt <- read.table(structure_variant_file, 
+    # Read the structure variant file (sv_fusions_gbm_protein.tsv) - optimized for tab-separated format
+    df_mgmt <- read.table(gbm_protein_fusion_file,
                          header = TRUE, 
                          sep = "\t",
                          stringsAsFactors = FALSE,
@@ -1426,29 +1435,39 @@ tryCatch({
                          na.strings = c("", "NA", "N/A", "na", "n/a"),
                          check.names = FALSE)
     
-    # Print diagnostic information
-    ##cat(sprintf("Successfully read %d rows with %d columns\n", nrow(df_mgmt), ncol(df_mgmt)))
-    #cat("Original columns found:", paste(colnames(df_mgmt), collapse = ", "), "\n")
-    
-    # Define essential columns for structural variants
-    # Updated to include new "Features" column that contains exon/intron information
-    essential_columns <- c("chr", "star", "end", "ID", "svtype", "breaking", "Genes", "Features")
+    # Embed the gene name into the chromosome column, e.g. "chrX[BCOR]"
+    if (all(c("chrom_A", "gene_A") %in% colnames(df_mgmt))) {
+        df_mgmt$chrom_A <- ifelse(!is.na(df_mgmt$gene_A) & df_mgmt$gene_A != "",
+                                   paste0(df_mgmt$chrom_A, "[", df_mgmt$gene_A, "]"),
+                                   df_mgmt$chrom_A)
+    }
+    if (all(c("chrom_B", "gene_B") %in% colnames(df_mgmt))) {
+        df_mgmt$chrom_B <- ifelse(!is.na(df_mgmt$gene_B) & df_mgmt$gene_B != "",
+                                   paste0(df_mgmt$chrom_B, "[", df_mgmt$gene_B, "]"),
+                                   df_mgmt$chrom_B)
+    }
 
-    # Keep only essential columns that exist in the data
+    # Keep only the display columns from sv_fusions_gbm_protein.tsv
+    essential_columns <- c("fusion_name", "svtype", "chrom_A", "chrom_B", "pos_A", "pos_B", "support", "af", "element_A", "element_B")
+    col_labels <- c(fusion_name = "Fusion Name", svtype = "SV Type",
+                     chrom_A = "Partner A", chrom_B = "Partner B",
+                     pos_A = "Pos A", pos_B = "Pos B",
+                     support = "Support", af = "VAF",
+                     element_A = "Breakpoint A", element_B = "Breakpoint B")
     available_essential <- essential_columns[essential_columns %in% colnames(df_mgmt)]
     df_mgmt <- df_mgmt[, available_essential, drop = FALSE]
-    
-    # Print filtered column information
-    #cat("Essential columns kept:", paste(colnames(df_mgmt), collapse = ", "), "\n")
-    
+    colnames(df_mgmt) <- col_labels[available_essential]
+
     # Check if the file is empty or has only headers
     if (!is_empty_file(df_mgmt)) {
         # Add explanatory text for structure variants
-        explanatory_text <- paste("Fusion events detected in the sample. The table shows essential breakpoint information including chromosome, position, Sniffles ID, structural variant type, associated genes, and genomic features (exons/introns) involved in the fusion.")
+        explanatory_text <- paste("Fusion events detected in the sample, restricted to candidates where AT LEAST",
+                                   "ONE partner gene falls within the regions-of-interest (ROI) gene list AND BOTH",
+                                   "partners are protein-coding.",
+                                   "The table shows the fusion gene pair, structural variant type, chromosome,",
+                                   "chromosome position, support: number of reads supporting the structural",
+                                   "variation, VAF: Allele Frequency, breakpoint position for each partner.")
         cat(strwrap(explanatory_text, width = 110), sep = "\n\n")
-
-        # Find Genes column index for italic formatting
-        genes_col_idx <- which(colnames(df_mgmt) == "Genes")
 
         if (knitr::is_html_output()) {
             tbl <- kable(df_mgmt,
@@ -1460,16 +1479,12 @@ tryCatch({
             for (i in 1:(ncol(df_mgmt) - 1)) {
                 tbl <- tbl %>% column_spec(i, border_right = "1px solid black")
             }
-            # Apply italic to Genes column
-            if (length(genes_col_idx) > 0) {
-                tbl <- tbl %>% column_spec(genes_col_idx, italic = TRUE)
-            }
             tbl %>%
                 kable_styling(bootstrap_options = c("striped", "hover"),
                             full_width = FALSE,
                             position = "center")
         } else if (knitr::is_latex_output()) {
-            tbl <- kable(df_mgmt,
+            kable(df_mgmt,
                   format = "latex",
                   booktabs = TRUE,
                   align = "c",
@@ -1477,35 +1492,32 @@ tryCatch({
                 kable_styling(latex_options = c("repeat_header", "striped", "hold_position", "scale_down"),
                             full_width = FALSE,
                             position = "center")
-            # Apply italic to Genes column
-            if (length(genes_col_idx) > 0) {
-                tbl <- tbl %>% column_spec(genes_col_idx, italic = TRUE)
-            }
-            tbl
         } else {
             kable(df_mgmt, row.names = FALSE)
         }
     } else {
         # Handle empty file or header-only case
+        no_fusion_msg <- "No fusion event detected involving any ROI gene paired with a protein-coding partner. No qualifying structural variant fusions were identified in this sample."
         if (knitr::is_html_output()) {
-            cat("<p style='text-align: center; color: #666;'><em>No fusion event break point detected in this sample.</em></p>")
+            cat("<p style='text-align: center; color: #666;'><em>", no_fusion_msg, "</em></p>")
         } else if (knitr::is_latex_output()) {
-            cat("No fusion event break point detected in this sample.")
+            cat(strwrap(no_fusion_msg, width = 110), sep = "\n")
         } else {
-            cat("No fusion event break point detected in this sample.")
+            cat(strwrap(no_fusion_msg, width = 110), sep = "\n")
         }
     }
 }, error = function(e) {
     # Handle file reading errors with more detailed information
     error_msg <- paste("Error reading structure variant file:", e$message)
     cat(error_msg, "\n")
-    
+
+    no_fusion_msg <- "No fusion event detected involving any ROI gene paired with a protein-coding partner. No qualifying structural variant fusions were identified in this sample."
     if (knitr::is_html_output()) {
-        cat("<p style='text-align: center; color: #666;'><em>No fusion event break point detected in this sample.</em></p>")
+        cat("<p style='text-align: center; color: #666;'><em>", no_fusion_msg, "</em></p>")
     } else if (knitr::is_latex_output()) {
-        cat("No fusion event break point detected in this sample.")
+        cat(strwrap(no_fusion_msg, width = 110), sep = "\n")
     } else {
-        cat("No fusion event break point detected in this sample.")
+        cat(strwrap(no_fusion_msg, width = 110), sep = "\n")
     }
 })
 ```

@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### `Added`
+- Added `bin/classify_sv_v5.py`, replacing the multi-script Perl/Python fusion pipeline previously used by `svannasv_fusion_events`
+  - Single BEDTools/bcftools-based script: classifies SVs, detects gene fusions, and filters by ROI gene list in one pass
+  - New SV-level outputs: `sv_classified.tsv`, `sv_bnd.tsv`, `sv_breakpoints.tsv`, `sv_fusions.tsv`, `sv_fusions_any_any.tsv`, `sv_fusions_any_gbm.tsv`, `sv_fusions_both_gbm.tsv`, `sv_fusions_gbm_protein.tsv`, `sv_gbm_genes.tsv`, `sv_breakpoints_gbm.tsv`
+  - Added `extract_sv_info()` — reads `INFO/SUPPORT` and `INFO/AF` (Sniffles2 allele frequency) per SV record and attaches `support`/`af` columns to all fusion outputs
+  - Added 5'/3' fusion partner ordering: `gene_A`/`fusion_name` is always the inferred 5' partner, `gene_B` the 3' partner
+    - Intrachromosomal (DEL/DUP/INV): retained breakpoint side inferred from SV type (DUP joins the duplicated segment's inside edges; DEL/INV/other join the outside flanks), combined with each gene's strand
+    - Translocations (BND): orientation derived from the VCF ALT bracket notation (`t[p[`, `t]p]`, `]p]t`, `[p[t`) rather than just chrom/pos
+    - Falls back to original left/right (or own/mate) order when orientation is ambiguous
+  - Validated against the canonical `FGFR3::TACC3` duplication fusion
+- Added `gbm_protein_fusion_channel` / `gbmproteinfusionout` emit to `svannasv_fusion_events`, threading `sv_fusions_gbm_protein.tsv` through to the markdown report as a new trailing Rscript argument (`args[32]` in the Rmd), separate from the existing `sv_fusions_both_gbm.tsv` (`filterfusioneventout`)
+  - Executive Summary fusion table now reads `sv_fusions_both_gbm.tsv` (stricter: both genes in ROI list)
+  - Extended Report fusion table now reads `sv_fusions_gbm_protein.tsv` (broader: any ROI gene + protein-coding partner)
+- Added `Support`/`VAF`/`Breakpoint A`/`Breakpoint B` columns to both fusion tables in `nextflow_markdown_pipeline_update_final.Rmd`, and embedded the partner gene name into the chromosome columns (e.g. `chrX[BCOR]`)
 - Added `--clair3_model sup|hac` parameter to select Clair3/ClairS-TO basecalling model at runtime
   - `sup` (Super Accuracy, default) uses `r1041_e82_400bps_sup_v520`
   - `hac` (High Accuracy) uses `r1041_e82_400bps_hac_v520`
@@ -50,6 +63,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ghostscript step is soft — skips silently if `gs` is not installed on the host, no extra install required
 
 ### `Changed`
+- Clarified "no fusion event detected" wording in the markdown PDF report so the Executive Summary and Extended Report can't appear to contradict each other
+  - Executive Summary (strict, both-in-ROI criteria): now states no fusion was found *under that criterion* and points to the Extended Report for the broader search
+  - Extended Report (broader, ROI gene + protein-coding partner criteria): now states no qualifying fusion was found under any of the report's filtering criteria
+- Replaced the `svannasv_fusion_events` process's Perl/Python script chain (`create_gff3_with_introns.py`, `breaking_point_bed_translocation_exon.py`, `remove_duplicate_report_exon.py`, `annotate_intergenic_breakpoints.py`, `summarize_fusion_features.py`, `filter_fusion_complete_ensembl.py`) with a single call to `classify_sv_v5.py`
 - Bundled ANNOVAR Perl scripts into `bin/` with permission from the ANNOVAR authors
   - Scripts included: `annotate_variation.pl`, `coding_change.pl`, `convert2annovar.pl`, `table_annovar.pl`, `index_annovar.pl`, `prepare_annovar_user.pl`
   - Created `THIRD_PARTY_LICENSES.md` with ANNOVAR licence notice and required citation (Wang et al. 2010, *NAR*)
@@ -57,6 +74,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed default SNV annotator from `"vep"` to `"annovar"` in `nextflow.config`
   - VEP remains available via `--snv_annotator vep` or by editing `nextflow.config`
   - README annotator table and code examples updated to reflect new default
+- Updated Zenodo record from `20609244` to `20761496` (DOI: `10.5281/zenodo.20761496`)
+  - Carries the corrected `reference_core.tar.gz` (updated `roi.protein_coding.bed`/`roi_fusions_genes.txt`, plus `Assembly.zip`/`svanna-data.zip` restored after being accidentally dropped in a rebuild)
+  - `humandb.tar.gz` and `diana_dummy.tar.gz` unchanged (verified identical checksums to the prior record)
 - Updated Zenodo record from `19232427` to `20596458`, then to `20609244` (DOI: `10.5281/zenodo.20609244`)
   - Updated `setup_pipeline.sh` (header comment, `ZENODO_RECORD` variable, summary banner)
   - Updated all DOI links in `README.md`
@@ -104,6 +124,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `"conflicting: Conflicting classifications of pathogenicity (ClinVar)"` to the SNV table legend so users understand the abbreviation
 
 ### `Fixed`
+- Fixed Docker image name mismatches between `setup_docker.sh`/`setup_pipeline.sh` (Docker section) and the Singularity scripts/`conf/*.config` (which were correct)
+  - `vilhelmmagnuslab/nanodx_env` → `vilhelmmagnuslab/nanodx_images_3feb25` (wrong/retired image name; Docker pull would have failed or pulled the wrong container)
+  - `vilhelmmagnuslab/gviz_amd64` → `vilhelmmagnuslab/gviz_amd64ps` (missing `ps` suffix)
+  - Also fixed the same `gviz_amd64` omission in `conf/annotation.config`'s Docker profile block, `conf/example.config`, `DOCKER_SETUP.md`, `SINGULARITY_SETUP.md`, `CONTAINERS.md`, `SOFTWARE_VERSIONS.md`, `versions.yml`, and `environment.yml`
+- Fixed `Access to 'sturgeon.out' is undefined` error when running `--run_mode_annotation svannasv`
+  - Root cause: `copy_results_to_summary` was guarded only by `params.run_mode_annotation`, but it also consumes MGMT-section outputs (`extract_epic`, `sturgeon`, `tsne_plot`) that never run in standalone `svannasv` mode
+  - Fix: added an `mgmt_section_ran` guard so the copy step only runs when the MGMT section was actually invoked (`rmd`/`all` modes, `run_mode_order`, or `run_mode_epiannotation`)
+- Fixed Sturgeon model warning text — now includes the actual Dropbox download link for `general.zip` instead of a generic "download from Zenodo" message
+- Fixed `classify_sv_v5.py` allele-frequency lookup returning empty `SUPPORT`/`AF` for all records
+  - Root cause: `extract_sv_info()` queried `INFO/AF`, but some Sniffles2 VCFs only declare `INFO/VAF`; querying a tag absent from the VCF header makes `bcftools query` fail outright (empty stdout), silently dropping `SUPPORT` too
+  - Fix: check the VCF header for `AF` before querying; falls back to `.` if not declared (no `VAF` fallback, per user preference, since different Sniffles2 runs are not assumed interchangeable)
+- Fixed non-deterministic BND fusion gene ordering in `classify_sv_v5.py`
+  - Root cause: applying the BND ALT bracket's reverse-complement flag to the mate gene's strand made the inferred 5'/3' order depend on which of the two reciprocal BND records (own vs. mate) was processed first, giving a different `fusion_name` for the same physical junction depending on file order
+  - Fix: 5'/3' inference now uses each gene's native strand only — verified to give the same, deterministic answer regardless of which reciprocal record is read first
+- Fixed "no fusion" messages in the markdown PDF report being truncated mid-sentence
+  - Root cause: the chunk lacked `results='asis'`, so a long unwrapped `cat()` string rendered in a fixed-width verbatim LaTeX block and was cut off at the page margin instead of wrapping
+  - Fix: wrapped the messages with `strwrap(msg, width = 110)` before `cat()`, matching the pattern already used by other explanatory text blocks in the report
 - Fixed `setup_pipeline.sh` extracting `reference_core.tar.gz` and `humandb.tar.gz` into the wrong directory, creating doubly-nested `data/reference/reference/...` and `data/humandb/humandb/...`
   - Root cause: both archives now contain a top-level `reference/`/`humandb/` directory, but were extracted into `${REFERENCE_DIR}`/`${HUMANDB_DIR}` (already pointing to `data/reference`/`data/humandb`)
   - Fix: both archives are now extracted into `${DATA_DIR}` so their top-level directory lands at the correct path

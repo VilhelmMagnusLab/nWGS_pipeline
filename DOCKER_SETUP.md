@@ -56,10 +56,10 @@ docker pull vilhelmmagnuslab/clair3:latest
 docker pull vilhemmanguslab/clars-to:latest
 docker pull vilhelmmagnuslab/igv_report_amd64:latest
 docker pull vilhelmmagnuslab/vcf2circos:latest
-docker pull vilhelmmagnuslab/nanodx_env:latest
+docker pull vilhelmmagnuslab/nanodx_images_3feb25:latest
 docker pull vilhelmmagnuslab/markdown_images_28feb2025:latest
 docker pull vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
-docker pull vilhelmmagnuslab/gviz_amd64:latest
+docker pull vilhelmmagnuslab/gviz_amd64ps:latest
 
 # Epi2me images
 docker pull vilhelmmagnuslab/snifflesv252_update_latest:latest
@@ -127,10 +127,10 @@ The nWGS pipeline supports three main modes:
 | Clair3 | `vilhelmmagnuslab/clair3_amd64` | variant calling |
 | IGV Tools | `vilhelmmagnuslab/igv_report_amd64` | IGV report generation |
 | Circos Plot | `vilhelmmagnuslab/vcf2circos` | Circos visualization |
-| NanoDx | `vilhelmmagnuslab/nanodx_env` | NanoDx classification |
+| NanoDx | `vilhelmmagnuslab/nanodx_images_3feb25` | NanoDx classification |
 | Markdown | `vilhelmmagnuslab/markdown_images_28feb2025` | Report generation |
 | Cramino | `vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni` | Quality assessment |
-| Gviz | `vilhelmmagnuslab/gviz_amd64` | Genomic visualization |
+| Gviz | `vilhelmmagnuslab/gviz_amd64ps` | Genomic visualization |
 | Sniffles2 | `vilhelmmagnuslab/snifflesv252_update_latest` | SV calling (Epi2me) |
 | QDNAseq | `vilhelmmagnuslab/qdnaseq_amd64_latest` | CNV analysis (Epi2me) |
 | Modkit | `vilhelmmagnuslab/modkit_latest` | Modified base calling |

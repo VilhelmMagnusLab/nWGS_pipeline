@@ -429,7 +429,7 @@ process svannasv {
    """
 }
 
-// Fusion event analysis and filtering from structural variants
+// Fusion event analysis using classify_sv_v5.py (BEDTools-based SV classification)
 process svannasv_fusion_events {
     label 'svannasv'
     publishDir "${params.output_path}/routine_annotation/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
@@ -438,114 +438,26 @@ process svannasv_fusion_events {
     tuple val(sample_id), path(roi_svannavcf), path(genecode_bed), path(roi_fusions_genes)
 
     output:
-    tuple val(sample_id), path("${sample_id}_filter_fusion_event.tsv"), emit: filterfusioneventout
-    tuple val(sample_id), path("${sample_id}_filter_fusion_event_detailed.tsv")
-    tuple val(sample_id), path("${sample_id}_filter_fusion_event_ensembl_only.tsv"), optional: true
-    tuple val(sample_id), path("${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv"), optional: true
+    tuple val(sample_id), path("${sample_id}.sv_classified.tsv")
+    tuple val(sample_id), path("${sample_id}.sv_bnd.tsv")
+    tuple val(sample_id), path("${sample_id}.sv_breakpoints.tsv")
+    tuple val(sample_id), path("${sample_id}.sv_fusions.tsv")
+    tuple val(sample_id), path("${sample_id}.sv_fusions_any_any.tsv")
+    tuple val(sample_id), path("${sample_id}.sv_fusions_any_gbm.tsv"),     optional: true
+    tuple val(sample_id), path("${sample_id}.sv_fusions_both_gbm.tsv"),    emit: filterfusioneventout, optional: true
+    tuple val(sample_id), path("${sample_id}.sv_fusions_gbm_protein.tsv"), emit: gbmproteinfusionout, optional: true
+    tuple val(sample_id), path("${sample_id}.sv_gbm_genes.tsv"),           optional: true
+    tuple val(sample_id), path("${sample_id}.sv_breakpoints_gbm.tsv"),     optional: true
 
     script:
-
     """
-    # Create enhanced GFF3 with both exons and introns
-    gunzip -c $roi_svannavcf > ${sample_id}_roi_svanna_annotation.vcf
-   
-    create_gff3_with_introns.py --gff3 $genecode_bed --out ${sample_id}_genecode_with_introns.gff3
-
-    breaking_point_bed_translocation_exon.py --vcf ${sample_id}_roi_svanna_annotation.vcf --out ${sample_id}_breaking_bedpoints.bed
-
-    awk 'BEGIN{OFS="\t"} {if (\$1 !~ /^chr/) \$1 = "chr"\$1; print}' ${sample_id}_breaking_bedpoints.bed > ${sample_id}_breaking_bedpoints_sort.bed
-
-    # Intersect with enhanced GFF3 that includes introns
-    intersectBed -a ${sample_id}_breaking_bedpoints_sort.bed  -b ${sample_id}_genecode_with_introns.gff3  -wb  > ${sample_id}_breaking_bedpoints_genecode.bed
-
-    #remove duplicate bed points and add exon/intron annotations
-
-    remove_duplicate_report_exon.py --in  ${sample_id}_breaking_bedpoints_genecode.bed  \
-            --formatted ${sample_id}_breaking_bedpoints_genecode_format.bed \
-             --out ${sample_id}_breaking_bedpoints_genecode_clean.bed    \
-             --paired ${sample_id}_breaking_bedpoints_genecode_clean_paired.bed  \
-             --gene-list $roi_fusions_genes \
-             --filtered ${sample_id}_filter_fusion_event_detailed_temp.tsv
-
-    # Add intergenic annotations for breakpoints that don't overlap any features
-    annotate_intergenic_breakpoints.py --original-bed ${sample_id}_breaking_bedpoints_sort.bed \
-             --annotated ${sample_id}_filter_fusion_event_detailed_temp.tsv \
-             --out ${sample_id}_filter_fusion_event_detailed.tsv
-
-    #summarize exon/intron/intergenic features into compact format
-
-    summarize_fusion_features.py --in ${sample_id}_filter_fusion_event_detailed.tsv \
-             --out ${sample_id}_filter_fusion_event_temp.tsv
-
-    # Filter to keep only complete fusion pairs (IDs with both start and end breakpoints)
-    # Then keep only one representative fusion per unique gene pair
-    awk 'NR==1 {header=\$0; next}
-         {id=\$4; breaking=\$6; gene=\$7;
-          data[id,breaking]=\$0; ids[id]++;
-          genes[id,breaking]=gene;
-          if(breaking=="start") has_start[id]=1;
-          if(breaking=="end") has_end[id]=1}
-         END {print header;
-              for(id in ids) {
-                if(has_start[id] && has_end[id]) {
-                  gene_start=genes[id,"start"];
-                  gene_end=genes[id,"end"];
-                  gene_pair=(gene_start < gene_end) ? gene_start"-"gene_end : gene_end"-"gene_start;
-                  if(!seen_pair[gene_pair]++) {
-                    if((id,"start") in data) print data[id,"start"];
-                    if((id,"end") in data) print data[id,"end"]
-                  }
-                }
-              }
-         }' ${sample_id}_filter_fusion_event_temp.tsv > ${sample_id}_filter_fusion_event.tsv
-
-    # Filter fusion events to keep only those with official Ensembl gene IDs (ENSG...)
-    echo "Filtering for fusions with complete Ensembl gene IDs..."
-    filter_fusion_complete_ensembl.py \
-        --input ${sample_id}_filter_fusion_event_detailed.tsv \
-        --output ${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv \
-        --gff3 $genecode_bed \
-        --stats ${sample_id}_ensembl_filter_stats.txt
-
-    # Annotate fusion breakpoints with exon coordinates and coding phase
-    if [ -s ${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv ]; then
-        echo "Annotating breakpoints with exon coordinates and phase information..."
-        annotate_fusion_exon_phase.py \
-            --input ${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv \
-            --output ${sample_id}_filter_fusion_event_detailed_ensembl_only_exon_phase.tsv \
-            --gff3 $genecode_bed \
-            --stats ${sample_id}_exon_phase_stats.txt
-
-        # Use the exon/phase annotated version as the detailed output
-        mv ${sample_id}_filter_fusion_event_detailed_ensembl_only_exon_phase.tsv ${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv
-
-        # Create summarized version of Ensembl-filtered fusions
-        summarize_fusion_features.py --in ${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv \
-             --out ${sample_id}_filter_fusion_event_ensembl_only_temp.tsv
-
-        # Filter to keep only complete fusion pairs (IDs with both start and end breakpoints)
-        # Then keep only one representative fusion per unique gene pair
-        awk 'NR==1 {header=\$0; next}
-             {id=\$4; breaking=\$6; gene=\$7;
-              data[id,breaking]=\$0; ids[id]++;
-              genes[id,breaking]=gene;
-              if(breaking=="start") has_start[id]=1;
-              if(breaking=="end") has_end[id]=1}
-             END {print header;
-                  for(id in ids) {
-                    if(has_start[id] && has_end[id]) {
-                      gene_start=genes[id,"start"];
-                      gene_end=genes[id,"end"];
-                      gene_pair=(gene_start < gene_end) ? gene_start"-"gene_end : gene_end"-"gene_start;
-                      if(!seen_pair[gene_pair]++) {
-                        if((id,"start") in data) print data[id,"start"];
-                        if((id,"end") in data) print data[id,"end"]
-                      }
-                    }
-                  }
-             }' ${sample_id}_filter_fusion_event_ensembl_only_temp.tsv > ${sample_id}_filter_fusion_event_ensembl_only.tsv
-    fi
-
+    classify_sv_v5.py \\
+        --vcf ${roi_svannavcf} \\
+        --sample-id ${sample_id} \\
+        --min-fusion-size 200 \\
+        --gff3 ${genecode_bed} \\
+        --gene-list ${roi_fusions_genes} \\
+        --outdir .
     """
 
 }
@@ -1070,7 +982,8 @@ process markdown_report {
           path(warning_img),
           path(nanodx_classifier_pancan),
           path(dictionaire_pancan),
-          path(tsne_plot_pancan_file)
+          path(tsne_plot_pancan_file),
+          path(gbm_protein_fusion_events)
 
     output:
     file("${sample_id}_markdown_pipeline_report.pdf")
@@ -1187,7 +1100,8 @@ process markdown_report {
       "\${PWD}/${warning_img}" \
       "\${PWD}/${nanodx_classifier_pancan}" \
       "\${PWD}/${dictionaire_pancan}" \
-      "\${PWD}/${tsne_plot_pancan_file}"
+      "\${PWD}/${tsne_plot_pancan_file}" \
+      "\${PWD}/${gbm_protein_fusion_events}"
 
     # Flatten PDF with Ghostscript for maximum printer compatibility (soft — skips if gs absent)
     if command -v gs >/dev/null 2>&1; then
@@ -1378,7 +1292,7 @@ def sturgeon_model_ch = sturgeon_available \
     ? Channel.value(_sturgeon_file) \
     : Channel.empty()
 if (!sturgeon_available) {
-    log.warn "Sturgeon model not found (${params.sturgeon_model}) — Sturgeon classification will be skipped. Download general.zip from Zenodo and place it in ${params.ref_dir}/"
+    log.warn "Sturgeon model not found (${params.sturgeon_model}) — Sturgeon classification will be skipped. Download general.zip from Download: https://www.dropbox.com/s/yzca4exl40x9ukw/general.zip?dl=0 and place it in ${params.ref_dir}/"
 }
 
 //---------------------------------------------------------------------
@@ -1392,8 +1306,9 @@ workflow annotation {
     main:
         validateParameters()
 
-        // Define fusion events channel conditionally to avoid undefined output errors
+        // Define fusion events channels conditionally to avoid undefined output errors
         def fusion_events_channel = Channel.empty()
+        def gbm_protein_fusion_channel = Channel.empty()
 
 
         // Initialize channels as empty by default
@@ -1907,11 +1822,16 @@ workflow annotation {
             }
             svannasv_fusion_events(svannaoutfusion_events)
             
-            // Assign fusion events channel when SV analysis is run
+            // Assign fusion events channels when SV analysis is run
             fusion_events_channel = svannasv_fusion_events.out.filterfusioneventout
+            gbm_protein_fusion_channel = svannasv_fusion_events.out.gbmproteinfusionout
 
-            // Copy result files to routine_results for easy access
-            if (params.run_mode_order || params.run_mode_epiannotation || params.run_mode_annotation) {
+            // Copy result files to routine_results for easy access.
+            // Requires both MGMT (extract_epic, tsne_plot) and Svanna outputs, so only runs
+            // when both sections were invoked: rmd/all modes, run_mode_order, or run_mode_epiannotation.
+            // Standalone svannasv annotation mode skips this — MGMT processes never ran.
+            def mgmt_section_ran = params.run_mode in ['mgmt', 'rmd', 'all'] || params.run_mode_order || params.run_mode_epiannotation
+            if ((params.run_mode_order || params.run_mode_epiannotation || params.run_mode_annotation) && mgmt_section_ran) {
                 def sturgeon_pdf_ch = sturgeon_available
                     ? sturgeon.out.sturgeon_pdf
                     : extract_epic.out.mnpflex_bed.map { sid, f -> tuple(sid, file("NO_STURGEON_PDF")) }
@@ -2412,12 +2332,14 @@ workflow annotation {
             }
         svannasv_fusion_events(svannaoutfusion_events)
         
-        // Assign fusion events channel
+        // Assign fusion events channels
         fusion_events_channel = svannasv_fusion_events.out.filterfusioneventout
+        gbm_protein_fusion_channel = svannasv_fusion_events.out.gbmproteinfusionout
             } else {
                 println "Reusing Svanna outputs from earlier analysis"
-                // Ensure fusion_events_channel is defined when reusing outputs
+                // Ensure fusion events channels are defined when reusing outputs
                 fusion_events_channel = svannasv_fusion_events.out.filterfusioneventout
+                gbm_protein_fusion_channel = svannasv_fusion_events.out.gbmproteinfusionout
             }
 
             // ROI analysis - reuse outputs if already run
@@ -2530,6 +2452,10 @@ workflow annotation {
             if (!fusion_events_channel) {
                 error "Fusion events results not found. Make sure Svanna analysis runs before RMD generation."
             }
+
+            if (!gbm_protein_fusion_channel) {
+                error "GBM protein-coding fusion results not found. Make sure Svanna analysis runs before RMD generation."
+            }
             
             if (!igv_tools.out.tertp_out_igv) {
                 error "tertp HTML results not found. Make sure tertp analysis runs before RMD generation."
@@ -2549,6 +2475,7 @@ workflow annotation {
             .combine(mgmt_promoter.out.mgmtresultsout, by:0)
             .combine(svannasv.out.rmdsvannahtml, by:0)
             .combine(fusion_events_channel, by:0)
+            .combine(gbm_protein_fusion_channel, by:0)
             .combine(igv_tools.out.tertp_out_igv, by:0)
             .combine(cramino_output_ch, by:0)
             .combine(plot_genomic_regions.out.plot_genomic_regions_out, by:0)
@@ -2568,15 +2495,16 @@ workflow annotation {
                 def mgmt_results = args[8]
                 def svannahtml = args[9]
                 def fusion_events = args[10]
-                def tertphtml = args[11]
-                def craminoreport = args[12]
-                def egfr_coverage = args[13]
-                def idh1_coverage = args[14]
-                def tertp_coverage = args[15]
-                def idh2_coverage = args[16]
-                def tsne_plot_file = args[17]
-                def nanodx_classifier_pancan = args[18]
-                def tsne_plot_pancan_file = args[19]
+                def gbm_protein_fusion_events = args[11]
+                def tertphtml = args[12]
+                def craminoreport = args[13]
+                def egfr_coverage = args[14]
+                def idh1_coverage = args[15]
+                def tertp_coverage = args[16]
+                def idh2_coverage = args[17]
+                def tsne_plot_file = args[18]
+                def nanodx_classifier_pancan = args[19]
+                def tsne_plot_pancan_file = args[20]
 
                 // Use correct sample ID file based on run mode
                 def sample_id_file = params.run_mode_order ? "placeholder" : params.analyse_sample_id_file
@@ -2609,7 +2537,8 @@ workflow annotation {
                     file("${params.diana_dir}/docs/warning.png"),
                     nanodx_classifier_pancan,
                     file(params.nanodx_pancan_dictinaire),
-                    tsne_plot_pancan_file
+                    tsne_plot_pancan_file,
+                    gbm_protein_fusion_events
                 ]
             }.view()
 
