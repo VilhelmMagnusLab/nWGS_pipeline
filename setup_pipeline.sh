@@ -47,7 +47,7 @@ BASE_URL="https://zenodo.org/record/${ZENODO_RECORD}/files"
 declare -A ARCHIVE_MD5=(
     ["diana_dummy.tar.gz"]="3067976db7e7bd190a415099c5c1cc53"
     ["humandb.tar.gz"]="a63ae92e6245129116b0d28f92d7a512"
-    ["reference_core.tar.gz"]="6675a32bcd83ef0d88de18e88ec676c7"
+    ["reference_core.tar.gz"]="5bf5bd10409e53d85dba69f4a076841a"
     ["Assembly.zip"]="de6bc8bed97e433cbe8be55ed0e1536a"
     ["svanna-data.zip"]="6a5cabf40172cc420553ae8ca6ea3805"
 )
