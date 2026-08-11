@@ -44,13 +44,13 @@ process merge_bam_files {
 
 process extract_roi {
     label 'roi_extraction'
-    publishDir "${params.occ_bam_dir}", mode: 'copy'
+    publishDir "${params.roi_bam_dir}", mode: 'copy'
 
     input:
     tuple val(sample_id), path(bam), path(bai), path(roi_bed)
 
     output:
-    tuple val(sample_id), path("${sample_id}.roi.bam"), path("${sample_id}.roi.bam.bai"), emit: occ_bam
+    tuple val(sample_id), path("${sample_id}.roi.bam"), path("${sample_id}.roi.bam.bai"), emit: roi_bam
 
     script:
     """
@@ -115,7 +115,7 @@ workflow mergebam {
     emit:
         // Emit the merged BAM files and a completion flag
         merged_bams = merge_bam_files.out.mergebamout
-        occ_bams = extract_roi.out.occ_bam
+        roi_bams = extract_roi.out.roi_bam
         complete = Channel.of(true)
 }
 

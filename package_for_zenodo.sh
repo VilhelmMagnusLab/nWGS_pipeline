@@ -2,7 +2,7 @@
 ################################################################################
 # Package Diana Pipeline Files for Zenodo Upload
 ################################################################################
-# This script packages all reference files for upload to Zenodo record 17589248.
+# This script packages all reference files for upload to Zenodo record 21886089.
 # It creates all necessary archives in the correct format.
 #
 # Source directories:
@@ -119,11 +119,10 @@ package_reference_core() {
     # Assembly.zip and svanna-data.zip ARE bundled (kept as zips so users can
     # extract on demand); their already-extracted directory counterparts are
     # excluded to avoid shipping the same content twice. general.zip
-    # (Sturgeon) is distributed separately, not via Zenodo. The deprecated
-    # v420 Dorado model is excluded in favor of the bundled v520 sup/hac models.
+    # (Sturgeon classifier model) is bundled here — kept as .zip (not extracted).
+    # The deprecated v420 Dorado model is excluded in favor of the bundled v520 sup/hac models.
     tar -czf "$output_file" \
         -C "${DATA_DIR}" \
-        --exclude='reference/general.zip' \
         --exclude='reference/Assembly' \
         --exclude='reference/svanna-data' \
         --exclude='reference/r1041_e82_400bps_sup_v420' \
@@ -166,26 +165,6 @@ package_humandb() {
     echo ""
 }
 
-copy_general_zip() {
-    print_header "Copying Sturgeon Classifier (general.zip)"
-
-    local source="${REFERENCE_DIR}/general.zip"
-    local dest="${OUTPUT_DIR}/general.zip"
-
-    if check_file_exists "$source" "general.zip"; then
-        cp "$source" "$dest"
-
-        local size=$(stat -f%z "$dest" 2>/dev/null || stat -c%s "$dest")
-        local size_human=$(human_readable_size $size)
-
-        print_success "Copied general.zip ($size_human)"
-        print_warning "Remember: general.zip should NOT be extracted (Sturgeon expects zip format)"
-    else
-        print_warning "general.zip not found - skipping"
-        print_info "If you need it, download from previous Zenodo version"
-    fi
-    echo ""
-}
 
 create_assembly_zip() {
     print_header "Handling Assembly.zip"
@@ -322,7 +301,7 @@ verify_packages() {
 print_next_steps() {
     print_header "Next Steps"
 
-    echo "Files are ready for Zenodo upload to record 17589248!"
+    echo "Files are ready for Zenodo upload to record 21886089!"
     echo ""
     echo -e "${CYAN}Option 1: Automated Upload (Recommended)${NC}"
     echo "  1. Get your Zenodo API token from:"
@@ -334,14 +313,14 @@ print_next_steps() {
     echo -e "     ${GREEN}./upload_to_zenodo.sh --token \"\$ZENODO_TOKEN\" --files-dir $OUTPUT_DIR${NC}"
     echo ""
     echo -e "${CYAN}Option 2: Manual Web Upload${NC}"
-    echo "  1. Go to: https://zenodo.org/records/17589248"
+    echo "  1. Go to: https://zenodo.org/records/21886089"
     echo "  2. Click 'New version'"
     echo "  3. Delete old files"
     echo "  4. Upload files from: $OUTPUT_DIR"
     echo "  5. Update metadata and publish"
     echo ""
     echo -e "${YELLOW}⚠️  Important Notes:${NC}"
-    echo "  - general.zip stays as .zip (DO NOT extract)"
+    echo "  - general.zip is bundled inside reference_core.tar.gz (DO NOT extract it)"
     echo "  - Other .zip files will be extracted by setup_pipeline.sh"
     echo "  - Test on Zenodo sandbox first if unsure!"
     echo "  - Upload adds --sandbox flag: ./upload_to_zenodo.sh --sandbox ..."
@@ -360,7 +339,7 @@ main() {
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
 ║        Diana Pipeline - Package Files for Zenodo               ║
-║          https://zenodo.org/records/17589248                  ║
+║          https://zenodo.org/records/21886089                  ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 EOF
@@ -386,9 +365,8 @@ EOF
 
     # Run packaging steps
     create_output_directory
-    package_reference_core      # ~25 GB, 5-10 min
+    package_reference_core      # ~27 GB (includes general.zip), 5-10 min
     package_humandb             # ~10 GB, 3-5 min
-    copy_general_zip            # ~3 GB, instant
     create_assembly_zip         # ~2 GB, 1-2 min
     copy_or_create_dorado_model # ~2 GB, instant or 1 min
     create_svanna_zip           # ~15 GB, 10-20 min (optional)

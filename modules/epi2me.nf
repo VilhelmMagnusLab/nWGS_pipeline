@@ -127,13 +127,13 @@ RENVEOF
 // Extract regions of interest from merged BAM — must complete before run_clair3 and run_clairs_to
 process extract_roi {
     label 'roi_extraction'
-    publishDir "${params.occ_bam_dir}", mode: 'copy', overwrite: true
+    publishDir "${params.roi_bam_dir}", mode: 'copy', overwrite: true
 
     input:
     tuple val(sample_id), path(bam), path(bai), path(roi_bed)
 
     output:
-    tuple val(sample_id), path("${sample_id}.roi.bam"), path("${sample_id}.roi.bam.bai"), emit: occ_bam
+    tuple val(sample_id), path("${sample_id}.roi.bam"), path("${sample_id}.roi.bam.bai"), emit: roi_bam
 
     script:
     """
@@ -150,7 +150,7 @@ process run_clair3 {
     publishDir "${params.output_path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(reference_genome), path(reference_genome_bai), path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex), path(hg38_cosmic100), path(hg38_cosmic100index)
+    tuple val(sample_id), path(roi_bam), path(roi_bam_bai), path(reference_genome), path(reference_genome_bai), path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex), path(hg38_cosmic100), path(hg38_cosmic100index)
 
     output:
     tuple val(sample_id), path('output_clair3/'), emit: clair3_output_dir
@@ -164,7 +164,7 @@ process run_clair3 {
     conda activate clair3_v2 2>/dev/null || conda activate clair3 2>/dev/null || true
 
     /opt/bin/run_clair3.sh \
-        --bam_fn=$occ_bam \
+        --bam_fn=$roi_bam \
         --ref_fn=$reference_genome  \
         --threads=8 \
         --var_pct_full=1 \
@@ -186,7 +186,7 @@ process run_clairs_to {
     publishDir "${params.output_path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(reference_genome), path(reference_genome_bai), path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex), path(hg38_cosmic100), path(hg38_cosmic100index), path(roi_protein_coding_bed)
+    tuple val(sample_id), path(roi_bam), path(roi_bam_bai), path(reference_genome), path(reference_genome_bai), path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex), path(hg38_cosmic100), path(hg38_cosmic100index), path(roi_protein_coding_bed)
 
     output:
     tuple val(sample_id), path('clairsto_output/'), emit: clairsto_output_dir
@@ -209,7 +209,7 @@ process run_clairs_to {
 
     # Run ClairS-TO (may produce empty VCFs if no variants found - this is normal)
     /opt/bin/run_clairs_to \
-        --tumor_bam_fn=${occ_bam} \
+        --tumor_bam_fn=${roi_bam} \
         --ref_fn=${reference_genome} \
         --threads=${task.cpus} \
         --platform="ont_r10_dorado_4khz" \
@@ -353,20 +353,20 @@ workflow epi2me {
         clair3_ch = Channel.empty()
         clairsto_ch = Channel.empty()
         cramino_ch = Channel.empty()
-        occ_bam_ch = Channel.empty()
+        roi_bam_ch = Channel.empty()
 
         // extract_roi runs only for snv and all modes — output feeds into run_clair3 and run_clairs_to
         if (params.run_mode in ['snv', 'all']) {
-            occ_bam_ch = extract_roi(
+            roi_bam_ch = extract_roi(
                 input_channel.map { sid, bam, bai, ref, ref_bai ->
                     tuple(sid, bam, bai, file(params.roi_bed))
                 }
-            ).occ_bam
+            ).roi_bam
         }
 
-        occ_input_channel = occ_bam_ch
-            .map { sid, occ_bam, occ_bai ->
-                tuple(sid, occ_bam, occ_bai, file(params.reference_genome), file(params.reference_genome_bai))
+        roi_input_channel = roi_bam_ch
+            .map { sid, roi_bam, roi_bai ->
+                tuple(sid, roi_bam, roi_bai, file(params.reference_genome), file(params.reference_genome_bai))
             }
 
         if (params.run_mode in ['modkit', 'all']) {
@@ -405,7 +405,7 @@ workflow epi2me {
             def roi_protein_coding_bed_ch = Channel.value(file(params.roi_protein_coding_bed))
 
             // Prepare input for Clair3 (OCC BAM + annotation files)
-            def clair3_input = occ_input_channel
+            def clair3_input = roi_input_channel
                 .combine(refgene_ch)
                 .combine(hg38_refgenemrna_ch)
                 .combine(clinvar_ch)
@@ -414,7 +414,7 @@ workflow epi2me {
                 .combine(hg38_cosmic100index_ch)
 
             // Prepare input for ClairS-TO (OCC BAM + annotation files + OCC BED)
-            def clairsto_input = occ_input_channel
+            def clairsto_input = roi_input_channel
                 .combine(refgene_ch)
                 .combine(hg38_refgenemrna_ch)
                 .combine(clinvar_ch)
@@ -554,5 +554,5 @@ workflow epi2me {
                 log.info "Epi2me processing completed for sample: ${results[0]}"
                 results
             }
-        occ_bam = occ_bam_ch
+        roi_bam = roi_bam_ch
 }

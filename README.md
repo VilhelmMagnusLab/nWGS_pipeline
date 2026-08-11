@@ -53,7 +53,7 @@ cd Diana
 **What the setup script does:**
 - Checks for compatible Java (11–21) and installs it if missing
 - Installs Nextflow and adds it to PATH via `.diana_env`
-- Downloads all reference files from Zenodo (DOI: [10.5281/zenodo.20761496](https://doi.org/10.5281/zenodo.20761496))
+- Downloads all reference files from Zenodo (DOI: [10.5281/zenodo.21886089](https://doi.org/10.5281/zenodo.21886089))
 - Extracts and organizes files into the correct directory structure
 - Downloads and sets up Docker containers or Singularity images
 
@@ -362,7 +362,7 @@ Simply run:
 ```
 
 The script will:
-1. Download reference data from [Zenodo (DOI: 10.5281/zenodo.20761496)](https://doi.org/10.5281/zenodo.20761496)
+1. Download reference data from [Zenodo (DOI: 10.5281/zenodo.21886089)](https://doi.org/10.5281/zenodo.21886089)
 2. Extract and organize all files into the correct directory structure
 3. Set up NanoDx classifier models
 4. Configure all required paths
@@ -522,24 +522,9 @@ data/humandb/
 ```
 
 **Additional reference files** (automatically extracted to `data/reference/`):
-- `general.zip` - Sturgeon classifier model (kept as zip, not extracted) — **see Sturgeon note below**
+- `general.zip` - Sturgeon classifier model (bundled with DIANA, kept as zip, not extracted)
 - `Assembly.zip` - Assembly folder for vcfcircos visualization (automatically extracted)
 - `svanna-data.zip` - Svanna structural variant annotation database (optional, automatically extracted)
-
-### Sturgeon Classifier Model (`general.zip`)
-
-The Sturgeon methylation classifier model (`general.zip`) must be present in `data/reference/` for Sturgeon-based classification to run. **If the file is absent the pipeline continues without Sturgeon** — all other analyses (NanoDx, MGMT, SNV, CNV, report) are unaffected.
-
-If you need to download it separately:
-
-> **Download:** [https://www.dropbox.com/s/yzca4exl40x9ukw/general.zip?dl=0](https://www.dropbox.com/s/yzca4exl40x9ukw/general.zip?dl=0)
-
-```bash
-# Copy to the reference folder
-cp general.zip /path/to/Diana/data/reference/general.zip
-```
-
-> The file must remain as a **zip archive** — do not extract it. Sturgeon reads the model directly from the zip.
 
 ### Clair3 Basecalling Model
 
@@ -583,7 +568,7 @@ params {
 
 **Note on roi_fusions_genes.txt:** Plain-text gene list (one gene symbol per line) used for SV/fusion event filtering and SNV annotation. This file can be replaced with any user custom gene list of interest — for example, a laboratory-specific panel of oncology-relevant genes. The default list contains 204 genes covering common fusion partners and oncogenes.
 
-**Manual download:** If needed, all reference files are available at [Zenodo (DOI: 10.5281/zenodo.20761496)](https://doi.org/10.5281/zenodo.20761496)
+**Manual download:** If needed, all reference files are available at [Zenodo (DOI: 10.5281/zenodo.21886089)](https://doi.org/10.5281/zenodo.21886089)
 
 ### Directory Structure Setup
 After downloading the reference files, your directory structure should look like this:
@@ -908,6 +893,47 @@ ls -la containers/*.sif                        # Singularity
 If you use this pipeline in your research, please cite:
 
 > Bope CD, Nagymihaly R, Halldorsson S, et al. *DIANA: Diagnostic Integrated Analytics for Neoplastic Alterations a long-read whole genome sequencing pipeline for molecular neuropathology.* 2026. https://doi.org/10.64898/2026.03.25.714119
+
+## Third-Party Licenses
+
+This file lists third-party software distributed with DIANA and their applicable license terms.
+
+---
+
+### ANNOVAR
+
+DIANA bundles the following ANNOVAR Perl scripts in the `bin/` directory:
+
+- `annotate_variation.pl`
+- `coding_change.pl`
+- `convert2annovar.pl`
+- `table_annovar.pl`
+- `index_annovar.pl`
+- `prepare_annovar_user.pl`
+
+**Usage of ANNOVAR is subject to its own licence terms.**
+Please review the ANNOVAR licence before use:
+[https://annovar.openbioinformatics.org/en/latest/user-guide/download/](https://annovar.openbioinformatics.org/en/latest/user-guide/download/)
+
+If you use ANNOVAR in your research, please cite:
+
+> Wang K, Li M, Hakonarson H. ANNOVAR: functional annotation of genetic variants from high-throughput sequencing data. *Nucleic Acids Research*, 38:e164, doi:[10.1093/nar/gkq603](https://doi.org/10.1093/nar/gkq603), 2010.
+
+---
+
+### Sturgeon
+
+DIANA integrates [Sturgeon](https://github.com/marcpaga/sturgeon) for CNS tumour methylation classification.
+
+**Use of Sturgeon within DIANA is strictly for research purposes only.**
+
+Incorporation of Sturgeon in DIANA has been authorised by the original authors under the following conditions:
+
+- The [Sturgeon End-User License Agreement (EULA)](https://github.com/marcpaga/sturgeon/blob/main/LICENSE) must be read and accepted before use.
+- Commercial, clinical, diagnostic, or redistribution use of Sturgeon requires a separate agreement.
+- The commercial and technology rights for Sturgeon are held by **Cyclomics B.V.** Users wishing to use the Sturgeon component within DIANA for routine clinical, diagnostic, or commercial purposes must enter into a separate agreement with Cyclomics before doing so ([www.cyclomics.com](https://www.cyclomics.com) · software@cyclomics.com).
+
+---
 
 ## License
 

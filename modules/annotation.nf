@@ -932,13 +932,9 @@ process plot_genomic_regions {
 
     script:
     """
-    #!/bin/bash
-    ls -l
-    echo "Rscript path: \$(which Rscript)"
-    echo "GViz file: ${gviz_data}"
     eval \"\$(micromamba shell hook --shell bash)\"
     micromamba activate gviz_env
-    plot_genomic_regions.R \
+    plot_genomic_regions_v2.R \
         "${gviz_data}" \
         "${sample_id}" \
         "${bam_file}" \
