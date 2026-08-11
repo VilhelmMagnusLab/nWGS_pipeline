@@ -46,7 +46,7 @@ BASE_URL="https://zenodo.org/record/${ZENODO_RECORD}/files"
 # MD5 checksums for Zenodo archives — update these whenever archives are rebuilt
 declare -A ARCHIVE_MD5=(
     ["diana_dummy.tar.gz"]="3067976db7e7bd190a415099c5c1cc53"
-    ["humandb.tar.gz"]="a63ae92e6245129116b0d28f92d7a512"
+    ["humandb.tar.gz"]="26a754e41fd4e95cdd2d7d766c3bcad8"
     ["reference_core.tar.gz"]="5bf5bd10409e53d85dba69f4a076841a"
     ["Assembly.zip"]="de6bc8bed97e433cbe8be55ed0e1536a"
     ["svanna-data.zip"]="6a5cabf40172cc420553ae8ca6ea3805"
