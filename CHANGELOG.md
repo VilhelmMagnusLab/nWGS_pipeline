@@ -124,6 +124,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `"conflicting: Conflicting classifications of pathogenicity (ClinVar)"` to the SNV table legend so users understand the abbreviation
 
 ### `Fixed`
+- Fixed LaTeX rendering error in `show_warning()` (markdown PDF report) when a warning message contains a literal `%` (e.g. tumor content/coverage thresholds)
+  - Root cause: `%` is a comment character in LaTeX, so any unescaped `%` in the message text truncated the rest of the line
+  - Fix: escape `%` to `\%` via `gsub("%", "\\\\%", message)` before passing the message to `cat()`
 - Fixed Docker image name mismatches between `setup_docker.sh`/`setup_pipeline.sh` (Docker section) and the Singularity scripts/`conf/*.config` (which were correct)
   - `vilhelmmagnuslab/nanodx_env` → `vilhelmmagnuslab/nanodx_images_3feb25` (wrong/retired image name; Docker pull would have failed or pulled the wrong container)
   - `vilhelmmagnuslab/gviz_amd64` → `vilhelmmagnuslab/gviz_amd64ps` (missing `ps` suffix)

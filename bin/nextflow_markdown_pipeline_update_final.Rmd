@@ -204,9 +204,10 @@ tc_value  <- suppressWarnings(as.numeric(gsub("%", "", tumor_percent)))
 
 show_warning <- function(title, message) {
   if (!is.null(warning_img) && file.exists(warning_img)) {
+    latex_message <- gsub("%", "\\\\%", message)
     cat("\\begin{minipage}{\\textwidth}\\vspace{4pt}\n")
     cat("\\includegraphics[height=20pt]{", warning_img, "} ",
-        "\\textbf{", title, "} ", message, "\n", sep = "")
+        "\\textbf{", title, "} ", latex_message, "\n", sep = "")
     cat("\\vspace{4pt}\\end{minipage}\n\n")
   } else {
     cat("> [!] **", title, "** ", message, "\n\n", sep = "")
