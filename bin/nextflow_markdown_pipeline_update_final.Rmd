@@ -234,20 +234,20 @@ if (!is.na(cov_value) && cov_value < 30) {
 ### Methylation-based Classification CrossNN, Pan cancer reference data
 
 ```{r echo=FALSE, results='asis'}
-render_classification_table <- function(mcf_data, mc_data) {
+render_classification_table <- function(mcf_data, mc_data, cutoff = 0.2) {
   tbl <- data.frame(
     Classification = c("Methylation Class Family", "Methylation Class"),
     Result = c(
-      ifelse(max(mcf_data$score_MCF) >= 0.2,
+      ifelse(max(mcf_data$score_MCF) >= cutoff,
              as.character(mcf_data[which.max(mcf_data$score_MCF), ]$Methylation.Class.Family),
              "not classifiable"),
-      ifelse(mc_data$score[1] >= 0.2,
+      ifelse(mc_data$score[1] >= cutoff,
              as.character(mc_data$Methylation.Class.Name[1]),
              "not classifiable")
     ),
     Score = c(
-      ifelse(max(mcf_data$score_MCF) >= 0.2, round(max(mcf_data$score_MCF), digits = 3), "-"),
-      ifelse(mc_data$score[1] >= 0.2, round(mc_data$score[1], digits = 3), "-")
+      ifelse(max(mcf_data$score_MCF) >= cutoff, round(max(mcf_data$score_MCF), digits = 3), "-"),
+      ifelse(mc_data$score[1] >= cutoff, round(mc_data$score[1], digits = 3), "-")
     )
   )
   if (knitr::is_latex_output()) {
@@ -270,7 +270,7 @@ render_classification_table <- function(mcf_data, mc_data) {
 }
 
 if (!is.null(mc_pancan) && !is.null(mcf_pancan)) {
-  render_classification_table(mcf_pancan, mc_pancan)
+  render_classification_table(mcf_pancan, mc_pancan, cutoff = 0.15)
 } else {
   cat("Pan-cancer classification results not available.\n")
 }

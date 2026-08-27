@@ -63,6 +63,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ghostscript step is soft — skips silently if `gs` is not installed on the host, no extra install required
 
 ### `Changed`
+- Set a separate classification cut-off for the Executive Summary tables in the markdown PDF report: Pan-cancer (pancan) classifier changed from `0.2` to `0.15`; Capper CNS classifier unchanged at `0.2`
+  - `render_classification_table()` in `nextflow_markdown_pipeline_update_final.Rmd` gained a `cutoff` parameter (default `0.2`); the pancan call now passes `cutoff = 0.15`
+  - Only affects the Executive Summary tables — the Capper-only narrative text and Top-5 score plots further down the report still use the `0.2` line
 - Clarified "no fusion event detected" wording in the markdown PDF report so the Executive Summary and Extended Report can't appear to contradict each other
   - Executive Summary (strict, both-in-ROI criteria): now states no fusion was found *under that criterion* and points to the Extended Report for the broader search
   - Extended Report (broader, ROI gene + protein-coding partner criteria): now states no qualifying fusion was found under any of the report's filtering criteria
