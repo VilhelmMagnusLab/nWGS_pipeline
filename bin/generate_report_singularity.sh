@@ -29,8 +29,8 @@
 # INPUT FILES:
 #   - sample_ids.txt: Two-column file with sample ID and tumor content (decimal)
 #     Location: /data/routine_diana/sample_ids.txt
-#   - Various analysis result files from routine_analysis/{sample_id}/ directories
-#   - The PATH for each analysis result file is configured in the script.
+#   - Various result files from routine_annotation/{sample_id}/ and routine_epi2me/{sample_id}/ directories
+#   - The PATH for each result file is configured in the script.
 #
 # OUTPUT:
 #   - PDF reports for each sample in routine_results/{sample_id}/ directory
@@ -59,15 +59,28 @@ fi
 echo "Using Singularity image: $SINGULARITY_IMAGE"
 
 # Define base paths based on current pipeline structure
-PIPELINE_DIR="/data/routine_diana/Diana"
+PIPELINE_DIR="path/diana"  # To be updated by the user
 REFERENCE_PATH="${PIPELINE_DIR}/data/reference"
-OUTPUT_PATH="/data/routine_diana"
+OUTPUT_PATH="output_path" #To be updated by the user
+
+# Pipeline version string embedded in the report footer (kept in sync with nextflow.config manifest.version)
+PIPELINE_VERSION=$(grep -m1 "version" "${PIPELINE_DIR}/nextflow.config" | sed -E "s/.*=\s*'([^']+)'.*/\1/")
+PIPELINE_VERSION="${PIPELINE_VERSION:-unknown}"
+
+# SNV filtering thresholds (kept in sync with conf/annotation.config defaults)
+SNV_DEPTH_THRESHOLD="${SNV_DEPTH_THRESHOLD:-10}"
+SNV_GQ_THRESHOLD="${SNV_GQ_THRESHOLD:-10}"
 
 # Sample IDs file path (hardcoded location for routine processing)
 samples_file="${OUTPUT_PATH}/sample_ids.txt"
 
 # RMarkdown template file path
 rmd_template="${PIPELINE_DIR}/bin/nextflow_markdown_pipeline_update_final.Rmd"
+
+# Reference files shared across all samples
+warning_img="${PIPELINE_DIR}/docs/warning.png"
+protein_coding_bed="${REFERENCE_PATH}/roi.protein_coding.bed"
+pancan_dictionaire="${REFERENCE_PATH}/nanoDx/static/pancan_devel_v5i_dictionary.txt"
 
 # Check if required files exist
 if [ ! -f "$samples_file" ]; then
@@ -84,30 +97,58 @@ fi
 while read -r sample_id tumor_content; do
     echo "Processing sample: $sample_id"
 
-    # Build dynamic input paths for this sample based on routine_analysis structure
-    ANALYSIS_PATH="${OUTPUT_PATH}/routine_analysis/${sample_id}"
+    # Build dynamic input paths for this sample based on routine_annotation/routine_epi2me structure
+    ANNOTATION_PATH="${OUTPUT_PATH}/routine_annotation/${sample_id}"
+    EPI2ME_PATH="${OUTPUT_PATH}/routine_epi2me/${sample_id}"
 
-    craminoreport="${ANALYSIS_PATH}/cramino/${sample_id}_cramino_statistics.txt"
-    sample_ids_file="${samples_file}"
-    nanodx="${ANALYSIS_PATH}/classifier/nanodx/${sample_id}_nanodx_classifier.tsv"
+    craminoreport="${EPI2ME_PATH}/cramino/${sample_id}_cramino_statistics.txt"
+
+    # Build a per-sample sample_ids_file, mirroring the priority logic in
+    # modules/annotation.nf's markdown_report process: user-provided tumor
+    # content (2-column sample_ids.txt) takes priority over the ACE-calculated
+    # value, which is only used as a fallback when no user value is given.
+    ace_threshold_file="${ANNOTATION_PATH}/cnv/ace/${sample_id}_ace_results/threshold_value.txt"
+    sample_ids_file="$(mktemp "${TMPDIR:-/tmp}/sample_file_${sample_id}.XXXXXX")"
+
+    NUM_COLS=$(awk 'NF{print NF; exit}' "${samples_file}")
+    if [ "${NUM_COLS:-0}" -ge 2 ]; then
+        if grep "^${sample_id}[[:space:]]" "${samples_file}" > "${sample_ids_file}"; then
+            echo "Using user-provided tumor content for ${sample_id} from ${samples_file}"
+        else
+            echo "WARNING: Sample ${sample_id} not found in ${samples_file}, creating file with sample_id only"
+            echo "${sample_id}" > "${sample_ids_file}"
+        fi
+    elif [ -f "${ace_threshold_file}" ]; then
+        THRESHOLD_VALUE=$(cat "${ace_threshold_file}")
+        printf '%s\t%s\n' "${sample_id}" "${THRESHOLD_VALUE}" > "${sample_ids_file}"
+        echo "Using ACE-calculated tumor content for ${sample_id}: ${THRESHOLD_VALUE}"
+    else
+        cp "${samples_file}" "${sample_ids_file}"
+        echo "WARNING: No tumor content available for ${sample_id} (single-column sample list, no ACE results at ${ace_threshold_file})"
+    fi
+
+    nanodx="${ANNOTATION_PATH}/classifier/nanodx/${sample_id}_nanodx_classifier.tsv"
     dictionaire="${REFERENCE_PATH}/nanoDx/static/Capper_et_al_dictionary.txt"
     logo="${REFERENCE_PATH}/log_update.pdf"
-    cnv_plot="${ANALYSIS_PATH}/cnv/${sample_id}_cnv_plot_full.pdf"
-    tumor_number="${ANALYSIS_PATH}/cnv/${sample_id}_tumor_copy_number.txt"
-    annotatecnv="${ANALYSIS_PATH}/cnv/${sample_id}_annotatedcnv_filter_header.csv"
-    cnv_chr9="${ANALYSIS_PATH}/cnv/${sample_id}_cnv_chr9.pdf"
-    cnv_chr7="${ANALYSIS_PATH}/cnv/${sample_id}_cnv_chr7.pdf"
-    mgmt_results="${ANALYSIS_PATH}/methylation/${sample_id}_MGMT_results.csv"
-    merge_results="${ANALYSIS_PATH}/merge_annot_clair3andclairsto/${sample_id}_merge_annotation_filter_snvs_allcall.csv"
-    fusion_events="${ANALYSIS_PATH}/structure_variant/svannasv/${sample_id}_filter_fusion_event.tsv"
-    tertphtml="${ANALYSIS_PATH}/coverage/${sample_id}_tertp_id1.html"
-    svannahtml="${ANALYSIS_PATH}/structure_variant/svannasv/${sample_id}_occ_svanna_annotation.html"
-    egfr_coverage="${ANALYSIS_PATH}/coverage/${sample_id}_egfr_coverage.pdf"
-    idh1_coverage="${ANALYSIS_PATH}/coverage/${sample_id}_idh1_coverage.pdf"
-    idh2_coverage="${ANALYSIS_PATH}/coverage/${sample_id}_idh2_coverage.pdf"
-    tertp_coverage="${ANALYSIS_PATH}/coverage/${sample_id}_tertp_coverage.pdf"
-    tsneplot="${ANALYSIS_PATH}/classifier/nanodx/${sample_id}_tsne_plot.pdf"
+    cnv_plot="${ANNOTATION_PATH}/cnv/${sample_id}_cnv_plot_full.pdf"
+    tumor_number="${ANNOTATION_PATH}/cnv/${sample_id}_tumor_copy_number.txt"
+    annotatecnv="${ANNOTATION_PATH}/cnv/${sample_id}_annotatedcnv_filter_header.csv"
+    cnv_chr9="${ANNOTATION_PATH}/cnv/${sample_id}_cnv_chr9.pdf"
+    cnv_chr7="${ANNOTATION_PATH}/cnv/${sample_id}_cnv_chr7.pdf"
+    mgmt_results="${ANNOTATION_PATH}/methylation/${sample_id}_MGMT_results.csv"
+    merge_results="${ANNOTATION_PATH}/merge_annot_clair3andclairsto/${sample_id}_merge_annotation_filter_snvs_allcall.csv"
+    fusion_events="${ANNOTATION_PATH}/structure_variant/svannasv/${sample_id}.sv_fusions_both_gbm.tsv"
+    gbm_protein_fusion_events="${ANNOTATION_PATH}/structure_variant/svannasv/${sample_id}.sv_fusions_gbm_protein.tsv"
+    tertphtml="${ANNOTATION_PATH}/coverage/${sample_id}_tertp_id1.html"
+    svannahtml="${ANNOTATION_PATH}/structure_variant/svannasv/${sample_id}_roi_svanna_annotation.html"
+    egfr_coverage="${ANNOTATION_PATH}/coverage/${sample_id}_egfr_coverage.pdf"
+    idh1_coverage="${ANNOTATION_PATH}/coverage/${sample_id}_idh1_coverage.pdf"
+    idh2_coverage="${ANNOTATION_PATH}/coverage/${sample_id}_idh2_coverage.pdf"
+    tertp_coverage="${ANNOTATION_PATH}/coverage/${sample_id}_tertp_coverage.pdf"
+    tsneplot="${ANNOTATION_PATH}/classifier/nanodx/${sample_id}_tsne_plot.pdf"
     snv_target_genes="${REFERENCE_PATH}/snv_target_genes.txt"
+    nanodx_pancan="${ANNOTATION_PATH}/classifier/nanodx/${sample_id}_nanodx_classifier_pancan.tsv"
+    tsneplot_pancan="${ANNOTATION_PATH}/classifier/nanodx/${sample_id}_tsne_plot_pancan.pdf"
 
     # Output PDF path - routine_results for final reports
     output_file="${OUTPUT_PATH}/routine_results/${sample_id}/${sample_id}_markdown_pipeline_report.pdf"
@@ -117,7 +158,7 @@ while read -r sample_id tumor_content; do
 
     # Now call the Rscript using Singularity container
     singularity exec --bind /data:/data "$SINGULARITY_IMAGE" \
-  	Rscript -e "rmarkdown::render('${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[23])" \
+  	Rscript -e "rmarkdown::render('${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[24])" \
       "${sample_id}" \
       "${craminoreport}" \
       "${sample_ids_file}" \
@@ -140,10 +181,20 @@ while read -r sample_id tumor_content; do
       "${tertp_coverage}" \
       "${tsneplot}" \
       "${snv_target_genes}" \
-      "${output_file}"
-    
-    # Clean up temporary R files
+      "${protein_coding_bed}" \
+      "${output_file}" \
+      "${PIPELINE_VERSION}" \
+      "${SNV_DEPTH_THRESHOLD}" \
+      "${SNV_GQ_THRESHOLD}" \
+      "${warning_img}" \
+      "${nanodx_pancan}" \
+      "${pancan_dictionaire}" \
+      "${tsneplot_pancan}" \
+      "${gbm_protein_fusion_events}"
+
+    # Clean up temporary R files and the per-sample sample_ids_file
     rm -rf /tmp/Rtmp*
+    rm -f "${sample_ids_file}"
 
     # Clean up RMarkdown temporary files and folders in the output directory
     output_dir="$(dirname "$output_file")"

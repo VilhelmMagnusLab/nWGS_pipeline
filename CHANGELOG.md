@@ -127,6 +127,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `"conflicting: Conflicting classifications of pathogenicity (ClinVar)"` to the SNV table legend so users understand the abbreviation
 
 ### `Fixed`
+- Fixed the "High-Confidence Copy Number Variation in Cancer Genes" table in the markdown PDF report only excluding chromosome **X**, not **Y**, despite its caption stating "no sex chromosomes"
+  - `nextflow_markdown_pipeline_update_final.Rmd`: changed the filter from `!grepl("X", get(chrom_col))` to `!grepl("[XY]$", get(chrom_col))` so a chrY amplification/homozygous deletion is no longer shown alongside the autosomal-only table
+- Fixed `bin/generate_report_singularity.sh` (standalone manual report re-run script) being out of sync with `nextflow_markdown_pipeline_update_final.Rmd`, which now requires at least 24 positional args (up to 32) — the script only passed 23, so any run would immediately fail with the Rmd's own `"Usage: Rscript report.R ..."` stop
+  - Updated `routine_analysis/` path references to `routine_annotation/` (stale since the `analysis` → `annotation` rename)
+  - Added `cramino` lookup under `routine_epi2me/{sample_id}/cramino/`, matching where the pipeline actually publishes it
+  - Fixed `fusion_events`/`svannahtml` filenames to the current `classify_sv_v5.py` naming (`{sample_id}.sv_fusions_both_gbm.tsv`, `{sample_id}_roi_svanna_annotation.html`) instead of the old pre-rewrite/pre-rename names
+  - Added the missing args: `protein_coding_bed`, `pipeline_version` (read from `nextflow.config`), `snv_depth_threshold`/`snv_gq_threshold`, `warning_img`, the three pancan classifier files, and `gbm_protein_fusion_events`
+  - Updated `rmarkdown::render()`'s `output_file` arg index from `[23]` to `[24]` to match the new `output_pdf_file` position
+  - Added the same tumor-content priority logic used by `modules/annotation.nf`'s `markdown_report` process: builds a per-sample `sample_ids_file` from the user-provided `sample_ids.txt` row when present, falling back to the ACE-calculated value at `routine_annotation/{sample_id}/cnv/ace/{sample_id}_ace_results/threshold_value.txt` when it isn't — previously the script always passed the raw global `sample_ids.txt` through, so tumor content silently showed as "N/A" whenever that file lacked a 2-column row for the sample
 - Fixed LaTeX rendering error in `show_warning()` (markdown PDF report) when a warning message contains a literal `%` (e.g. tumor content/coverage thresholds)
   - Root cause: `%` is a comment character in LaTeX, so any unescaped `%` in the message text truncated the rest of the line
   - Fix: escape `%` to `\%` via `gsub("%", "\\\\%", message)` before passing the message to `cat()`

@@ -1100,8 +1100,8 @@ df_mgmt$Score <- gsub("SCORE=", "", df_mgmt$Score)
 df_mgmt$LOG2CNT <- gsub("LOG2CNT=", "", df_mgmt$LOG2CNT)
 df_mgmt$Gene <- gsub("gene_name=", "", df_mgmt$Gene)
 
-# Apply filtering: score and autosomes only
-df_filtered <- subset(df_mgmt, ScoreValue %in% c(2, -2) & !grepl("X", get(chrom_col)))
+# Apply filtering: score and autosomes only (excludes both X and Y)
+df_filtered <- subset(df_mgmt, ScoreValue %in% c(2, -2) & !grepl("[XY]$", get(chrom_col)))
 df_filtered$ScoreValue <- NULL  # Remove helper column
 
 # Display content
